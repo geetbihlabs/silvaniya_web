@@ -26,7 +26,7 @@ const trending = [
     badge: "10% OFF",
     image: "/images/products/mangalsutra-1.jpg",
     imageBgClass: "bg-[#f8f8f8]",
-    href: "/products",
+    href: "/products/t1",
   },
   {
     id: "t2",
@@ -37,7 +37,7 @@ const trending = [
     badge: null,
     image: "/images/products/nose-pin-1.jpg",
     imageBgClass: "bg-charcoal",
-    href: "/products",
+    href: "/products/t2",
   },
   {
     id: "t3",
@@ -48,7 +48,7 @@ const trending = [
     badge: "BESTSELLER",
     image: "/images/products/payal-1.jpg",
     imageBgClass: "bg-charcoal",
-    href: "/products",
+    href: "/products/t3",
   },
   {
     id: "t4",
@@ -59,7 +59,7 @@ const trending = [
     badge: "NEW",
     image: "/images/products/coin-1.jpg",
     imageBgClass: "bg-charcoal",
-    href: "/products",
+    href: "/products/t4",
   },
 ];
 
@@ -198,18 +198,20 @@ export default function HomePage() {
                 >
                   {/* Image area */}
                   <div className={`relative w-full aspect-square overflow-hidden ${p.imageBgClass}`}>
-                    <Image
-                      src={p.image} alt={p.name} fill
-                      sizes="(max-width: 640px) 50vw, 25vw"
-                      className="object-cover object-center"
-                    />
+                    <Link href={p.href} className="block relative w-full h-full">
+                      <Image
+                        src={p.image} alt={p.name} fill
+                        sizes="(max-width: 640px) 50vw, 25vw"
+                        className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </Link>
                     {p.badge && (
-                      <span className="absolute top-[14px] left-[14px] font-body text-[10px] font-bold tracking-[0.08em] uppercase py-[5px] px-[10px] rounded text-white bg-emerald">
+                      <span className="absolute top-[14px] left-[14px] font-body text-[10px] font-bold tracking-[0.08em] uppercase py-[5px] px-[10px] rounded text-white bg-emerald pointer-events-none">
                         {p.badge}
                       </span>
                     )}
                     <button
-                      className="absolute top-3 right-3 w-[34px] h-[34px] rounded-full bg-white/88 border-none flex items-center justify-center cursor-pointer"
+                      className="absolute top-3 right-3 w-[34px] h-[34px] rounded-full bg-white/88 border-none flex items-center justify-center cursor-pointer z-10"
                       aria-label="Add to wishlist"
                     >
                       <Heart size={16} className="text-silver-dark" fill="none" />
@@ -217,12 +219,14 @@ export default function HomePage() {
                   </div>
                   {/* Card content */}
                   <div className="p-[18px_20px_20px] flex-1 flex flex-col">
-                    <p className="font-heading text-[16px] font-medium text-charcoal mb-1 leading-tight">
-                      {p.name}
-                    </p>
-                    <p className="font-body text-[13px] font-normal text-muted mb-[14px]">
-                      {p.subtitle}
-                    </p>
+                    <Link href={p.href} className="no-underline group/link">
+                      <p className="font-heading text-[16px] font-medium text-charcoal mb-1 leading-tight group-hover/link:text-emerald transition-colors">
+                        {p.name}
+                      </p>
+                      <p className="font-body text-[13px] font-normal text-muted mb-[14px]">
+                        {p.subtitle}
+                      </p>
+                    </Link>
                     <div className="flex items-baseline gap-2 mb-[18px]">
                       <span className="font-body text-[18px] font-semibold text-charcoal tracking-[0.01em]">
                         {fmt(p.price)}

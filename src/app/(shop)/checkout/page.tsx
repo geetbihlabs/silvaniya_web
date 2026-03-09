@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, CreditCard, Wallet, Truck, Plus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -144,7 +145,13 @@ export default function CheckoutPage() {
                                         <div className="ml-3 flex-1">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-semibold text-charcoal">UPI / QR</span>
-                                                <img src="/images/icons/upi-icon.png" alt="UPI" className="h-4 object-contain opacity-70" />
+                                                <Image
+                                                    src="/images/icons/upi-icon.png"
+                                                    alt="UPI"
+                                                    width={40}
+                                                    height={16}
+                                                    className="object-contain opacity-70"
+                                                />
                                             </div>
                                             <p className="text-sm text-muted mt-1">Pay via Google Pay, PhonePe, Paytm or any UPI app</p>
 
