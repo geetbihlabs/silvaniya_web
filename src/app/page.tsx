@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,7 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroCTA from "@/components/features/hero/HeroCTA";
 
-// ─── Categories ───────────────────────────────────────────────────────────────
+// --- Categories ---------------------------------------------------------------
 const categories = [
   { name: "Mangal Sutras", slug: "mangalsutras", image: "/images/categories/mangalsutras.jpg" },
   { name: "Nose Pins", slug: "nose-pins", image: "/images/categories/nose-pins.jpg" },
@@ -15,7 +15,7 @@ const categories = [
   { name: "Silver Coins", slug: "silver-coins", image: "/images/categories/silver-coins.jpg" },
 ];
 
-// ─── Trending Products ────────────────────────────────────────────────────────
+// --- Trending Products --------------------------------------------------------
 const trending = [
   {
     id: "t1",
@@ -31,7 +31,7 @@ const trending = [
   {
     id: "t2",
     name: "Chhavi Floral Nose Pin",
-    subtitle: "Pure Silver • Handcrafted",
+    subtitle: "Pure Silver  Handcrafted",
     price: 850,
     originalPrice: null,
     badge: null,
@@ -63,9 +63,9 @@ const trending = [
   },
 ];
 
-const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+const fmt = (n: number) => `?${n.toLocaleString("en-IN")}`;
 
-// ─── Testimonials data ────────────────────────────────────────────────────────
+// --- Testimonials data --------------------------------------------------------
 const testimonials = [
   {
     id: "r1",
@@ -94,7 +94,7 @@ export default function HomePage() {
 
       <main className="flex-1">
 
-        {/* ══════════════════════════ HERO ══════════════════════════════ */}
+        {/* -------------------------- HERO ------------------------------ */}
         <section className="w-full bg-background py-4 md:py-6">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="relative w-full aspect-4/5 sm:aspect-video md:aspect-1138/488 rounded-2xl md:rounded-[20px] overflow-hidden bg-[#222024]">
@@ -106,7 +106,7 @@ export default function HomePage() {
                 className="object-cover object-center"
               />
 
-              {/* Text block — vertically centered, matching Figma */}
+              {/* Text block  vertically centered, matching Figma */}
               <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-0 left-0 md:left-[clamp(32px,6%,80px)] max-w-[500px]">
                 {/* Label */}
                 <p className="font-body text-[10.5px] font-semibold tracking-[0.25em] uppercase text-white mb-[18px]">
@@ -139,7 +139,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══════════════════════ SHOP BY CATEGORY ══════════════════════ */}
+        {/* ---------------------- SHOP BY CATEGORY ---------------------- */}
         <section className="bg-background py-8 md:py-12 w-full">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex flex-row justify-between items-end md:items-center mb-8 md:mb-10">
@@ -153,7 +153,7 @@ export default function HomePage() {
                 href="/products"
                 className="font-body text-[14px] font-medium text-emerald no-underline hover:underline pb-1 md:pb-0"
               >
-                View All →
+                View All ?
               </Link>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-10">
@@ -179,7 +179,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ════════════════════════ TRENDING NOW ════════════════════════ */}
+        {/* ------------------------ TRENDING NOW ------------------------ */}
         <section className="bg-background py-8 md:py-16 w-full">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="text-center mb-10 md:mb-12">
@@ -247,11 +247,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ════════════════════════ TRUST BADGES ════════════════════════ */}
+        {/* ------------------------ TRUST BADGES ------------------------ */}
         <section className="bg-white border-t border-b border-border py-12 md:py-16 w-full">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 md:gap-20 max-w-7xl mx-auto px-4 md:px-8">
 
-            {/* Badge 1 — Hallmarked Silver */}
+            {/* Badge 1  Hallmarked Silver */}
             <div className="flex flex-col items-center text-center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -268,7 +268,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Badge 2 — Secure Shipping */}
+            {/* Badge 2  Secure Shipping */}
             <div className="flex flex-col items-center text-center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -287,7 +287,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Badge 3 — Purity Certificate */}
+            {/* Badge 3  Purity Certificate */}
             <div className="flex flex-col items-center text-center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -308,11 +308,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ════════════════════════ BRAND STORY ════════════════════════ */}
+        {/* ------------------------ BRAND STORY ------------------------ */}
         <section className="bg-background py-12 md:py-16 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-20 items-center max-w-7xl mx-auto px-4 md:px-8">
 
-            {/* Left — Image */}
+            {/* Left  Image */}
             <div className="relative">
               <div className="w-full aspect-[4/3.6] rounded-[20px] overflow-hidden bg-charcoal relative">
                 <Image
@@ -325,7 +325,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — Content */}
+            {/* Right  Content */}
             <div className="flex flex-col justify-center">
               {/* Heading */}
               <div className="mb-6 md:mb-7">
@@ -373,7 +373,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ════════════════════════ TESTIMONIALS ═══════════════════════ */}
+        {/* ------------------------ TESTIMONIALS ----------------------- */}
         <section className="bg-background py-12 md:py-16 w-full">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="text-center mb-10 md:mb-12">

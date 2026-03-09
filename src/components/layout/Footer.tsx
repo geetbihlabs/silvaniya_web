@@ -7,18 +7,19 @@ import { Facebook, Instagram } from "lucide-react";
 
 const SHOP_LINKS = [
     { label: "New Arrivals", href: "/products?filter=new-arrivals" },
-    { label: "Bestsellers", href: "/products?filter=bestsellers" },
+    { label: "Bestsellers", href: "/best-sellers" },
     { label: "Wedding Special", href: "/products?filter=wedding" },
     { label: "Gifting Guide", href: "/gifting" },
     { label: "999 Silver Coins", href: "/products?category=silver-coins" },
 ];
 
 const SUPPORT_LINKS = [
-    { label: "Track Order", href: "/orders" },
-    { label: "Returns & Refunds", href: "/returns" },
-    { label: "Shipping Policy", href: "/shipping" },
-    { label: "Purity Certificate", href: "/purity-cert" },
-    { label: "FAQs", href: "/faqs" },
+    { label: "Track Order", href: "/track" },
+    { label: "Returns & Refunds", href: "/support" },
+    { label: "Shipping Policy", href: "/support" },
+    { label: "Purity Certificate", href: "/support" },
+    { label: "FAQs", href: "/support" },
+    { label: "Contact Us", href: "/contact" },
 ];
 
 export default function Footer() {

@@ -1,318 +1,342 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, CreditCard, Wallet, Truck, Plus, Shield } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Shield, Award, RotateCcw, ChevronRight } from "lucide-react";
 import { mockCartItems, mockAddresses } from "@/data/mock-data";
 import { formatPrice } from "@/lib/utils";
-import { Address } from "@/types/order.types";
+
+const INDIAN_STATES = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+    "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+    "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+    "Delhi", "Jammu & Kashmir", "Ladakh", "Puducherry",
+];
 
 export default function CheckoutPage() {
-    const [step, setStep] = useState<1 | 2>(1);
-    const [selectedAddress, setSelectedAddress] = useState<string>(
-        mockAddresses.find((a) => a.isDefault)?.id || mockAddresses[0].id
-    );
-    const [paymentMethod, setPaymentMethod] = useState("upi");
+    const hasAddresses = mockAddresses && mockAddresses.length > 0;
+    const [showForm, setShowForm] = useState(!hasAddresses);
+    const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
 
     const cartItems = mockCartItems;
     const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-    const shipping = 0; // Free
+    const shippingCost = shippingMethod === "express" ? 250 : 0;
     const tax = Math.round(subtotal * 0.03);
-    const total = subtotal + shipping + tax;
+    const total = subtotal + shippingCost + tax;
 
     return (
-        <div className="bg-cream min-h-screen pb-12">
-            {/* Minimal Header for Checkout */}
-            <header className="bg-white border-b border-border py-4">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Link href="/">
-                        <span className="text-xl font-light tracking-[0.3em] text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
-                            SILVANIYA
-                        </span>
-                    </Link>
-                    <div className="flex items-center gap-4 text-sm font-medium">
-                        <span className={step >= 1 ? "text-emerald font-semibold" : "text-charcoal"}>1. Shipping</span>
-                        <ChevronRight size={14} className="text-muted" />
-                        <span className={step >= 2 ? "text-emerald font-semibold" : "text-muted"}>2. Payment</span>
-                        <ChevronRight size={14} className="text-muted" />
-                        <span className="text-muted">3. Confirm</span>
+        <div className="bg-[#f5f5f3] min-h-screen">
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-8 lg:py-10">
+
+                {/* ======== STEP INDICATOR ======== */}
+                <div className="flex items-center justify-center gap-3 mb-8">
+                    {/* Step 1 - Active */}
+                    <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-charcoal flex items-center justify-center text-white text-[12px] font-bold">
+                            1
+                        </div>
+                        <span className="text-[13px] font-semibold text-charcoal">Shipping</span>
+                    </div>
+                    {/* Connector */}
+                    <div className="w-16 h-px bg-[#d0d0cc]" />
+                    {/* Step 2 */}
+                    <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full border-2 border-[#d0d0cc] flex items-center justify-center text-[12px] font-semibold text-[#aaa]">
+                            2
+                        </div>
+                        <span className="text-[13px] text-muted">Payment</span>
+                    </div>
+                    {/* Connector */}
+                    <div className="w-16 h-px bg-[#d0d0cc]" />
+                    {/* Step 3 */}
+                    <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full border-2 border-[#d0d0cc] flex items-center justify-center text-[12px] font-semibold text-[#aaa]">
+                            3
+                        </div>
+                        <span className="text-[13px] text-muted">Review</span>
                     </div>
                 </div>
-            </header>
 
-            <div className="max-w-7xl mx-auto mt-8">
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-                    {/* ======== MAIN CHECKOUT FLOW ======== */}
-                    <div className="flex-1 space-y-8">
-                        {/* Delivery Address */}
-                        <section className="bg-white rounded-xl p-6 shadow-sm">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
-                                    Delivery Address
-                                </h2>
-                                {step === 1 && (
-                                    <Button variant="outline" size="sm" className="hidden sm:flex">
-                                        <Plus size={16} /> Add New Address
-                                    </Button>
-                                )}
-                            </div>
+                {/* ======== MAIN GRID ======== */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 lg:gap-7 items-start">
 
-                            {step === 1 ? (
-                                <>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {mockAddresses.map((address: Address) => (
-                                            <label
-                                                key={address.id}
-                                                className={`block relative border rounded-xl p-4 cursor-pointer transition-all ${selectedAddress === address.id
-                                                    ? "border-emerald bg-emerald/5"
-                                                    : "border-border hover:border-charcoal/30"
-                                                    }`}
-                                            >
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            type="radio"
-                                                            name="address"
-                                                            checked={selectedAddress === address.id}
-                                                            onChange={() => setSelectedAddress(address.id)}
-                                                            className="w-4 h-4 border-silver accent-emerald"
-                                                        />
-                                                        <span className="font-semibold text-charcoal">{address.fullName}</span>
-                                                    </div>
-                                                    <span className="text-xs bg-gray-100 text-charcoal px-2 py-0.5 rounded-sm uppercase tracking-wider">
-                                                        {address.label}
-                                                    </span>
-                                                </div>
-                                                <div className="pl-6 text-sm text-muted leading-relaxed">
-                                                    {address.addressLine1}
-                                                    {address.addressLine2 && <><br />{address.addressLine2}</>}
-                                                    <br />
-                                                    {address.city}, {address.state} {address.pincode}
-                                                    <br />
-                                                    Mobile: {address.phone}
-                                                </div>
-                                            </label>
-                                        ))}
-                                    </div>
-                                    <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                                        <Button variant="outline" size="sm" className="w-full sm:hidden">
-                                            <Plus size={16} /> Add New Address
-                                        </Button>
-                                    </div>
-                                </>
-                            ) : (
-                                // Collapsed Address View for Step 2
-                                <div className="border border-emerald/20 bg-emerald/5 rounded-xl p-4 flex justify-between items-start">
-                                    <div className="text-sm text-charcoal leading-relaxed">
-                                        <span className="font-semibold block mb-1">
-                                            {mockAddresses.find(a => a.id === selectedAddress)?.fullName}
-                                        </span>
-                                        {mockAddresses.find(a => a.id === selectedAddress)?.addressLine1}, {mockAddresses.find(a => a.id === selectedAddress)?.city} - {mockAddresses.find(a => a.id === selectedAddress)?.pincode}
-                                    </div>
+                    {/* ======== LEFT COLUMN ======== */}
+                    <div className="space-y-5">
+
+                        {/* SHIPPING ADDRESS */}
+                        <section className="bg-white rounded-xl border border-[#e8e8e4] px-6 py-6">
+                            <h2
+                                className="text-[22px] font-bold text-charcoal mb-5"
+                                style={{ fontFamily: "var(--font-heading)" }}
+                            >
+                                Shipping Address
+                            </h2>
+
+                            {/* If addresses exist AND form not forced open: show selector */}
+                            {hasAddresses && !showForm ? (
+                                <div className="space-y-3">
+                                    {mockAddresses.map((addr) => (
+                                        <label
+                                            key={addr.id}
+                                            className="flex items-start gap-3 p-4 border border-[#e0e0db] rounded-lg cursor-pointer hover:border-charcoal/40 transition-colors"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="saved-address"
+                                                defaultChecked={addr.isDefault}
+                                                className="mt-1 accent-charcoal w-4 h-4 shrink-0"
+                                            />
+                                            <div className="text-[13px] text-charcoal leading-relaxed">
+                                                <p className="font-semibold">{addr.fullName}</p>
+                                                <p className="text-muted mt-0.5">{addr.addressLine1}, {addr.city}, {addr.state} – {addr.pincode}</p>
+                                                <p className="text-muted">{addr.phone}</p>
+                                            </div>
+                                        </label>
+                                    ))}
                                     <button
-                                        onClick={() => setStep(1)}
-                                        className="text-emerald text-sm font-medium hover:underline p-1"
+                                        onClick={() => setShowForm(true)}
+                                        className="text-[13px] text-[#107c6f] font-medium hover:underline underline-offset-2 mt-1"
                                     >
-                                        Change
+                                        + Add a new address
                                     </button>
+                                </div>
+                            ) : (
+                                /* ADDRESS FORM */
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-charcoal uppercase tracking-widest mb-1.5">First Name</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Jane"
+                                                className="w-full h-11 px-4 text-[13px] text-charcoal rounded-lg border border-[#d8d8d2] bg-white placeholder:text-gray-400 focus:outline-none focus:border-charcoal transition-colors"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-charcoal uppercase tracking-widest mb-1.5">Last Name</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Doe"
+                                                className="w-full h-11 px-4 text-[13px] text-charcoal rounded-lg border border-[#d8d8d2] bg-white placeholder:text-gray-400 focus:outline-none focus:border-charcoal transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-charcoal uppercase tracking-widest mb-1.5">Address Line 1</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Apt, Suite, Building, Street"
+                                            className="w-full h-11 px-4 text-[13px] text-charcoal rounded-lg border border-[#d8d8d2] bg-white placeholder:text-gray-400 focus:outline-none focus:border-charcoal transition-colors"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-charcoal uppercase tracking-widest mb-1.5">City</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Mumbai"
+                                                className="w-full h-11 px-4 text-[13px] text-charcoal rounded-lg border border-[#d8d8d2] bg-white placeholder:text-gray-400 focus:outline-none focus:border-charcoal transition-colors"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-charcoal uppercase tracking-widest mb-1.5">State</label>
+                                            <div className="relative">
+                                                <select
+                                                    className="w-full h-11 px-4 pr-10 text-[13px] text-charcoal rounded-lg border border-[#d8d8d2] bg-white focus:outline-none focus:border-charcoal transition-colors appearance-none"
+                                                    defaultValue="Maharashtra"
+                                                >
+                                                    {INDIAN_STATES.map((s) => (
+                                                        <option key={s} value={s}>{s}</option>
+                                                    ))}
+                                                </select>
+                                                <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted rotate-90 pointer-events-none" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-charcoal uppercase tracking-widest mb-1.5">Pincode</label>
+                                            <input
+                                                type="text"
+                                                placeholder="400001"
+                                                maxLength={6}
+                                                className="w-full h-11 px-4 text-[13px] text-charcoal rounded-lg border border-[#d8d8d2] bg-white placeholder:text-gray-400 focus:outline-none focus:border-charcoal transition-colors"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-charcoal uppercase tracking-widest mb-1.5">Phone</label>
+                                            <input
+                                                type="tel"
+                                                placeholder="+91 98765 43210"
+                                                className="w-full h-11 px-4 text-[13px] text-charcoal rounded-lg border border-[#d8d8d2] bg-white placeholder:text-gray-400 focus:outline-none focus:border-charcoal transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {hasAddresses && (
+                                        <button
+                                            onClick={() => setShowForm(false)}
+                                            className="text-[13px] text-muted hover:text-charcoal underline underline-offset-2"
+                                        >
+                                            ← Use saved address
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </section>
 
-                        {/* Payment Method - Only visible on Step 2 */}
-                        {step === 2 && (
-                            <section className="bg-white rounded-xl p-6 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                <h2 className="text-xl font-semibold text-charcoal mb-6" style={{ fontFamily: "var(--font-heading)" }}>
-                                    Payment Method
-                                </h2>
+                        {/* SHIPPING METHOD */}
+                        <section className="bg-white rounded-xl border border-[#e8e8e4] px-6 py-6">
+                            <h2
+                                className="text-[22px] font-bold text-charcoal mb-5"
+                                style={{ fontFamily: "var(--font-heading)" }}
+                            >
+                                Shipping Method
+                            </h2>
 
-                                <div className="space-y-4">
-                                    {/* UPI */}
-                                    <label
-                                        className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "upi" ? "border-emerald bg-emerald/5" : "border-border"
-                                            }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            checked={paymentMethod === "upi"}
-                                            onChange={() => setPaymentMethod("upi")}
-                                            className="mt-1 w-4 h-4 border-silver accent-emerald"
-                                        />
-                                        <div className="ml-3 flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-semibold text-charcoal">UPI / QR</span>
-                                                <Image
-                                                    src="/images/icons/upi-icon.png"
-                                                    alt="UPI"
-                                                    width={40}
-                                                    height={16}
-                                                    className="object-contain opacity-70"
-                                                />
-                                            </div>
-                                            <p className="text-sm text-muted mt-1">Pay via Google Pay, PhonePe, Paytm or any UPI app</p>
-
-                                            {paymentMethod === "upi" && (
-                                                <div className="mt-4 pt-4 border-t border-border/50">
-                                                    <p className="text-sm text-muted mb-3">Scan QR code using any UPI app</p>
-                                                    <div className="w-32 h-32 bg-gray-100 border border-border rounded-lg flex items-center justify-center text-xs text-muted">
-                                                        QR Code
-                                                    </div>
-                                                </div>
+                            <div className="space-y-3">
+                                {/* Standard */}
+                                <label
+                                    className={`flex items-center justify-between px-5 py-4 rounded-xl border-2 cursor-pointer transition-colors ${shippingMethod === "standard"
+                                        ? "border-charcoal bg-white"
+                                        : "border-[#e0e0db] hover:border-charcoal/40"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${shippingMethod === "standard" ? "border-charcoal" : "border-[#ccc]"}`}>
+                                            {shippingMethod === "standard" && (
+                                                <div className="w-2.5 h-2.5 rounded-full bg-charcoal" />
                                             )}
                                         </div>
-                                    </label>
+                                        <div>
+                                            <p className="text-[14px] font-semibold text-charcoal">Standard Shipping</p>
+                                            <p className="text-[12px] text-muted">3-5 Business Days</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-[14px] font-bold text-charcoal">FREE</span>
+                                    <input
+                                        type="radio"
+                                        name="shipping"
+                                        className="sr-only"
+                                        checked={shippingMethod === "standard"}
+                                        onChange={() => setShippingMethod("standard")}
+                                    />
+                                </label>
 
-                                    {/* Cards */}
-                                    <label
-                                        className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "card" ? "border-emerald bg-emerald/5" : "border-border"
-                                            }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            checked={paymentMethod === "card"}
-                                            onChange={() => setPaymentMethod("card")}
-                                            className="mt-1 w-4 h-4 border-silver accent-emerald"
-                                        />
-                                        <div className="ml-3 flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <CreditCard size={18} className="text-charcoal" />
-                                                <span className="font-semibold text-charcoal">Credit / Debit Card</span>
-                                            </div>
-                                            <p className="text-sm text-muted mt-1">Visa, Mastercard, Amex, RuPay</p>
-
-                                            {paymentMethod === "card" && (
-                                                <div className="mt-4 pt-4 border-t border-border/50 space-y-4">
-                                                    <Input label="Card Number" placeholder="0000 0000 0000 0000" />
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <Input label="Expiry (MM/YY)" placeholder="MM/YY" />
-                                                        <Input label="CVV" placeholder="123" type="password" />
-                                                    </div>
-                                                    <Input label="Name on Card" placeholder="John Doe" />
-                                                </div>
+                                {/* Express */}
+                                <label
+                                    className={`flex items-center justify-between px-5 py-4 rounded-xl border-2 cursor-pointer transition-colors ${shippingMethod === "express"
+                                        ? "border-charcoal bg-white"
+                                        : "border-[#e0e0db] hover:border-charcoal/40"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${shippingMethod === "express" ? "border-charcoal" : "border-[#ccc]"}`}>
+                                            {shippingMethod === "express" && (
+                                                <div className="w-2.5 h-2.5 rounded-full bg-charcoal" />
                                             )}
                                         </div>
-                                    </label>
-
-                                    {/* Net Banking */}
-                                    <label
-                                        className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "netbanking" ? "border-emerald bg-emerald/5" : "border-border"
-                                            }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            checked={paymentMethod === "netbanking"}
-                                            onChange={() => setPaymentMethod("netbanking")}
-                                            className="mt-1 w-4 h-4 border-silver accent-emerald"
-                                        />
-                                        <div className="ml-3 flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <Wallet size={18} className="text-charcoal" />
-                                                <span className="font-semibold text-charcoal">Net Banking</span>
-                                            </div>
-                                            <p className="text-sm text-muted mt-1">All major Indian banks supported</p>
+                                        <div>
+                                            <p className="text-[14px] font-semibold text-charcoal">Express Shipping</p>
+                                            <p className="text-[12px] text-muted">Next Business Day</p>
                                         </div>
-                                    </label>
-
-                                    {/* COD */}
-                                    <label
-                                        className={`flex items-start p-4 border rounded-xl cursor-pointer transition-all ${paymentMethod === "cod" ? "border-emerald bg-emerald/5" : "border-border"
-                                            }`}
-                                    >
-                                        <input
-                                            type="radio"
-                                            name="payment"
-                                            checked={paymentMethod === "cod"}
-                                            onChange={() => setPaymentMethod("cod")}
-                                            className="mt-1 w-4 h-4 border-silver accent-emerald"
-                                        />
-                                        <div className="ml-3 flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <Truck size={18} className="text-charcoal" />
-                                                <span className="font-semibold text-charcoal">Cash on Delivery</span>
-                                            </div>
-                                            <p className="text-sm text-muted mt-1">Additional ₹50 handling charge applies</p>
-                                        </div>
-                                    </label>
-                                </div>
-                            </section>
-                        )}
+                                    </div>
+                                    <span className="text-[14px] font-bold text-charcoal">₹250</span>
+                                    <input
+                                        type="radio"
+                                        name="shipping"
+                                        className="sr-only"
+                                        checked={shippingMethod === "express"}
+                                        onChange={() => setShippingMethod("express")}
+                                    />
+                                </label>
+                            </div>
+                        </section>
                     </div>
 
-                    {/* ======== ORDER SUMMARY SIDEBAR ======== */}
-                    <div className="w-full lg:w-[400px]">
-                        <div className="bg-white rounded-xl p-6 shadow-sm sticky top-6">
-                            <h2 className="text-lg font-semibold text-charcoal mb-4" style={{ fontFamily: "var(--font-heading)" }}>
+                    {/* ======== RIGHT COLUMN: ORDER SUMMARY ======== */}
+                    <div className="space-y-4">
+                        <div className="bg-white rounded-xl border border-[#e8e8e4] px-6 py-6 sticky top-24">
+                            <h2
+                                className="text-[18px] font-bold text-charcoal mb-5"
+                                style={{ fontFamily: "var(--font-heading)" }}
+                            >
                                 Order Summary
                             </h2>
 
-                            {/* Items */}
-                            <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
+                            {/* Cart Items */}
+                            <div className="space-y-4 mb-5">
                                 {cartItems.map((item) => (
-                                    <div key={item.id} className="flex gap-4">
-                                        <div className="w-16 h-16 rounded-md bg-gray-100 shrink-0 flex items-center justify-center text-[10px] text-muted relative">
+                                    <div key={item.id} className="flex gap-3 items-start">
+                                        <div className="w-[60px] h-[60px] rounded-md bg-[#1a1a1a] shrink-0 flex items-center justify-center text-[10px] text-white/20 overflow-hidden">
                                             Img
-                                            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-charcoal text-white flex items-center justify-center text-xs font-medium">
-                                                {item.quantity}
-                                            </span>
                                         </div>
-                                        <div className="flex-1 min-w-0 py-1">
-                                            <h4 className="text-sm font-medium text-charcoal line-clamp-1">{item.productName}</h4>
-                                            <div className="flex items-center justify-between mt-1">
-                                                <span className="text-xs text-muted">{item.variantInfo}</span>
-                                                <span className="text-sm font-semibold text-charcoal">{formatPrice(item.unitPrice)}</span>
-                                            </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[13px] font-semibold text-charcoal leading-snug">{item.productName}</p>
+                                            <p className="text-[11px] text-muted mt-0.5">925 Sterling Silver | {item.variantInfo}</p>
+                                            <p className="text-[11px] text-muted">Qty: {item.quantity}</p>
                                         </div>
+                                        <span className="text-[13px] font-semibold text-charcoal shrink-0">{formatPrice(item.unitPrice)}</span>
                                     </div>
                                 ))}
                             </div>
 
+                            {/* Divider */}
+                            <div className="border-t border-[#e8e8e4] mb-4" />
+
                             {/* Totals */}
-                            <div className="space-y-3 mb-6 border-t border-border pt-4">
-                                <div className="flex justify-between text-sm">
+                            <div className="space-y-2 mb-4">
+                                <div className="flex justify-between text-[13px]">
                                     <span className="text-muted">Subtotal</span>
-                                    <span className="font-medium text-charcoal">{formatPrice(subtotal)}</span>
+                                    <span className="text-charcoal font-medium">₹{subtotal.toLocaleString("en-IN")}</span>
                                 </div>
-                                <div className="flex justify-between text-sm">
+                                <div className="flex justify-between text-[13px]">
                                     <span className="text-muted">Shipping</span>
-                                    <span className="font-medium text-emerald">FREE</span>
+                                    <span className={shippingCost === 0 ? "font-semibold text-[#107c6f]" : "font-medium text-charcoal"}>
+                                        {shippingCost === 0 ? "FREE" : `₹${shippingCost}`}
+                                    </span>
                                 </div>
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted">Estimated Tax</span>
-                                    <span className="font-medium text-charcoal">{formatPrice(tax)}</span>
-                                </div>
-                                <div className="border-t border-border pt-3 flex justify-between items-center">
-                                    <span className="font-semibold text-charcoal">Total Amount</span>
-                                    <span className="font-bold text-xl text-charcoal">{formatPrice(total)}</span>
+                                <div className="flex justify-between text-[13px]">
+                                    <span className="text-muted">Estimated Tax (GST 3%)</span>
+                                    <span className="text-charcoal font-medium">₹{tax}</span>
                                 </div>
                             </div>
 
-                            {/* Secure Checkout Banner */}
-                            <div className="bg-green-50 rounded-lg p-3 flex items-center gap-3 mb-6 border border-green-100">
-                                <div className="w-8 h-8 rounded-full bg-emerald/10 flex items-center justify-center shrink-0">
-                                    <Shield size={16} className="text-emerald" />
-                                </div>
-                                <p className="text-xs text-green-800 leading-relaxed font-medium">
-                                    We offer 100% secure SSL-encrypted checkout for safe payments.
-                                </p>
+                            {/* Grand Total */}
+                            <div className="flex justify-between items-center mb-5 border-t border-[#e8e8e4] pt-3">
+                                <span className="text-[15px] font-bold text-charcoal">Grand Total</span>
+                                <span className="text-[15px] font-bold text-charcoal">₹{total.toLocaleString("en-IN")}</span>
                             </div>
 
-                            {step === 1 ? (
-                                <Button variant="primary" size="xl" className="w-full" onClick={() => setStep(2)}>
-                                    Continue to Payment
-                                </Button>
-                            ) : (
-                                <Button variant="primary" size="xl" className="w-full" asChild>
-                                    <Link href="/order-confirmed">
-                                        Pay {formatPrice(total)}
-                                    </Link>
-                                </Button>
-                            )}
+                            {/* Complete Purchase Button */}
+                            <Link
+                                href="/order-confirmed"
+                                className="w-full h-[52px] flex items-center justify-center gap-2 bg-charcoal hover:bg-charcoal/90 text-white text-[12px] font-bold tracking-widest uppercase rounded-md transition-colors duration-200"
+                            >
+                                COMPLETE PURCHASE
+                                <Shield size={14} strokeWidth={2} />
+                            </Link>
+
+                            {/* Trust Icons — inside card, no overlap */}
+                            <div className="flex items-center justify-around border-t border-[#e8e8e4] pt-4 mt-4">
+                                <div className="flex flex-col items-center gap-2 text-center">
+                                    <Shield size={20} strokeWidth={1.5} className="text-muted" />
+                                    <p className="text-[9px] font-bold text-muted uppercase tracking-widest leading-tight">100% Secure<br />Payment</p>
+                                </div>
+                                <div className="flex flex-col items-center gap-2 text-center">
+                                    <Award size={20} strokeWidth={1.5} className="text-muted" />
+                                    <p className="text-[9px] font-bold text-muted uppercase tracking-widest leading-tight">925 Purity<br />Guaranteed</p>
+                                </div>
+                                <div className="flex flex-col items-center gap-2 text-center">
+                                    <RotateCcw size={20} strokeWidth={1.5} className="text-muted" />
+                                    <p className="text-[9px] font-bold text-muted uppercase tracking-widest leading-tight">Easy 30-Day<br />Returns</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

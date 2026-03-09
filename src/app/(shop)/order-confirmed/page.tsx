@@ -132,7 +132,7 @@ export default function OrderConfirmedPage() {
 
                 {/* Need Help */}
                 <div className="mt-12 text-center text-sm text-muted">
-                    Need help? <Link href="/contact" className="text-emerald hover:underline font-medium">Contact Customer Support</Link>
+                    Need help? <Link href="/support" className="text-emerald hover:underline font-medium">Contact Customer Support</Link>
                 </div>
             </div>
         </div>
