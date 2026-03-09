@@ -3,182 +3,217 @@
 import React from "react";
 import Link from "next/link";
 import { Minus, Plus, Trash2, Heart, Shield, Truck, RotateCcw, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import ProductCard from "@/components/features/products/ProductCard";
 import { mockCartItems, mockProducts } from "@/data/mock-data";
 import { formatPrice } from "@/lib/utils";
 
 export default function CartPage() {
     const cartItems = mockCartItems;
-    const relatedProducts = mockProducts.slice(8, 12);
+    const relatedProducts = mockProducts.slice(2, 6);
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-    const shipping = 0; // Free
+    const shipping = 0;
     const tax = Math.round(subtotal * 0.03);
     const total = subtotal + shipping + tax;
 
     return (
-        <div className="max-w-7xl mx-auto py-6 md:py-8 px-4 md:px-8">
-            {/* Header */}
-            <div className="mb-6 md:mb-8">
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-charcoal">
-                    Shopping Bag
-                </h1>
-                <p className="text-xs md:text-sm text-muted mt-1">
-                    Review your exquisite selections ({cartItems.length} Items)
-                </p>
-            </div>
+        <div className="bg-[#f5f5f3] min-h-screen">
+            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-8 lg:py-12">
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-                {/* ======== CART ITEMS ======== */}
-                <div className="lg:col-span-2 space-y-6">
-                    {cartItems.map((item) => (
-                        <div key={item.id} className="border border-border rounded-xl p-4 sm:p-6">
-                            <div className="flex gap-4">
-                                {/* Product Image */}
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 shrink-0 flex items-center justify-center text-xs text-muted">
-                                    Image
-                                </div>
+                {/* Header */}
+                <div className="mb-6">
+                    <h1
+                        className="text-[32px] sm:text-[40px] font-bold text-charcoal leading-tight"
+                        style={{ fontFamily: "var(--font-heading)" }}
+                    >
+                        Shopping Bag
+                    </h1>
+                    <p className="text-[13px] text-muted mt-1">
+                        Review your exquisite selections ({cartItems.length} Items)
+                    </p>
+                </div>
 
-                                {/* Product Info */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-4">
-                                        <div>
-                                            <h3 className="text-sm sm:text-base font-medium text-charcoal leading-tight">{item.productName}</h3>
-                                            <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider mt-1 sm:mt-0.5">
-                                                SKU: {item.sku} <span className="hidden sm:inline">|</span><span className="sm:hidden"><br /></span> {item.variantInfo}
-                                            </p>
-                                        </div>
-                                        <span className="text-sm sm:text-base font-bold text-charcoal whitespace-nowrap mt-1 sm:mt-0">
-                                            {formatPrice(item.unitPrice)}
-                                        </span>
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5 lg:gap-7">
+
+                    {/* ======== LEFT: CART ITEMS + TRUST ======== */}
+                    <div className="space-y-3">
+
+                        {/* Cart Items */}
+                        {cartItems.map((item) => (
+                            <div
+                                key={item.id}
+                                className="bg-white rounded-xl border border-[#e8e8e4] px-5 py-5"
+                            >
+                                <div className="flex gap-4 items-start">
+                                    {/* Product Image */}
+                                    <div className="w-[90px] h-[90px] sm:w-[100px] sm:h-[100px] rounded-lg overflow-hidden bg-[#1a1a1a] shrink-0 flex items-center justify-center text-[10px] text-white/30">
+                                        Img
                                     </div>
 
-                                    {/* Quantity + Actions */}
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4 sm:gap-0">
-                                        <div className="flex items-center border border-border rounded-md">
-                                            <button className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal transition-colors">
-                                                <Minus size={14} />
-                                            </button>
-                                            <span className="w-10 h-8 flex items-center justify-center text-sm font-medium text-charcoal border-x border-border">
-                                                {item.quantity}
+                                    {/* Info */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div>
+                                                <h3 className="text-[15px] font-semibold text-charcoal leading-snug">
+                                                    {item.productName}
+                                                </h3>
+                                                <p className="text-[10px] text-muted uppercase tracking-wider mt-1">
+                                                    SKU: {item.sku} | {item.variantInfo}
+                                                </p>
+                                            </div>
+                                            <span className="text-[15px] font-bold text-charcoal whitespace-nowrap shrink-0">
+                                                {formatPrice(item.unitPrice)}
                                             </span>
-                                            <button className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal transition-colors">
-                                                <Plus size={14} />
-                                            </button>
                                         </div>
 
-                                        <div className="flex items-center gap-4">
-                                            <button className="flex items-center gap-1.5 text-xs text-muted hover:text-error transition-colors">
-                                                <Trash2 size={14} />
-                                                <span className="hidden sm:inline">REMOVE</span>
-                                            </button>
-                                            <button className="flex items-center gap-1.5 text-xs text-muted hover:text-emerald transition-colors">
-                                                <Heart size={14} />
-                                                <span className="hidden sm:inline">WISHLIST</span>
-                                            </button>
+                                        {/* Qty + Actions */}
+                                        <div className="flex items-center justify-between mt-4">
+                                            {/* Qty stepper */}
+                                            <div className="flex items-center border border-[#e0e0db] rounded-md overflow-hidden">
+                                                <button className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal hover:bg-gray-50 transition-colors text-lg leading-none">
+                                                    <Minus size={13} />
+                                                </button>
+                                                <span className="w-10 h-8 flex items-center justify-center text-sm font-medium text-charcoal border-x border-[#e0e0db]">
+                                                    {item.quantity}
+                                                </span>
+                                                <button className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal hover:bg-gray-50 transition-colors">
+                                                    <Plus size={13} />
+                                                </button>
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div className="flex items-center gap-4">
+                                                <button className="flex items-center gap-1.5 text-[11px] text-muted hover:text-red-500 transition-colors uppercase tracking-wider font-medium">
+                                                    <Trash2 size={13} strokeWidth={1.8} />
+                                                    REMOVE
+                                                </button>
+                                                <button className="flex items-center gap-1.5 text-[11px] text-muted hover:text-emerald transition-colors uppercase tracking-wider font-medium">
+                                                    <Heart size={13} strokeWidth={1.8} />
+                                                    WISHLIST
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
 
-                    {/* Trust Badges */}
-                    <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-4 sm:gap-6 py-4">
-                        <div className="flex items-center gap-3 sm:gap-2">
-                            <Shield size={20} className="text-charcoal sm:w-[18px] sm:h-[18px]" />
-                            <div>
-                                <p className="text-xs font-semibold text-charcoal uppercase tracking-wider">Secure Payment</p>
-                                <p className="text-[10px] text-muted">SSL Encrypted Checkout</p>
+                        {/* Trust Badges */}
+                        <div className="flex flex-wrap items-center gap-6 sm:gap-10 py-4 px-1">
+                            <div className="flex items-center gap-2.5">
+                                <Shield size={18} strokeWidth={1.5} className="text-charcoal shrink-0" />
+                                <div>
+                                    <p className="text-[10px] font-bold text-charcoal uppercase tracking-widest">Secure Payment</p>
+                                    <p className="text-[10px] text-muted">SSL Encrypted Checkout</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-3 sm:gap-2">
-                            <Truck size={20} className="text-charcoal sm:w-[18px] sm:h-[18px]" />
-                            <div>
-                                <p className="text-xs font-semibold text-charcoal uppercase tracking-wider">Fast Delivery</p>
-                                <p className="text-[10px] text-muted">Free shipping across India</p>
+                            <div className="flex items-center gap-2.5">
+                                <Truck size={18} strokeWidth={1.5} className="text-charcoal shrink-0" />
+                                <div>
+                                    <p className="text-[10px] font-bold text-charcoal uppercase tracking-widest">Fast Delivery</p>
+                                    <p className="text-[10px] text-muted">Free shipping across India</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-3 sm:gap-2">
-                            <RotateCcw size={20} className="text-charcoal sm:w-[18px] sm:h-[18px]" />
-                            <div>
-                                <p className="text-xs font-semibold text-charcoal uppercase tracking-wider">Easy Returns</p>
-                                <p className="text-[10px] text-muted">52-day hassle-free policy</p>
+                            <div className="flex items-center gap-2.5">
+                                <RotateCcw size={18} strokeWidth={1.5} className="text-charcoal shrink-0" />
+                                <div>
+                                    <p className="text-[10px] font-bold text-charcoal uppercase tracking-widest">Easy Returns</p>
+                                    <p className="text-[10px] text-muted">30-day hassle-free policy</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* ======== ORDER SUMMARY ======== */}
-                <div className="lg:col-span-1">
-                    <div className="border border-border rounded-xl p-6 sticky top-20">
-                        <h2 className="text-lg font-semibold text-charcoal mb-6" style={{ fontFamily: "var(--font-heading)" }}>
-                            Order Summary
-                        </h2>
+                    {/* ======== RIGHT: ORDER SUMMARY ======== */}
+                    <div>
+                        <div className="bg-white rounded-xl border border-[#e8e8e4] p-6 sticky top-24">
+                            <h2
+                                className="text-[18px] font-bold text-charcoal mb-5"
+                                style={{ fontFamily: "var(--font-heading)" }}
+                            >
+                                Order Summary
+                            </h2>
 
-                        <div className="space-y-3 mb-6">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted">Subtotal</span>
-                                <span className="font-medium text-charcoal">{formatPrice(subtotal)}</span>
+                            {/* Line items */}
+                            <div className="space-y-2.5 mb-4">
+                                <div className="flex justify-between text-[13px]">
+                                    <span className="text-muted">Subtotal</span>
+                                    <span className="font-medium text-charcoal">₹ {subtotal.toLocaleString("en-IN")}</span>
+                                </div>
+                                <div className="flex justify-between text-[13px]">
+                                    <span className="text-muted">Shipping</span>
+                                    <span className="font-semibold text-[#107c6f]">FREE</span>
+                                </div>
+                                <div className="flex justify-between text-[13px]">
+                                    <span className="text-muted">Estimated Tax</span>
+                                    <span className="font-medium text-charcoal">₹ {tax}</span>
+                                </div>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted">Shipping</span>
-                                <span className="font-medium text-emerald">FREE</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted">Estimated Tax</span>
-                                <span className="font-medium text-charcoal">{formatPrice(tax)}</span>
-                            </div>
-                            <div className="border-t border-border pt-3 flex justify-between">
-                                <span className="font-semibold text-charcoal">Total</span>
-                                <span className="font-bold text-lg text-charcoal">{formatPrice(total)}</span>
-                            </div>
-                        </div>
 
-                        {/* Coupon */}
-                        <div className="mb-6">
-                            <label className="label-uppercase block mb-2 text-charcoal">Apply Coupon</label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="Promo code"
-                                    className="flex-1 h-10 px-3 text-sm rounded-md border border-border text-charcoal placeholder:text-muted-light focus:outline-none focus:border-charcoal"
-                                />
-                                <Button variant="primary" size="sm">Apply</Button>
+                            {/* Total */}
+                            <div className="border-t border-[#e8e8e4] pt-3 flex justify-between mb-5">
+                                <span className="text-[15px] font-bold text-charcoal">Total</span>
+                                <span className="text-[15px] font-bold text-charcoal">₹ {total.toLocaleString("en-IN")}</span>
                             </div>
-                        </div>
 
-                        <Button variant="emerald" size="lg" className="w-full" asChild>
-                            <Link href="/checkout">
+                            {/* Coupon */}
+                            <div className="mb-4">
+                                <p className="text-[9px] font-bold text-charcoal uppercase tracking-widest mb-2">Apply Coupon</p>
+                                <div className="flex rounded-md overflow-hidden border border-[#e0e0db]">
+                                    <input
+                                        type="text"
+                                        placeholder="Promo code"
+                                        className="flex-1 h-10 px-3 text-[13px] text-charcoal placeholder:text-gray-400 focus:outline-none bg-transparent"
+                                    />
+                                    <button className="bg-charcoal text-white text-[12px] font-semibold px-4 h-10 shrink-0 hover:bg-charcoal/90 transition-colors">
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Checkout Button */}
+                            <Link
+                                href="/checkout"
+                                className="w-full h-[50px] flex items-center justify-center gap-2 bg-charcoal hover:bg-charcoal/90 text-white text-[13px] font-semibold rounded-md transition-colors duration-200"
+                            >
                                 Proceed to Checkout
-                                <ArrowRight size={16} />
+                                <ArrowRight size={16} strokeWidth={2} />
                             </Link>
-                        </Button>
 
-                        <p className="text-[10px] text-muted text-center mt-4 leading-relaxed">
-                            Prices inclusive of all taxes. By proceeding, you agree to our{" "}
-                            <Link href="/terms" className="underline">Terms of Service</Link>.
-                        </p>
+                            <p className="text-[10px] text-muted text-center mt-3 leading-relaxed px-2">
+                                Prices inclusive of all taxes. By proceeding, you agree to our{" "}
+                                <Link href="/terms" className="underline underline-offset-2 hover:text-charcoal">
+                                    Terms of Service
+                                </Link>
+                                .
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* ======== YOU MAY ALSO LIKE ======== */}
-            <div className="mt-16 mb-8">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl lg:text-2xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
-                        You May Also Like
-                    </h2>
-                    <Link href="/products" className="text-sm text-charcoal font-medium hover:underline underline-offset-4">
-                        View All Collection
-                    </Link>
+                {/* ======== YOU MAY ALSO LIKE ======== */}
+                <div className="mt-14 mb-4">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2
+                            className="text-[22px] sm:text-[26px] font-semibold text-charcoal"
+                            style={{ fontFamily: "var(--font-heading)" }}
+                        >
+                            You May Also Like
+                        </h2>
+                        <Link
+                            href="/products"
+                            className="text-[13px] text-charcoal font-medium hover:underline underline-offset-4"
+                        >
+                            View All Collection
+                        </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
+                        {relatedProducts.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                    {relatedProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
-                </div>
+
             </div>
         </div>
     );

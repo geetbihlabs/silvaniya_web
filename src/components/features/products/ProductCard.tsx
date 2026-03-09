@@ -5,8 +5,6 @@ import Link from "next/link";
 import { Heart, ShoppingCart } from "lucide-react";
 import { cn, formatPrice, getDiscountPercentage } from "@/lib/utils";
 import { Product } from "@/types/product.types";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 
 interface ProductCardProps {
     product: Product;
@@ -30,65 +28,48 @@ export default function ProductCard({
         : 0;
 
     return (
-        <div className={cn("group relative", className)}>
+        <div className={cn("group relative flex flex-col", className)}>
             {/* Image Container */}
-            <div className="relative aspect-square rounded-[2px] overflow-hidden bg-silver-light mb-3">
-                <Link href={`/products/${product.id}`}>
-                    <div className="w-full h-full bg-silver-light flex items-center justify-center text-muted text-sm">
+            <div className="relative aspect-square overflow-hidden bg-[#f0f0f0] mb-3 rounded-sm">
+                <Link href={`/products/${product.id}`} className="block w-full h-full">
+                    <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-white/30 text-xs">
                         {primaryImage?.alt || product.name}
                     </div>
                 </Link>
 
-                {/* Badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                    {hasDiscount && (
-                        <Badge variant="emerald" className="px-2 py-[2px] text-[10px] font-bold tracking-widest uppercase rounded-[2px]">
-                            {discountPercent}% OFF
-                        </Badge>
-                    )}
-                    {product.isNewArrival && (
-                        <Badge variant="default" className="px-2 py-[2px] text-[10px] font-bold tracking-widest uppercase rounded-[2px] bg-charcoal text-white">
-                            NEW ARRIVAL
-                        </Badge>
-                    )}
-                    {product.isBestSeller && (
-                        <Badge variant="default" className="px-2 py-[2px] text-[10px] font-bold tracking-widest uppercase rounded-[2px] bg-charcoal text-white">
-                            BEST SELLER
-                        </Badge>
-                    )}
-                    {product.stock <= 5 && product.stock > 0 && (
-                        <Badge variant="warning" className="px-2 py-[2px] text-[10px] font-bold tracking-widest uppercase rounded-[2px]">
-                            LOW STOCK
-                        </Badge>
-                    )}
-                </div>
+                {/* Discount Badge — top-left, red-orange pill */}
+                {hasDiscount && (
+                    <div className="absolute top-2.5 left-2.5 bg-[#e84c4c] text-white text-[10px] font-semibold px-2 py-0.5 rounded-sm leading-tight z-10">
+                        {discountPercent}% OFF
+                    </div>
+                )}
 
-                {/* Wishlist / Remove Button */}
+                {/* Wishlist / Remove Button — top-right, always visible */}
                 {showRemove ? (
                     <button
                         onClick={onRemove}
-                        className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-charcoal hover:bg-white hover:text-error transition-all shadow-sm"
+                        className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center text-charcoal hover:bg-white transition-all shadow-sm z-10 text-base font-medium"
                         aria-label="Remove"
                     >
                         ×
                     </button>
                 ) : (
                     <button
-                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-charcoal hover:bg-white hover:text-emerald transition-all shadow-sm opacity-0 group-hover:opacity-100"
+                        className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center text-gray-400 hover:text-[#e84c4c] transition-all shadow-sm z-10"
                         aria-label="Add to wishlist"
                     >
-                        <Heart size={16} />
+                        <Heart size={15} strokeWidth={1.5} />
                     </button>
                 )}
             </div>
 
             {/* Product Info */}
-            <div>
+            <div className="flex flex-col flex-1">
                 {/* Rating */}
                 {product.rating && (
                     <div className="flex items-center gap-1 mb-1">
-                        <span className="text-yellow-500 text-xs">★</span>
-                        <span className="text-xs text-muted">
+                        <span className="text-yellow-400 text-xs leading-none">★</span>
+                        <span className="text-[11px] text-muted leading-none">
                             {product.rating} ({product.reviewCount})
                         </span>
                     </div>
@@ -96,18 +77,18 @@ export default function ProductCard({
 
                 {/* Name */}
                 <Link href={`/products/${product.id}`}>
-                    <h3 className="text-sm font-medium text-charcoal line-clamp-2 hover:text-emerald transition-colors duration-500" style={{ fontFamily: "var(--font-heading)" }}>
+                    <h3 className="text-[13px] font-medium text-charcoal line-clamp-1 hover:text-emerald transition-colors mb-1.5 leading-snug" style={{ fontFamily: "var(--font-heading)" }}>
                         {product.name}
                     </h3>
                 </Link>
 
                 {/* Price */}
-                <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-base font-medium text-charcoal">
+                <div className="flex items-baseline gap-2 mb-3">
+                    <span className="text-[15px] font-semibold text-charcoal leading-none">
                         {formatPrice(product.salePrice || product.basePrice)}
                     </span>
                     {hasDiscount && (
-                        <span className="text-sm text-muted line-through">
+                        <span className="text-[12px] text-muted line-through leading-none">
                             {formatPrice(product.basePrice)}
                         </span>
                     )}
@@ -115,14 +96,10 @@ export default function ProductCard({
 
                 {/* Add to Cart */}
                 {showAddToCart && (
-                    <Button
-                        variant="primary"
-                        size="sm"
-                        className="mt-3 w-full"
-                    >
-                        <ShoppingCart size={14} />
+                    <button className="mt-auto w-full flex items-center justify-center gap-2 bg-charcoal hover:bg-charcoal/90 text-white text-[11px] font-semibold tracking-widest uppercase py-2.5 rounded-sm transition-colors duration-200">
+                        <ShoppingCart size={13} strokeWidth={1.8} />
                         Add to Cart
-                    </Button>
+                    </button>
                 )}
             </div>
         </div>

@@ -36,44 +36,44 @@ export default function ProductListingPage() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto py-6">
+        <div className="max-w-[1440px] mx-auto py-6 px-4 sm:px-6 lg:px-8">
             {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-xs text-muted mb-6">
+            <nav className="flex items-center gap-1.5 text-xs text-muted mb-5">
                 <Link href="/" className="hover:text-charcoal transition-colors">Home</Link>
-                <span>›</span>
+                <span className="text-gray-300">›</span>
                 <Link href="/products" className="hover:text-charcoal transition-colors">Jewellery</Link>
-                <span>›</span>
+                <span className="text-gray-300">›</span>
                 <span className="text-charcoal font-medium">Mangalsutras</span>
             </nav>
 
-            <div className="flex gap-8">
+            <div className="flex gap-6 lg:gap-8">
                 {/* ======== FILTERS SIDEBAR ======== */}
                 {/* Desktop */}
-                <aside className="hidden lg:block w-56 shrink-0">
+                <aside className="hidden lg:block w-52 xl:w-56 shrink-0">
                     <div className="sticky top-20">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-semibold text-charcoal uppercase tracking-wider">Filters</h2>
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-sm font-bold text-charcoal uppercase tracking-[0.12em]">Filters</h2>
                             <button
                                 onClick={clearFilters}
-                                className="text-xs text-emerald hover:underline"
+                                className="text-xs text-muted hover:text-charcoal underline underline-offset-2 transition-colors"
                             >
                                 Clear All
                             </button>
                         </div>
 
                         {/* Price Range */}
-                        <div className="mb-8">
-                            <h3 className="text-xs font-semibold text-charcoal uppercase tracking-wider mb-3">Price Range</h3>
-                            <div className="space-y-2.5">
+                        <div className="mb-6">
+                            <h3 className="text-[10px] font-bold text-charcoal uppercase tracking-[0.12em] mb-3">Price Range</h3>
+                            <div className="space-y-2">
                                 {priceRanges.map((range) => (
                                     <label key={range.value} className="flex items-center gap-2.5 cursor-pointer group">
                                         <input
                                             type="checkbox"
                                             checked={selectedPriceRanges.includes(range.value)}
                                             onChange={() => togglePriceRange(range.value)}
-                                            className="w-4 h-4 rounded border-silver accent-emerald"
+                                            className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-charcoal cursor-pointer"
                                         />
-                                        <span className="text-sm text-muted group-hover:text-charcoal transition-colors">
+                                        <span className="text-[13px] text-muted group-hover:text-charcoal transition-colors">
                                             {range.label}
                                         </span>
                                     </label>
@@ -82,18 +82,18 @@ export default function ProductListingPage() {
                         </div>
 
                         {/* Occasion */}
-                        <div className="mb-8">
-                            <h3 className="text-xs font-semibold text-charcoal uppercase tracking-wider mb-3">Occasion</h3>
-                            <div className="space-y-2.5">
+                        <div className="mb-6">
+                            <h3 className="text-[10px] font-bold text-charcoal uppercase tracking-[0.12em] mb-3">Occasion</h3>
+                            <div className="space-y-2">
                                 {occasions.map((occ) => (
                                     <label key={occ} className="flex items-center gap-2.5 cursor-pointer group">
                                         <input
                                             type="checkbox"
                                             checked={selectedOccasion === occ}
                                             onChange={() => setSelectedOccasion(selectedOccasion === occ ? "" : occ)}
-                                            className="w-4 h-4 rounded border-silver accent-emerald"
+                                            className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-charcoal cursor-pointer"
                                         />
-                                        <span className="text-sm text-muted group-hover:text-charcoal transition-colors">
+                                        <span className="text-[13px] text-muted group-hover:text-charcoal transition-colors">
                                             {occ}
                                         </span>
                                     </label>
@@ -102,9 +102,9 @@ export default function ProductListingPage() {
                         </div>
 
                         {/* Discount */}
-                        <div className="mb-8">
-                            <h3 className="text-xs font-semibold text-charcoal uppercase tracking-wider mb-3">Discount</h3>
-                            <div className="space-y-2.5">
+                        <div className="mb-6">
+                            <h3 className="text-[10px] font-bold text-charcoal uppercase tracking-[0.12em] mb-3">Discount</h3>
+                            <div className="space-y-2">
                                 {discounts.map((disc) => (
                                     <label key={disc} className="flex items-center gap-2.5 cursor-pointer group">
                                         <input
@@ -112,9 +112,9 @@ export default function ProductListingPage() {
                                             name="discount"
                                             checked={selectedDiscount === disc}
                                             onChange={() => setSelectedDiscount(selectedDiscount === disc ? "" : disc)}
-                                            className="w-4 h-4 border-silver accent-emerald"
+                                            className="w-3.5 h-3.5 border-gray-300 accent-charcoal cursor-pointer"
                                         />
-                                        <span className="text-sm text-muted group-hover:text-charcoal transition-colors">
+                                        <span className="text-[13px] text-muted group-hover:text-charcoal transition-colors">
                                             {disc}
                                         </span>
                                     </label>
@@ -123,14 +123,14 @@ export default function ProductListingPage() {
                         </div>
 
                         {/* Trust */}
-                        <div className="bg-cream border border-border rounded-[2px] p-4 space-y-3">
-                            <div className="flex items-center gap-2">
-                                <Shield size={16} className="text-charcoal" />
-                                <span className="text-xs font-semibold uppercase tracking-wider text-charcoal">BIS Hallmarked</span>
+                        <div className="bg-[#f4f4f1] border border-[#e8e8e3] rounded-sm p-4 space-y-3">
+                            <div className="flex items-center gap-2.5">
+                                <Shield size={14} className="text-charcoal shrink-0" />
+                                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-charcoal">BIS Hallmarked</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <RotateCcw size={16} className="text-charcoal" />
-                                <span className="text-xs font-semibold uppercase tracking-wider text-charcoal">30-Day Returns</span>
+                            <div className="flex items-center gap-2.5">
+                                <RotateCcw size={14} className="text-charcoal shrink-0" />
+                                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-charcoal">30-Day Returns</span>
                             </div>
                         </div>
                     </div>
@@ -139,23 +139,23 @@ export default function ProductListingPage() {
                 {/* ======== MAIN CONTENT ======== */}
                 <div className="flex-1 min-w-0">
                     {/* Top Bar */}
-                    <div className="flex items-center justify-between bg-cream border border-border px-4 py-3 mb-6">
-                        <p className="text-sm text-muted">
-                            Showing <span className="font-medium text-charcoal">{mockProducts.length}</span> of{" "}
-                            <span className="font-medium text-charcoal">156</span> Designs
+                    <div className="flex items-center justify-between bg-white border border-[#e8e8e3] rounded-sm px-4 py-2.5 mb-5 shadow-sm">
+                        <p className="text-[13px] text-muted">
+                            Showing <span className="font-semibold text-charcoal">{mockProducts.length}</span> of{" "}
+                            <span className="font-semibold text-[#107c6f]">156 Designs</span>
                         </p>
                         <div className="flex items-center gap-3">
                             {/* Mobile Filter Toggle */}
                             <button
-                                className="lg:hidden flex items-center gap-2 text-sm text-charcoal"
+                                className="lg:hidden flex items-center gap-1.5 text-[13px] text-charcoal font-medium"
                                 onClick={() => setIsFilterOpen(true)}
                             >
-                                <SlidersHorizontal size={16} />
+                                <SlidersHorizontal size={15} />
                                 Filters
                             </button>
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-muted hidden sm:inline">Sort By:</span>
-                                <select className="text-sm bg-cream border border-border rounded-[2px] px-3 py-1.5 text-charcoal focus:outline-none focus:border-emerald transition-colors duration-500 font-body">
+                                <span className="text-[13px] text-muted hidden sm:inline">Sort By:</span>
+                                <select className="text-[13px] bg-white border border-[#d1d1cc] rounded-sm px-3 py-1.5 pr-8 text-charcoal focus:outline-none focus:border-charcoal transition-colors font-body appearance-auto">
                                     <option>Featured</option>
                                     <option>Price: Low to High</option>
                                     <option>Price: High to Low</option>
@@ -167,28 +167,28 @@ export default function ProductListingPage() {
                     </div>
 
                     {/* Product Grid */}
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
                         {mockProducts.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
 
                     {/* Pagination */}
-                    <div className="flex items-center justify-center gap-2 mt-10">
-                        <button className="w-9 h-9 rounded-[2px] border border-border text-muted hover:border-charcoal hover:text-charcoal transition-colors duration-500 text-sm">
+                    <div className="flex items-center justify-center gap-1.5 mt-10">
+                        <button className="w-9 h-9 rounded-sm border border-[#d1d1cc] text-muted hover:border-charcoal hover:text-charcoal transition-colors text-sm flex items-center justify-center">
                             ‹
                         </button>
-                        <button className="w-9 h-9 rounded-[2px] bg-charcoal text-white text-sm font-medium">
+                        <button className="w-9 h-9 rounded-sm bg-charcoal text-white text-sm font-semibold flex items-center justify-center">
                             1
                         </button>
-                        <button className="w-9 h-9 rounded-[2px] border border-border text-muted hover:border-charcoal hover:text-charcoal transition-colors duration-500 text-sm">
+                        <button className="w-9 h-9 rounded-sm border border-[#d1d1cc] text-muted hover:border-charcoal hover:text-charcoal transition-colors text-sm flex items-center justify-center">
                             2
                         </button>
-                        <span className="text-muted text-sm px-1">...</span>
-                        <button className="w-9 h-9 rounded-[2px] border border-border text-muted hover:border-charcoal hover:text-charcoal transition-colors duration-500 text-sm">
+                        <span className="text-muted text-sm px-1 flex items-center justify-center w-9 h-9">...</span>
+                        <button className="w-9 h-9 rounded-sm border border-[#d1d1cc] text-muted hover:border-charcoal hover:text-charcoal transition-colors text-sm flex items-center justify-center">
                             12
                         </button>
-                        <button className="w-9 h-9 rounded-[2px] border border-border text-muted hover:border-charcoal hover:text-charcoal transition-colors duration-500 text-sm">
+                        <button className="w-9 h-9 rounded-sm border border-[#d1d1cc] text-muted hover:border-charcoal hover:text-charcoal transition-colors text-sm flex items-center justify-center">
                             ›
                         </button>
                     </div>
