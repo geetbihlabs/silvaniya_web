@@ -61,7 +61,7 @@ export default function WishlistPage() {
                                 {product.name}
                             </p>
                             <p className="text-[13px] font-bold text-charcoal mb-3">
-                                {formatPrice(product.price)}
+                                {formatPrice(product.salePrice || product.basePrice)}
                             </p>
 
                             {/* Add to Cart button */}
@@ -124,7 +124,7 @@ export default function WishlistPage() {
                                     </button>
                                 </div>
                                 <p className="text-[12px] font-semibold text-charcoal leading-snug">{product.name}</p>
-                                <p className="text-[12px] text-muted mt-0.5">{formatPrice(product.price)}</p>
+                                <p className="text-[12px] text-muted mt-0.5">{formatPrice(product.salePrice || product.basePrice)}</p>
                             </Link>
                         ))}
                     </div>

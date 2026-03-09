@@ -63,7 +63,7 @@ const trending = [
   },
 ];
 
-const fmt = (n: number) => `?${n.toLocaleString("en-IN")}`;
+const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
 // --- Testimonials data --------------------------------------------------------
 const testimonials = [
