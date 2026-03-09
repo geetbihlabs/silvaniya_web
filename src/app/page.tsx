@@ -95,57 +95,68 @@ export default function HomePage() {
       <main className="flex-1">
 
         {/* ══════════════════════════ HERO ══════════════════════════════ */}
-        <section className="w-full bg-background py-0">
-          <div className="max-w-7xl mx-auto">
-            <div className="relative w-full h-[clamp(340px,42vw,500px)] rounded-[20px] overflow-hidden bg-[#1a1a1a]">
-              {/* Hero image — positioned right */}
+        <section className="w-full bg-background py-4 md:py-6">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="relative w-full aspect-4/5 sm:aspect-video md:aspect-1138/488 rounded-2xl md:rounded-[20px] overflow-hidden bg-[#222024]">
+              {/* Hero image */}
               <Image
                 src="/hero.png"
                 alt="Silvaniya Exclusive Festive Collection"
                 fill priority sizes="100vw"
-                className="object-cover object-[70%_center]"
+                className="object-cover object-center"
               />
-              {/* Left-side gradient fade — matches Figma dark-left treatment */}
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #1a1a1a 28%, rgba(26,26,26,0.75) 48%, transparent 70%)' }} />
-              {/* Text block — top-left positioned, matching Figma */}
-              <div className="absolute top-[48px] left-[clamp(32px,4vw,64px)] max-w-[420px]">
+
+              {/* Text block — vertically centered, matching Figma */}
+              <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-0 left-0 md:left-[clamp(32px,6%,80px)] max-w-[500px]">
                 {/* Label */}
-                <p className="font-body text-[10.5px] font-semibold tracking-[0.25em] uppercase text-white/70 mb-[18px]">
+                <p className="font-body text-[10.5px] font-semibold tracking-[0.25em] uppercase text-white mb-[18px]">
                   Exclusive Festive Collection
                 </p>
                 {/* Heading */}
-                <h1 className="font-heading font-medium leading-[1.15] text-white mb-8"
-                  style={{ fontSize: 'clamp(36px, 3.6vw, 52px)' }}>
-                  <span className="text-white">Curated for the</span>
-                  <span className="block font-heading font-medium text-white">Modern</span>
-                  <span className="block font-heading italic font-medium text-emerald">
+                <h1 className="font-heading font-medium leading-[1.12] text-white mb-6 md:mb-8"
+                  style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
+                  <span
+                    className="block font-normal text-white font-playfair"
+                  >
+                    Curated for the
+                  </span>
+                  <span
+                    className="block font-normal text-white font-playfair"
+                  >
+                    Modern
+                  </span>
+                  <span
+                    className="block italic font-normal text-emerald font-playfair"
+                  >
                     Indian Woman
                   </span>
                 </h1>
-                <HeroCTA />
+                <div className="mt-2">
+                  <HeroCTA />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* ══════════════════════ SHOP BY CATEGORY ══════════════════════ */}
-        <section className="bg-background py-16 w-full">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-start mb-10">
+        <section className="bg-background py-8 md:py-12 w-full">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="flex flex-row justify-between items-end md:items-center mb-8 md:mb-10">
               <div>
-                <h2 className="font-script italic text-[36px] font-normal text-charcoal leading-tight m-0">
+                <h2 className="italic text-[28px] md:text-[36px] font-normal text-charcoal leading-tight m-0 font-playfair">
                   Shop by Category
                 </h2>
                 <span className="block w-14 h-[2px] bg-emerald mt-2" />
               </div>
               <Link
                 href="/products"
-                className="font-body text-[14px] font-medium text-emerald no-underline self-center hover:underline"
+                className="font-body text-[14px] font-medium text-emerald no-underline hover:underline pb-1 md:pb-0"
               >
                 View All →
               </Link>
             </div>
-            <div className="grid grid-cols-4 gap-6 mt-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-10">
               {categories.map((cat) => (
                 <Link
                   key={cat.slug}
@@ -169,17 +180,17 @@ export default function HomePage() {
         </section>
 
         {/* ════════════════════════ TRENDING NOW ════════════════════════ */}
-        <section className="bg-background py-20 w-full">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="font-script italic text-[42px] font-normal text-charcoal m-0 mb-[10px]">
+        <section className="bg-background py-8 md:py-16 w-full">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="text-center mb-10 md:mb-12">
+              <h2 className="italic text-[32px] md:text-[42px] font-normal text-charcoal m-0 mb-[10px] font-playfair">
                 Trending Now
               </h2>
               <p className="font-body text-[11px] font-semibold tracking-[0.22em] uppercase text-muted m-0">
                 Our Most Loved Pieces This Week
               </p>
             </div>
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {trending.map((p) => (
                 <div
                   key={p.id}
@@ -233,8 +244,8 @@ export default function HomePage() {
         </section>
 
         {/* ════════════════════════ TRUST BADGES ════════════════════════ */}
-        <section className="bg-white border-t border-b border-border py-16 w-full">
-          <div className="grid grid-cols-3 gap-20 max-w-7xl mx-auto">
+        <section className="bg-white border-t border-b border-border py-12 md:py-16 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 md:gap-20 max-w-7xl mx-auto px-4 md:px-8">
 
             {/* Badge 1 — Hallmarked Silver */}
             <div className="flex flex-col items-center text-center">
@@ -294,8 +305,8 @@ export default function HomePage() {
         </section>
 
         {/* ════════════════════════ BRAND STORY ════════════════════════ */}
-        <section className="bg-background py-20 w-full">
-          <div className="grid grid-cols-2 gap-20 items-center max-w-7xl mx-auto">
+        <section className="bg-background py-12 md:py-16 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-20 items-center max-w-7xl mx-auto px-4 md:px-8">
 
             {/* Left — Image */}
             <div className="relative">
@@ -313,11 +324,11 @@ export default function HomePage() {
             {/* Right — Content */}
             <div className="flex flex-col justify-center">
               {/* Heading */}
-              <div className="mb-7">
-                <span className="font-heading italic text-[40px] font-medium text-charcoal leading-tight block">
+              <div className="mb-6 md:mb-7">
+                <span className="italic text-[28px] md:text-[40px] font-medium text-charcoal leading-tight block font-playfair">
                   India&apos;s Finest Sterling Silver,
                 </span>
-                <span className="font-heading italic text-[40px] font-medium text-emerald leading-tight block">
+                <span className="italic text-[28px] md:text-[40px] font-medium text-emerald leading-tight block font-playfair">
                   Curated for You.
                 </span>
               </div>
@@ -330,9 +341,9 @@ export default function HomePage() {
               </p>
 
               {/* Stats */}
-              <div className="grid grid-cols-[auto_auto] gap-12 items-start mb-10 justify-start">
+              <div className="grid grid-cols-[auto_auto] gap-8 md:gap-12 items-start mb-10 justify-start">
                 <div>
-                  <span className="font-script italic text-[36px] font-normal text-emerald block mb-1">
+                  <span className="italic text-[28px] md:text-[36px] font-normal text-emerald block mb-1 font-playfair">
                     10k+
                   </span>
                   <span className="font-body text-[11px] font-semibold tracking-[0.18em] uppercase text-muted">
@@ -340,7 +351,7 @@ export default function HomePage() {
                   </span>
                 </div>
                 <div>
-                  <span className="font-script italic text-[36px] font-normal text-emerald block mb-1">
+                  <span className="italic text-[28px] md:text-[36px] font-normal text-emerald block mb-1 font-playfair">
                     500+
                   </span>
                   <span className="font-body text-[11px] font-semibold tracking-[0.18em] uppercase text-muted">
@@ -359,14 +370,14 @@ export default function HomePage() {
         </section>
 
         {/* ════════════════════════ TESTIMONIALS ═══════════════════════ */}
-        <section className="bg-background py-20 w-full">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="font-script italic text-[40px] font-normal text-charcoal m-0">
+        <section className="bg-background py-12 md:py-16 w-full">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="text-center mb-10 md:mb-12">
+              <h2 className="italic text-[32px] md:text-[40px] font-normal text-charcoal m-0 font-playfair">
                 Voices of Our Customers
               </h2>
             </div>
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {testimonials.map((t) => (
                 <div
                   key={t.id}

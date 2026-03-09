@@ -18,7 +18,7 @@ export default function AccountSidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className="w-full lg:w-60 flex-shrink-0">
+        <aside className="hidden lg:block w-full lg:w-60 shrink-0">
             {/* Account Header */}
             <div className="mb-6">
                 <h2 className="text-2xl lg:text-3xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>

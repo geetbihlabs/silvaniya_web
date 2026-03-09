@@ -11,7 +11,7 @@ export default function ContactPage() {
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
             <div className="text-center max-w-2xl mx-auto mb-12 lg:mb-16">
                 <h1 className="text-3xl lg:text-4xl font-semibold text-charcoal mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-                    We'd love to hear from you
+                    We&apos;d love to hear from you
                 </h1>
                 <p className="text-muted leading-relaxed">
                     Whether you have a question about our heritage collections, hallmarking process, or need assistance with your order, our concierge team is here to help.
@@ -27,7 +27,7 @@ export default function ContactPage() {
 
                     <div className="space-y-8">
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-full bg-emerald/10 flex items-center justify-center flex-shrink-0 text-emerald">
+                            <div className="w-12 h-12 rounded-full bg-emerald/10 flex items-center justify-center shrink-0 text-emerald">
                                 <Phone size={24} />
                             </div>
                             <div>
@@ -40,7 +40,7 @@ export default function ContactPage() {
                         </div>
 
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-full bg-emerald/10 flex items-center justify-center flex-shrink-0 text-emerald">
+                            <div className="w-12 h-12 rounded-full bg-emerald/10 flex items-center justify-center shrink-0 text-emerald">
                                 <Mail size={24} />
                             </div>
                             <div>
@@ -53,7 +53,7 @@ export default function ContactPage() {
                         </div>
 
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-full bg-emerald/10 flex items-center justify-center flex-shrink-0 text-emerald">
+                            <div className="w-12 h-12 rounded-full bg-emerald/10 flex items-center justify-center shrink-0 text-emerald">
                                 <MapPin size={24} />
                             </div>
                             <div>
@@ -84,7 +84,7 @@ export default function ContactPage() {
                     <h2 className="text-2xl font-semibold text-charcoal mb-2" style={{ fontFamily: "var(--font-heading)" }}>
                         Send us a Message
                     </h2>
-                    <p className="text-sm text-muted mb-8">Fill out the form below and we'll get back to you shortly.</p>
+                    <p className="text-sm text-muted mb-8">Fill out the form below and we&apos;ll get back to you shortly.</p>
 
                     <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

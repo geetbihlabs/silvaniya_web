@@ -49,7 +49,7 @@ export default function ProductListingPage() {
             <div className="flex gap-8">
                 {/* ======== FILTERS SIDEBAR ======== */}
                 {/* Desktop */}
-                <aside className="hidden lg:block w-56 flex-shrink-0">
+                <aside className="hidden lg:block w-56 shrink-0">
                     <div className="sticky top-20">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-charcoal uppercase tracking-wider">Filters</h2>

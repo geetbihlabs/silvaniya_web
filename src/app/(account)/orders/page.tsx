@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Package, Truck, Info, ChevronRight } from "lucide-react";
+import { Package, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { mockOrders } from "@/data/mock-data";
 import { formatPrice } from "@/lib/utils";
-import { Order, OrderStatus } from "@/types/order.types";
+import { OrderStatus } from "@/types/order.types";
 
 export default function OrdersPage() {
     const [activeTab, setActiveTab] = useState<"ALL" | "PROCESSING" | "DELIVERED">("ALL");
@@ -36,20 +36,20 @@ export default function OrdersPage() {
     };
 
     return (
-        <div className="max-w-4xl">
-            <h1 className="text-2xl font-semibold text-charcoal mb-6" style={{ fontFamily: "var(--font-heading)" }}>
+        <div className="max-w-4xl px-4 sm:px-0">
+            <h1 className="text-2xl font-semibold text-charcoal mb-4 sm:mb-6" style={{ fontFamily: "var(--font-heading)" }}>
                 Order History
             </h1>
 
             {/* Tabs */}
-            <div className="flex gap-6 border-b border-border mb-8">
+            <div className="flex gap-6 border-b border-border mb-6 sm:mb-8 overflow-x-auto hide-scrollbar">
                 {(["ALL", "PROCESSING", "DELIVERED"] as const).map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`pb-3 text-sm font-medium transition-colors border-b-2 capitalize ${activeTab === tab
-                                ? "border-charcoal text-charcoal"
-                                : "border-transparent text-muted hover:text-charcoal"
+                        className={`pb-3 text-sm font-medium transition-colors border-b-2 capitalize whitespace-nowrap ${activeTab === tab
+                            ? "border-charcoal text-charcoal"
+                            : "border-transparent text-muted hover:text-charcoal"
                             }`}
                     >
                         {tab === "ALL" ? "All Orders" : tab.toLowerCase()}
@@ -60,13 +60,13 @@ export default function OrdersPage() {
             <div className="space-y-6">
                 {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
-                        <div key={order.id} className="bg-white rounded-xl border border-border overflow-hidden">
+                        <div key={order.id} className="bg-white rounded-xl border border-border overflow-hidden mb-4 sm:mb-0">
                             {/* Order Header */}
-                            <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
-                                <div className="flex flex-wrap items-center gap-x-8 gap-y-2">
+                            <div className="bg-gray-50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
+                                <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-start sm:items-center gap-x-2 sm:gap-x-8 gap-y-2">
                                     <div>
                                         <p className="text-[10px] text-muted uppercase tracking-wider font-semibold mb-0.5">Order Placed</p>
-                                        <p className="text-sm font-medium text-charcoal">
+                                        <p className="text-[13px] sm:text-sm font-medium text-charcoal whitespace-nowrap">
                                             {new Date(order.createdAt).toLocaleDateString("en-IN", {
                                                 day: "numeric", month: "short", year: "numeric",
                                             })}
@@ -74,16 +74,16 @@ export default function OrdersPage() {
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-muted uppercase tracking-wider font-semibold mb-0.5">Total</p>
-                                        <p className="text-sm font-medium text-charcoal">{formatPrice(order.totalAmount)}</p>
+                                        <p className="text-[13px] sm:text-sm font-medium text-charcoal whitespace-nowrap">{formatPrice(order.totalAmount)}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-muted uppercase tracking-wider font-semibold mb-0.5">Ship To</p>
-                                        <p className="text-sm font-medium text-emerald hover:underline cursor-pointer">
+                                        <p className="text-[13px] sm:text-sm font-medium text-emerald hover:underline cursor-pointer whitespace-nowrap truncate max-w-[80px] sm:max-w-none">
                                             {order.shippingAddress.fullName}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex flex-col sm:items-end gap-1">
+                                <div className="flex flex-col sm:items-end gap-1 mt-1 sm:mt-0 pt-3 sm:pt-0 border-t border-border/50 sm:border-0">
                                     <span className="text-sm font-semibold text-charcoal">#{order.orderNumber}</span>
                                     <div className="flex items-center gap-3">
                                         <Link href={`/orders/${order.id}`} className="text-xs text-muted hover:text-emerald hover:underline flex items-center gap-1">
@@ -108,11 +108,11 @@ export default function OrdersPage() {
                             </div>
 
                             {/* Order Items */}
-                            <div className="px-6 pb-6">
+                            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
                                 {order.items.map((item, index) => (
-                                    <div key={item.id} className={`flex gap-4 sm:gap-6 py-4 ${index !== order.items.length - 1 ? "border-b border-border/50" : ""}`}>
+                                    <div key={item.id} className={`flex gap-3 sm:gap-6 py-4 ${index !== order.items.length - 1 ? "border-b border-border/50" : ""}`}>
                                         {/* Img */}
-                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center text-xs text-muted">
+                                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 shrink-0 flex items-center justify-center text-xs text-muted">
                                             Product Img
                                         </div>
 
@@ -130,7 +130,7 @@ export default function OrdersPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="flex flex-col gap-2 sm:items-end sm:w-40 flex-shrink-0">
+                                            <div className="flex flex-col gap-2 sm:items-end w-full sm:w-40 shrink-0 mt-3 sm:mt-0">
                                                 <Button variant="outline" size="sm" className="w-full text-xs h-8">Need Help?</Button>
                                                 <Button variant="primary" size="sm" className="w-full text-xs h-8">Track Package</Button>
                                             </div>
@@ -147,7 +147,7 @@ export default function OrdersPage() {
                         </div>
                         <h3 className="text-lg font-semibold text-charcoal mb-2">No orders found</h3>
                         <p className="text-sm text-muted mb-6 max-w-sm mx-auto">
-                            Looks like you haven't placed any orders in this category yet.
+                            Looks like you haven&apos;t placed any orders in this category yet.
                         </p>
                         <Button variant="primary" asChild>
                             <Link href="/products">Start Shopping</Link>

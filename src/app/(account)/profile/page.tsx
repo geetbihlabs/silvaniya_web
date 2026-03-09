@@ -8,14 +8,14 @@ import { Button } from "@/components/ui/Button";
 
 export default function ProfilePage() {
     return (
-        <div className="max-w-4xl space-y-4">
+        <div className="max-w-4xl space-y-4 px-4 sm:px-0 mb-8 sm:mb-0">
             {/* <h1 className="text-3xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
                 My Account
             </h1> */}
-            <p className="text-sm text-muted mb-8">Welcome back, John</p>
+            <p className="text-sm text-muted mb-6 sm:mb-8">Welcome back, John</p>
 
             {/* Profile Header Card */}
-            <div className="bg-white rounded-xl border border-border p-6 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 shadow-sm">
+            <div className="bg-white rounded-xl border border-border p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 sm:gap-6 shadow-sm">
                 <div className="flex flex-col sm:flex-row items-center gap-6">
                     {/* Avatar with Camera Icon */}
                     <div className="relative">
@@ -55,9 +55,9 @@ export default function ProfilePage() {
             </div>
 
             {/* Personal Information Card */}
-            <div className="bg-white rounded-xl border border-border p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-100">
-                    <h3 className="text-xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
+            <div className="bg-white rounded-xl border border-border p-4 sm:p-6 shadow-sm mt-6 sm:mt-8">
+                <div className="flex items-center justify-between mb-6 sm:mb-8 pb-4 border-b border-gray-100">
+                    <h3 className="text-lg sm:text-xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
                         Personal Information
                     </h3>
                     <button className="flex items-center gap-1.5 text-sm font-semibold text-emerald hover:text-emerald-dark transition-colors">
@@ -111,12 +111,12 @@ export default function ProfilePage() {
             </div>
 
             {/* Security Card */}
-            <div className="bg-white rounded-xl border border-border p-6 shadow-sm mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div className="bg-white rounded-xl border border-border p-4 sm:p-6 shadow-sm mb-6 sm:mb-8 mt-6 sm:mt-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <Shield size={20} className="text-emerald shrink-0" />
-                            <h3 className="text-xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
+                            <h3 className="text-lg sm:text-xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
                                 Security
                             </h3>
                         </div>
@@ -131,11 +131,11 @@ export default function ProfilePage() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="flex items-center justify-end gap-6 pt-4">
-                <button className="text-sm font-semibold text-muted hover:text-charcoal uppercase tracking-wider transition-colors">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-6 pt-2 sm:pt-4">
+                <button className="text-sm font-semibold text-muted hover:text-charcoal uppercase tracking-wider transition-colors h-12 sm:h-auto py-2 sm:py-0">
                     Cancel Changes
                 </button>
-                <Button variant="primary" className="uppercase tracking-wide text-xs px-8 h-12 font-semibold">
+                <Button variant="primary" className="uppercase tracking-wide text-xs px-8 h-12 font-semibold w-full sm:w-auto">
                     Save All Changes
                 </Button>
             </div>

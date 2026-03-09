@@ -27,8 +27,8 @@
   --font-heading:  "Playfair Display", Georgia, serif;
   --font-script:   "Cormorant Garamond", Georgia, serif;
   --font-body:     "Manrope", system-ui, -apple-system, sans-serif;
+  --font-playfair: "Playfair Display", Georgia, serif;
 }
-
 @layer base {
   /* Reset */
   *, *::before, *::after {
@@ -82,6 +82,10 @@
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--color-muted);
+  }
+
+  .font-playfair {
+    font-family: 'Playfair Display', serif;
   }
 }
 

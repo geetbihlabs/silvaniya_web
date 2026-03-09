@@ -23,10 +23,10 @@ const SUPPORT_LINKS = [
 
 export default function Footer() {
     return (
-        <footer className="bg-[#1e1b2e] w-full pt-[72px] px-6">
+        <footer className="bg-[#1e1b2e] w-full pt-12 md:pt-[72px] px-6 md:px-8">
 
             {/* ── Main grid ── */}
-            <div className="grid grid-cols-[2fr_1.2fr_1.2fr_1.4fr] gap-16 max-w-7xl mx-auto pb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1.2fr_1.2fr_1.4fr] gap-10 lg:gap-16 max-w-7xl mx-auto pb-12 md:pb-16">
 
                 {/* Column 1 — Brand */}
                 <div>
@@ -131,11 +131,11 @@ export default function Footer() {
             <hr className="border-0 border-t border-white/10 w-full m-0" />
 
             {/* ── Bottom bar ── */}
-            <div className="max-w-7xl mx-auto py-6 flex justify-between items-center">
+            <div className="max-w-7xl mx-auto py-6 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 text-center md:text-left">
                 <p className="font-body text-[11px] font-normal tracking-[0.08em] text-white/35">
                     © 2026 SILVANIYA JEWELLERS PVT LTD. ALL RIGHTS RESERVED.
                 </p>
-                <div className="flex gap-8">
+                <div className="flex flex-wrap justify-center gap-4 md:gap-8">
                     {[
                         { label: "PRIVACY POLICY", href: "/privacy-policy" },
                         { label: "TERMS OF USE", href: "/terms" },

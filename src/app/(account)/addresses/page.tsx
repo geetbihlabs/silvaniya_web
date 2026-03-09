@@ -47,9 +47,9 @@ export default function AddressesPage() {
     };
 
     return (
-        <div className="max-w-4xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <h1 className="text-2xl font-semibold text-charcoal" style={{ fontFamily: "var(--font-heading)" }}>
+        <div className="max-w-4xl px-4 sm:px-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                <h1 className="text-2xl font-semibold text-charcoal mb-2 sm:mb-0" style={{ fontFamily: "var(--font-heading)" }}>
                     Saved Addresses
                 </h1>
                 {!isAdding && (
@@ -61,7 +61,7 @@ export default function AddressesPage() {
             </div>
 
             {isAdding && (
-                <div className="bg-white rounded-xl p-6 border border-emerald/30 shadow-sm mb-8 animate-in fade-in slide-in-from-top-2">
+                <div className="bg-white rounded-xl p-4 sm:p-6 border border-emerald/30 shadow-sm mb-8 animate-in fade-in slide-in-from-top-2">
                     <h2 className="text-xl font-semibold text-charcoal mb-6" style={{ fontFamily: "var(--font-heading)" }}>
                         Add New Address
                     </h2>
@@ -123,47 +123,49 @@ export default function AddressesPage() {
                             />
                         </div>
 
-                        <div className="flex gap-4 items-center mt-2">
+                        <div className="flex flex-wrap gap-4 items-center mt-2">
                             <span className="text-sm font-medium text-charcoal label-caps">Address Type:</span>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="label"
-                                    value="home"
-                                    checked={formData.label === "home"}
-                                    onChange={() => setFormData({ ...formData, label: "home" })}
-                                    className="accent-emerald w-4 h-4"
-                                />
-                                <span className="text-sm">Home</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="label"
-                                    value="work"
-                                    checked={formData.label === "work"}
-                                    onChange={() => setFormData({ ...formData, label: "work" })}
-                                    className="accent-emerald w-4 h-4"
-                                />
-                                <span className="text-sm">Work</span>
-                            </label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="label"
+                                        value="home"
+                                        checked={formData.label === "home"}
+                                        onChange={() => setFormData({ ...formData, label: "home" })}
+                                        className="accent-emerald w-4 h-4"
+                                    />
+                                    <span className="text-sm">Home</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="label"
+                                        value="work"
+                                        checked={formData.label === "work"}
+                                        onChange={() => setFormData({ ...formData, label: "work" })}
+                                        className="accent-emerald w-4 h-4"
+                                    />
+                                    <span className="text-sm">Work</span>
+                                </label>
+                            </div>
                         </div>
 
-                        <label className="flex items-center gap-2 cursor-pointer mt-4">
+                        <label className="flex items-start sm:items-center gap-2 cursor-pointer mt-4">
                             <input
                                 type="checkbox"
                                 checked={formData.isDefault}
                                 onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                                className="accent-emerald w-4 h-4 rounded-sm"
+                                className="accent-emerald w-4 h-4 rounded-sm mt-0.5 sm:mt-0"
                             />
-                            <span className="text-sm text-charcoal">Make this my default address</span>
+                            <span className="text-xs sm:text-sm text-charcoal leading-tight">Make this my default address</span>
                         </label>
 
-                        <div className="flex items-center gap-4 pt-4 border-t border-border mt-6">
-                            <Button type="submit" variant="primary" size="lg">
+                        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-4 border-t border-border mt-6">
+                            <Button type="submit" variant="primary" className="w-full sm:w-auto h-11 sm:h-10">
                                 Save Address
                             </Button>
-                            <Button type="button" variant="outline" size="lg" onClick={() => setIsAdding(false)}>
+                            <Button type="button" variant="outline" className="w-full sm:w-auto h-11 sm:h-10" onClick={() => setIsAdding(false)}>
                                 Cancel
                             </Button>
                         </div>
@@ -171,39 +173,39 @@ export default function AddressesPage() {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {addresses.map((address) => (
                     <div
                         key={address.id}
-                        className={`bg-white rounded-xl p-6 border relative transition-all ${address.isDefault ? "border-emerald shadow-sm" : "border-border hover:border-charcoal/30"
+                        className={`bg-white rounded-xl p-4 sm:p-6 border relative transition-all ${address.isDefault ? "border-emerald shadow-sm" : "border-border hover:border-charcoal/30"
                             }`}
                     >
                         {/* Header */}
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs bg-gray-100 text-charcoal px-2.5 py-1 rounded-sm uppercase tracking-wider font-semibold">
+                        <div className="flex items-start justify-between gap-2 mb-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-[10px] sm:text-xs bg-gray-100 text-charcoal px-2.5 py-1 rounded-sm uppercase tracking-wider font-semibold">
                                     {address.label}
                                 </span>
                                 {address.isDefault && (
-                                    <span className="text-xs bg-emerald/10 text-emerald px-2.5 py-1 rounded-sm flex items-center gap-1 font-medium">
-                                        <MapPin size={12} /> Default
+                                    <span className="text-[10px] sm:text-xs bg-emerald/10 text-emerald px-2.5 py-1 rounded-sm flex items-center gap-1 font-medium">
+                                        <MapPin size={12} className="w-3 h-3" /> Default
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                                 <button aria-label="Edit" className="p-1.5 text-muted hover:text-charcoal hover:bg-gray-100 rounded-md transition-colors">
-                                    <Edit2 size={16} />
+                                    <Edit2 size={16} className="w-[14px] h-[14px] sm:w-4 sm:h-4" />
                                 </button>
                                 <button aria-label="Delete" className="p-1.5 text-muted hover:text-error hover:bg-red-50 rounded-md transition-colors">
-                                    <Trash2 size={16} />
+                                    <Trash2 size={16} className="w-[14px] h-[14px] sm:w-4 sm:h-4" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Content */}
-                        <div className="mb-6">
-                            <h3 className="font-semibold text-charcoal mb-2">{address.fullName}</h3>
-                            <p className="text-sm text-muted leading-relaxed">
+                        <div className="mb-5 sm:mb-6">
+                            <h3 className="text-sm sm:text-base font-semibold text-charcoal mb-2">{address.fullName}</h3>
+                            <p className="text-xs sm:text-sm text-muted leading-relaxed">
                                 {address.addressLine1}
                                 {address.addressLine2 && <><br />{address.addressLine2}</>}
                                 <br />

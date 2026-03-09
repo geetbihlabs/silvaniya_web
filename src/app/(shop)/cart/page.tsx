@@ -18,44 +18,44 @@ export default function CartPage() {
     const total = subtotal + shipping + tax;
 
     return (
-        <div className="max-w-7xl mx-auto py-8">
+        <div className="max-w-7xl mx-auto py-6 md:py-8 px-4 md:px-8">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-3xl lg:text-4xl font-semibold text-charcoal">
+            <div className="mb-6 md:mb-8">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-charcoal">
                     Shopping Bag
                 </h1>
-                <p className="text-sm text-muted mt-1">
+                <p className="text-xs md:text-sm text-muted mt-1">
                     Review your exquisite selections ({cartItems.length} Items)
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
                 {/* ======== CART ITEMS ======== */}
                 <div className="lg:col-span-2 space-y-6">
                     {cartItems.map((item) => (
                         <div key={item.id} className="border border-border rounded-xl p-4 sm:p-6">
                             <div className="flex gap-4">
                                 {/* Product Image */}
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center text-xs text-muted">
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-gray-100 shrink-0 flex items-center justify-center text-xs text-muted">
                                     Image
                                 </div>
 
                                 {/* Product Info */}
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-4">
+                                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-4">
                                         <div>
-                                            <h3 className="text-base font-medium text-charcoal">{item.productName}</h3>
-                                            <p className="text-xs text-muted uppercase tracking-wider mt-0.5">
-                                                SKU: {item.sku} | {item.variantInfo}
+                                            <h3 className="text-sm sm:text-base font-medium text-charcoal leading-tight">{item.productName}</h3>
+                                            <p className="text-[10px] sm:text-xs text-muted uppercase tracking-wider mt-1 sm:mt-0.5">
+                                                SKU: {item.sku} <span className="hidden sm:inline">|</span><span className="sm:hidden"><br /></span> {item.variantInfo}
                                             </p>
                                         </div>
-                                        <span className="text-base font-bold text-charcoal whitespace-nowrap">
+                                        <span className="text-sm sm:text-base font-bold text-charcoal whitespace-nowrap mt-1 sm:mt-0">
                                             {formatPrice(item.unitPrice)}
                                         </span>
                                     </div>
 
                                     {/* Quantity + Actions */}
-                                    <div className="flex items-center justify-between mt-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-4 sm:gap-0">
                                         <div className="flex items-center border border-border rounded-md">
                                             <button className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal transition-colors">
                                                 <Minus size={14} />
@@ -85,23 +85,23 @@ export default function CartPage() {
                     ))}
 
                     {/* Trust Badges */}
-                    <div className="flex flex-wrap items-center gap-6 sm:gap-8 py-4">
-                        <div className="flex items-center gap-2">
-                            <Shield size={18} className="text-charcoal" />
+                    <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-4 sm:gap-6 py-4">
+                        <div className="flex items-center gap-3 sm:gap-2">
+                            <Shield size={20} className="text-charcoal sm:w-[18px] sm:h-[18px]" />
                             <div>
                                 <p className="text-xs font-semibold text-charcoal uppercase tracking-wider">Secure Payment</p>
                                 <p className="text-[10px] text-muted">SSL Encrypted Checkout</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Truck size={18} className="text-charcoal" />
+                        <div className="flex items-center gap-3 sm:gap-2">
+                            <Truck size={20} className="text-charcoal sm:w-[18px] sm:h-[18px]" />
                             <div>
                                 <p className="text-xs font-semibold text-charcoal uppercase tracking-wider">Fast Delivery</p>
                                 <p className="text-[10px] text-muted">Free shipping across India</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <RotateCcw size={18} className="text-charcoal" />
+                        <div className="flex items-center gap-3 sm:gap-2">
+                            <RotateCcw size={20} className="text-charcoal sm:w-[18px] sm:h-[18px]" />
                             <div>
                                 <p className="text-xs font-semibold text-charcoal uppercase tracking-wider">Easy Returns</p>
                                 <p className="text-[10px] text-muted">52-day hassle-free policy</p>

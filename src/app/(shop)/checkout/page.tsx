@@ -248,7 +248,7 @@ export default function CheckoutPage() {
                             <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
                                 {cartItems.map((item) => (
                                     <div key={item.id} className="flex gap-4">
-                                        <div className="w-16 h-16 rounded-md bg-gray-100 flex-shrink-0 flex items-center justify-center text-[10px] text-muted relative">
+                                        <div className="w-16 h-16 rounded-md bg-gray-100 shrink-0 flex items-center justify-center text-[10px] text-muted relative">
                                             Img
                                             <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-charcoal text-white flex items-center justify-center text-xs font-medium">
                                                 {item.quantity}
@@ -287,7 +287,7 @@ export default function CheckoutPage() {
 
                             {/* Secure Checkout Banner */}
                             <div className="bg-green-50 rounded-lg p-3 flex items-center gap-3 mb-6 border border-green-100">
-                                <div className="w-8 h-8 rounded-full bg-emerald/10 flex items-center justify-center flex-shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-emerald/10 flex items-center justify-center shrink-0">
                                     <Shield size={16} className="text-emerald" />
                                 </div>
                                 <p className="text-xs text-green-800 leading-relaxed font-medium">

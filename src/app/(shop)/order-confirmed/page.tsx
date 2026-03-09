@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Package, Truck, Contact } from "lucide-react";
+import { CheckCircle2, ChevronRight, Package, Truck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { mockOrders } from "@/data/mock-data";
 import { formatPrice } from "@/lib/utils";
@@ -30,7 +30,7 @@ export default function OrderConfirmedPage() {
                 {/* ======== ORDER STATUS CARDS ======== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
                     <div className="bg-white rounded-xl p-6 border border-border shadow-sm flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-emerald/10 flex items-center justify-center flex-shrink-0 text-emerald">
+                        <div className="w-10 h-10 rounded-full bg-emerald/10 flex items-center justify-center shrink-0 text-emerald">
                             <Package size={20} />
                         </div>
                         <div>
@@ -41,7 +41,7 @@ export default function OrderConfirmedPage() {
                     </div>
 
                     <div className="bg-white rounded-xl p-6 border border-border shadow-sm flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-emerald/10 flex items-center justify-center flex-shrink-0 text-emerald">
+                        <div className="w-10 h-10 rounded-full bg-emerald/10 flex items-center justify-center shrink-0 text-emerald">
                             <Truck size={20} />
                         </div>
                         <div>
@@ -63,7 +63,7 @@ export default function OrderConfirmedPage() {
                         <div className="space-y-4 mb-6 pb-6 border-b border-border">
                             {order.items.map((item) => (
                                 <div key={item.id} className="flex gap-4">
-                                    <div className="w-16 h-16 rounded-lg bg-gray-100 flex-shrink-0 flex items-center justify-center text-xs text-muted">
+                                    <div className="w-16 h-16 rounded-lg bg-gray-100 shrink-0 flex items-center justify-center text-xs text-muted">
                                         Img
                                     </div>
                                     <div className="flex-1 min-w-0">

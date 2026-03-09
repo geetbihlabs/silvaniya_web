@@ -103,7 +103,7 @@ export default function LoginPage() {
 
                             <Button
                                 variant="emerald"
-                                className="w-full h-12 rounded bg-[#107c6f] hover:bg-[#0e6b5f] text-white tracking-[0.1em]"
+                                className="w-full h-12 rounded bg-[#107c6f] hover:bg-[#0e6b5f] text-white tracking-widest"
                                 type="submit"
                                 disabled={phone.length !== 10}
                             >
