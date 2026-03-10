@@ -12,6 +12,16 @@ export interface DashboardStats {
   aovChange: number;
 }
 
+export type PaymentMethod =
+  | "RAZORPAY"
+  | "UPI"
+  | "NET_BANKING"
+  | "CREDIT_CARD"
+  | "DEBIT_CARD"
+  | "CASH_ON_DELIVERY"
+  | "STORE_CREDIT"
+  | "EMI";
+
 // Extended order statuses for admin (per PRD lifecycle)
 export type AdminOrderStatus =
   | "PENDING_PAYMENT"
@@ -22,6 +32,9 @@ export type AdminOrderStatus =
   | "OUT_FOR_DELIVERY"
   | "DELIVERED"
   | "RETURN_REQUESTED"
+  | "RETURN_APPROVED"
+  | "RETURN_REJECTED"
+  | "RETURNED"
   | "REFUNDED"
   | "CANCELLED";
 
@@ -134,9 +147,9 @@ export interface AdminProduct {
   id: string;
   name: string;
   sku: string;
-  category: string;
+  category: "RINGS" | "NECKLACES" | "BANGLES" | "EARRINGS" | "BRACELETS" | "PENDANTS" | "CHAINS" | "ANKLETS" | "NOSE_PINS" | "MAANG_TIKKA" | "OTHER";
   collection?: string;
-  material: string;
+  material: "GOLD_22K" | "GOLD_18K" | "GOLD_14K" | "PLATINUM" | "SILVER_925" | "SILVER_999" | "WHITE_GOLD" | "ROSE_GOLD" | "OTHER";
   basePrice: number;
   salePrice?: number;
   stock: number;

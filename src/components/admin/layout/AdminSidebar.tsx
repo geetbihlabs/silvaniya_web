@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 import {
     LayoutDashboard,
     Package,
@@ -86,7 +87,7 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
             </nav>
 
             {/* Bottom */}
-            <div className="px-2 pb-4 space-y-1 border-t border-white/10 pt-4">
+            <div className="px-2 pb-4 space-y-1 border-t border-white/10 pt-4 flex flex-col items-center">
                 <button
                     onClick={onToggle}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all w-full"
@@ -94,12 +95,13 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
                     <ChevronLeft size={20} className={cn("shrink-0 transition-transform", collapsed && "rotate-180")} />
                     {!collapsed && <span>Collapse</span>}
                 </button>
-                <button
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all w-full"
-                >
-                    <LogOut size={20} className="shrink-0" />
-                    {!collapsed && <span>Logout</span>}
-                </button>
+                <div className="pt-2 flex justify-center w-full">
+                    <UserButton 
+                        appearance={{ 
+                            elements: { userButtonAvatarBox: "w-8 h-8", userButtonPopoverCard: "z-[100]" } 
+                        }} 
+                    />
+                </div>
             </div>
         </aside>
     );
