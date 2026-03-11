@@ -27,11 +27,12 @@ export type UpdateCategoryDto = Partial<CreateCategoryDto>;
 
 interface CategoryState {
   categories: Category[];
+  meta: { page: number; limit: number; total: number; totalPages: number } | null;
   isLoading: boolean;
   error: string | null;
 
   // Actions
-  fetchCategories: () => Promise<void>;
+  fetchCategories: (params?: { page?: number; limit?: number }) => Promise<void>;
   getCategory: (id: string) => Promise<Category | null>;
   createCategory: (data: CreateCategoryDto, getToken: () => Promise<string | null>) => Promise<Category | null>;
   updateCategory: (id: string, data: UpdateCategoryDto, getToken: () => Promise<string | null>) => Promise<Category | null>;
@@ -41,16 +42,31 @@ interface CategoryState {
 
 export const useCategoryStore = create<CategoryState>((set) => ({
   categories: [],
+  meta: null,
   isLoading: false,
   error: null,
 
-  fetchCategories: async () => {
+  fetchCategories: async (params) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.get('/categories');
-      // Depending on if there is a global interceptor, the data might be in res.data or res.data.data
-      const categories = res.data?.data ? res.data.data : res.data;
-      set({ categories: categories || [], isLoading: false });
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.append('page', params.page.toString());
+      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      
+      const queryString = queryParams.toString();
+      const url = queryString ? `/categories?${queryString}` : '/categories';
+
+      const res = await api.get(url);
+      
+      const categories: Category[] = Array.isArray(res.data?.data) 
+        ? res.data.data 
+        : Array.isArray(res.data) 
+          ? res.data 
+          : [];
+          
+      const meta = res.data?.meta || null;
+
+      set({ categories, meta, isLoading: false });
     } catch (error: any) {
       console.error("Error fetching categories:", error);
       const msg = error.response?.data?.message || error.message || "Failed to fetch categories";

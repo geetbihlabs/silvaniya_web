@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Edit2, Trash2, Loader2, AlertTriangle, Image as ImageIcon } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2, AlertTriangle, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import PageHeader from "@/components/admin/shared/PageHeader";
@@ -11,13 +11,31 @@ import { useAuth } from "@clerk/nextjs";
 
 export default function AdminCategoriesPage() {
   const { getToken } = useAuth();
-  const { categories, isLoading, fetchCategories, deleteCategory } = useCategoryStore();
+  const { categories, meta, isLoading, fetchCategories, deleteCategory } = useCategoryStore();
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    fetchCategories({ page, limit: 10 });
+  }, [fetchCategories, page]);
+
+  const handlePageChange = (newPage: number) => {
+    if (!meta) return;
+    if (newPage < 1 || newPage > meta.totalPages) return;
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const getPageNumbers = (): number[] => {
+    if (!meta) return [];
+    const pages: number[] = [];
+    const delta = 2;
+    const from = Math.max(1, meta.page - delta);
+    const to = Math.min(meta.totalPages, meta.page + delta);
+    for (let i = from; i <= to; i++) pages.push(i);
+    return pages;
+  };
 
   const handleDeleteConfirm = async () => {
     if (!confirmDelete) return;
@@ -124,6 +142,51 @@ export default function AdminCategoriesPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-5 py-4 border-t border-border bg-gray-50/30">
+          <p className="text-xs text-muted">
+            Showing {categories.length} of {meta?.total || 0} categories
+            {meta && meta.totalPages > 1 && ` — Page ${meta.page} of ${meta.totalPages}`}
+          </p>
+
+          {meta && meta.totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handlePageChange(meta.page - 1)}
+                disabled={meta.page === 1 || isLoading}
+                className="p-1.5 rounded-md text-muted hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Previous page"
+              >
+                <ChevronLeft size={14} />
+              </button>
+
+              {getPageNumbers().map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handlePageChange(p)}
+                  disabled={isLoading}
+                  className={`px-3 py-1.5 text-xs rounded-md font-semibold transition-colors ${
+                    p === meta.page
+                      ? "bg-charcoal text-white"
+                      : "text-muted hover:bg-gray-100 disabled:opacity-50"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(meta.page + 1)}
+                disabled={meta.page === meta.totalPages || isLoading}
+                className="p-1.5 rounded-md text-muted hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Next page"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
