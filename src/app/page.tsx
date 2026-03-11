@@ -1,67 +1,13 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroCTA from "@/components/features/hero/HeroCTA";
-
-// --- Categories ---------------------------------------------------------------
-const categories = [
-  { name: "Mangal Sutras", slug: "mangalsutras", image: "/images/categories/mangalsutras.jpg" },
-  { name: "Nose Pins", slug: "nose-pins", image: "/images/categories/nose-pins.jpg" },
-  { name: "Toe Rings", slug: "toe-rings", image: "/images/categories/toe-rings.jpg" },
-  { name: "Silver Coins", slug: "silver-coins", image: "/images/categories/silver-coins.jpg" },
-];
-
-// --- Trending Products --------------------------------------------------------
-const trending = [
-  {
-    id: "t1",
-    name: "Aditi Traditional Mangalsutra",
-    subtitle: "925 Sterling Silver",
-    price: 4299,
-    originalPrice: 4776,
-    badge: "10% OFF",
-    image: "/images/products/mangalsutra-1.jpg",
-    imageBgClass: "bg-[#f8f8f8]",
-    href: "/products/t1",
-  },
-  {
-    id: "t2",
-    name: "Chhavi Floral Nose Pin",
-    subtitle: "Pure Silver  Handcrafted",
-    price: 850,
-    originalPrice: null,
-    badge: null,
-    image: "/images/products/nose-pin-1.jpg",
-    imageBgClass: "bg-charcoal",
-    href: "/products/t2",
-  },
-  {
-    id: "t3",
-    name: "Meenakari Bridal Payal",
-    subtitle: "92.5 Hallmarked Silver",
-    price: 6499,
-    originalPrice: null,
-    badge: "BESTSELLER",
-    image: "/images/products/payal-1.jpg",
-    imageBgClass: "bg-charcoal",
-    href: "/products/t3",
-  },
-  {
-    id: "t4",
-    name: "50g Purity 999 Coin",
-    subtitle: "Investment Grade Silver",
-    price: 5150,
-    originalPrice: null,
-    badge: "NEW",
-    image: "/images/products/coin-1.jpg",
-    imageBgClass: "bg-charcoal",
-    href: "/products/t4",
-  },
-];
+import { useCategoryStore } from "@/store/useCategoryStore";
+import { useShopProductStore } from "@/store/useShopProductStore";
 
 const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
@@ -88,6 +34,18 @@ const testimonials = [
 ];
 
 export default function HomePage() {
+  const { categories, fetchCategories, isLoading: categoriesLoading } = useCategoryStore();
+  const { products: trending, fetchProducts, isLoading: productsLoading } = useShopProductStore();
+
+  useEffect(() => {
+    fetchCategories();
+    // Fetch only featured products for "Trending Now"
+    fetchProducts({ isFeatured: true, limit: 4 });
+  }, [fetchCategories, fetchProducts]);
+
+  // Take top 4 categories
+  const displayCategories = categories.filter((c) => c.isVisible).slice(0, 4);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -106,7 +64,7 @@ export default function HomePage() {
                 className="object-cover object-center"
               />
 
-              {/* Text block  vertically centered, matching Figma */}
+              {/* Text block — vertically centered, matching Figma */}
               <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-0 left-0 md:left-[clamp(32px,6%,80px)] max-w-[500px]">
                 {/* Label */}
                 <p className="font-body text-[10.5px] font-semibold tracking-[0.25em] uppercase text-white mb-[18px]">
@@ -153,29 +111,42 @@ export default function HomePage() {
                 href="/products"
                 className="font-body text-[14px] font-medium text-emerald no-underline hover:underline pb-1 md:pb-0"
               >
-                View All ?
+                View All →
               </Link>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-10">
-              {categories.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={`/products?category=${cat.slug}`}
-                  className="no-underline cursor-pointer block group"
-                >
-                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-charcoal relative">
-                    <Image
-                      src={cat.image} alt={cat.name} fill
-                      sizes="(max-width: 640px) 50vw, 25vw"
-                      className="object-cover object-center transition-transform duration-400 ease-out group-hover:scale-[1.04]"
-                    />
-                  </div>
-                  <p className="mt-5 text-center font-body text-[12px] font-semibold tracking-[0.2em] uppercase text-charcoal">
-                    {cat.name}
-                  </p>
-                </Link>
-              ))}
-            </div>
+
+            {categoriesLoading ? (
+              <div className="flex justify-center items-center h-48">
+                <Loader2 size={32} className="animate-spin text-emerald" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-10">
+                {displayCategories.map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    href={`/products?category=${cat.slug}`}
+                    className="no-underline cursor-pointer block group"
+                  >
+                    <div className="w-full aspect-square rounded-xl overflow-hidden bg-charcoal relative">
+                      {cat.imageUrl ? (
+                        <Image
+                          src={cat.imageUrl} alt={cat.name} fill
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                          className="object-cover object-center transition-transform duration-400 ease-out group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <span className="text-gray-400 text-sm">No Image</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-5 text-center font-body text-[12px] font-semibold tracking-[0.2em] uppercase text-charcoal">
+                      {cat.name}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -190,60 +161,69 @@ export default function HomePage() {
                 Our Most Loved Pieces This Week
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {trending.map((p) => (
-                <div
-                  key={p.id}
-                  className="group bg-white rounded-xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.07)] flex flex-col"
-                >
-                  {/* Image area */}
-                  <div className={`relative w-full aspect-square overflow-hidden ${p.imageBgClass}`}>
-                    <Link href={p.href} className="block relative w-full h-full">
-                      <Image
-                        src={p.image} alt={p.name} fill
-                        sizes="(max-width: 640px) 50vw, 25vw"
-                        className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </Link>
-                    {p.badge && (
-                      <span className="absolute top-[14px] left-[14px] font-body text-[10px] font-bold tracking-[0.08em] uppercase py-[5px] px-[10px] rounded text-white bg-emerald pointer-events-none">
-                        {p.badge}
-                      </span>
-                    )}
-                    <button
-                      className="absolute top-3 right-3 w-[34px] h-[34px] rounded-full bg-white/88 border-none flex items-center justify-center cursor-pointer z-10"
-                      aria-label="Add to wishlist"
-                    >
-                      <Heart size={16} className="text-silver-dark" fill="none" />
-                    </button>
-                  </div>
-                  {/* Card content */}
-                  <div className="p-[18px_20px_20px] flex-1 flex flex-col">
-                    <Link href={p.href} className="no-underline group/link">
-                      <p className="font-heading text-[16px] font-medium text-charcoal mb-1 leading-tight group-hover/link:text-emerald transition-colors">
-                        {p.name}
-                      </p>
-                      <p className="font-body text-[13px] font-normal text-muted mb-[14px]">
-                        {p.subtitle}
-                      </p>
-                    </Link>
-                    <div className="flex items-baseline gap-2 mb-[18px]">
-                      <span className="font-body text-[18px] font-semibold text-charcoal tracking-[0.01em]">
-                        {fmt(p.price)}
-                      </span>
-                      {p.originalPrice && (
-                        <span className="font-body text-[14px] font-normal text-silver-dark line-through">
-                          {fmt(p.originalPrice)}
-                        </span>
-                      )}
+
+            {productsLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 size={40} className="animate-spin text-emerald" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {trending.slice(0, 4).map((p) => (
+                  <div
+                    key={p.id}
+                    className="group bg-white rounded-xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.07)] flex flex-col"
+                  >
+                    {/* Image area */}
+                    <div className="relative w-full aspect-square overflow-hidden bg-[#f8f8f8]">
+                      <Link href={`/products/${p.slug}`} className="block relative w-full h-full">
+                        {p.images && p.images.length > 0 ? (
+                          <Image
+                            src={p.images[0].s3Url} alt={p.name} fill
+                            sizes="(max-width: 640px) 50vw, 25vw"
+                            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                            <span className="text-gray-400 text-sm">No Image</span>
+                          </div>
+                        )}
+                      </Link>
+                      {/* Fake badge logic depending on creation date or tags. For now, we can omit if not in MVP or show NEW if recent */}
+                      <button
+                        className="absolute top-3 right-3 w-[34px] h-[34px] rounded-full bg-white/88 border-none flex items-center justify-center cursor-pointer z-10 hover:bg-white transition-colors"
+                        aria-label="Add to wishlist"
+                      >
+                        <Heart size={16} className="text-silver-dark hover:text-red-500 transition-colors" fill="none" />
+                      </button>
                     </div>
-                    <button className="mt-auto w-full py-3 bg-transparent border-[1.5px] border-charcoal font-body text-[11px] font-semibold tracking-[0.18em] uppercase text-charcoal cursor-pointer transition-all duration-300 rounded hover:bg-charcoal hover:text-white">
-                      ADD TO CART
-                    </button>
+                    {/* Card content */}
+                    <div className="p-[18px_20px_20px] flex-1 flex flex-col">
+                      <Link href={`/products/${p.slug}`} className="no-underline group/link">
+                        <p className="font-heading text-[16px] font-medium text-charcoal mb-1 leading-tight group-hover/link:text-emerald transition-colors line-clamp-1">
+                          {p.name}
+                        </p>
+                        <p className="font-body text-[13px] font-normal text-muted mb-[14px]">
+                          {p.metalType.replace(/_/g, ' ')}
+                        </p>
+                      </Link>
+                      <div className="flex items-baseline gap-2 mb-[18px]">
+                        <span className="font-body text-[18px] font-semibold text-charcoal tracking-[0.01em]">
+                          {fmt(p.salePrice || p.basePrice)}
+                        </span>
+                        {p.salePrice && p.salePrice < p.basePrice && (
+                          <span className="font-body text-[14px] font-normal text-silver-dark line-through">
+                            {fmt(p.basePrice)}
+                          </span>
+                        )}
+                      </div>
+                      <Link href={`/products/${p.slug}`} className="mt-auto w-full py-3 text-center bg-transparent border-[1.5px] border-charcoal font-body text-[11px] font-semibold tracking-[0.18em] uppercase text-charcoal cursor-pointer transition-all duration-300 rounded hover:bg-charcoal hover:text-white no-underline">
+                        VIEW PRODUCT
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -251,7 +231,7 @@ export default function HomePage() {
         <section className="bg-white border-t border-b border-border py-12 md:py-16 w-full">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 md:gap-20 max-w-7xl mx-auto px-4 md:px-8">
 
-            {/* Badge 1  Hallmarked Silver */}
+            {/* Badge 1 — Hallmarked Silver */}
             <div className="flex flex-col items-center text-center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -268,7 +248,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Badge 2  Secure Shipping */}
+            {/* Badge 2 — Secure Shipping */}
             <div className="flex flex-col items-center text-center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -287,7 +267,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Badge 3  Purity Certificate */}
+            {/* Badge 3 — Purity Certificate */}
             <div className="flex flex-col items-center text-center">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
@@ -312,7 +292,7 @@ export default function HomePage() {
         <section className="bg-background py-12 md:py-16 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-20 items-center max-w-7xl mx-auto px-4 md:px-8">
 
-            {/* Left  Image */}
+            {/* Left — Image */}
             <div className="relative">
               <div className="w-full aspect-[4/3.6] rounded-[20px] overflow-hidden bg-charcoal relative">
                 <Image
@@ -325,7 +305,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right  Content */}
+            {/* Right — Content */}
             <div className="flex flex-col justify-center">
               {/* Heading */}
               <div className="mb-6 md:mb-7">

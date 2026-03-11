@@ -6,6 +6,20 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
 import { UserButton, useAuth, SignOutButton } from "@clerk/nextjs";
+import CartBadge from "./CartBadge";
+import { useWishlistStore } from "@/store/useWishlistStore";
+
+function WishlistBadge() {
+    const { items, initialized } = useWishlistStore();
+    
+    if (!initialized || items.length === 0) return null;
+    
+    return (
+        <span className="absolute -top-1.5 -right-2 bg-[#e84c4c] text-white text-[10px] font-bold h-4 min-w-[16px] flex items-center justify-center rounded-full px-1 z-10">
+            {items.length}
+        </span>
+    );
+}
 
 const NAV_LINKS = [
     { label: "Jewellery", href: "/products" },
@@ -123,9 +137,10 @@ export default function Navbar() {
                     <Link
                         href="/wishlist"
                         aria-label="Wishlist"
-                        className="flex items-center text-charcoal transition-colors duration-300 hover:text-emerald"
+                        className="relative flex items-center text-charcoal transition-colors duration-300 hover:text-emerald"
                     >
                         <Heart size={20} strokeWidth={1.6} />
+                        <WishlistBadge />
                     </Link>
 
                     {/* Cart */}
@@ -135,9 +150,7 @@ export default function Navbar() {
                         className="relative flex items-center text-charcoal transition-colors duration-300 hover:text-emerald"
                     >
                         <ShoppingBag size={20} strokeWidth={1.6} />
-                        <span className="absolute -top-[6px] -right-[8px] bg-emerald text-white text-[9px] font-bold font-body w-4 h-4 rounded-full flex items-center justify-center">
-                            2
-                        </span>
+                        <CartBadge />
                     </Link>
 
                     {/* User */}

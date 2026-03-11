@@ -13,14 +13,15 @@ import {
     Headphones,
     // Settings,
     ChevronLeft,
-    LogOut,
     Gem,
+    Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
     { label: "Dashboard", href: "/admin-panel/dashboard", icon: LayoutDashboard },
     { label: "Products", href: "/admin-panel/products", icon: Package },
+    { label: "Categories", href: "/admin-panel/categories", icon: Layers },
     { label: "Orders", href: "/admin-panel/orders", icon: ShoppingCart },
     { label: "Customers", href: "/admin-panel/customers", icon: Users },
     { label: "Support", href: "/admin-panel/support", icon: Headphones },

@@ -12,6 +12,7 @@ import * as z from "zod";
 import toast from "react-hot-toast";
 import { useDropzone } from 'react-dropzone';
 import Image from "next/image";
+import api from "@/lib/axios";
 
 const productSchema = z.object({
   name: z.string().min(3, "Product name is required"),
@@ -28,13 +29,15 @@ const productSchema = z.object({
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   
+  isReturnable: z.boolean().default(true),
+  refundPolicy: z.string().optional(),
+  allowPartialPayment: z.boolean().default(false),
+  minBookingAmount: z.coerce.number().min(0).optional(),
+  
   status: z.enum(["PUBLISHED", "DRAFT", "ARCHIVED"]).default("DRAFT"),
   isFeatured: z.boolean().default(false),
   
-  category: z.enum([
-    "RINGS", "NECKLACES", "BANGLES", "EARRINGS", "BRACELETS", 
-    "PENDANTS", "CHAINS", "ANKLETS", "NOSE_PINS", "MAANG_TIKKA", "OTHER"
-  ]),
+  categoryId: z.string().min(1, "Please select a category"),
   collectionId: z.string().optional(),
   metalType: z.enum([
     "GOLD_22K", "GOLD_18K", "GOLD_14K", "PLATINUM", 
@@ -73,6 +76,26 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
         })) || []
     );
     
+    // Categories Management State
+    const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+    // Fetch categories on mount
+    React.useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await api.get('/categories');
+                setCategories(res.data?.data || []);
+            } catch (err) {
+                console.error("Failed to load categories:", err);
+                toast.error("Failed to load categories");
+            } finally {
+                setIsLoadingCategories(false);
+            }
+        };
+        fetchCategories();
+    }, []);
+
     // Cleanup previews on unmount
     React.useEffect(() => {
         return () => {
@@ -158,7 +181,11 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
             lowStockThreshold: initialValues?.lowStockThreshold ?? undefined,
             metaTitle: initialValues?.metaTitle ?? "",
             metaDescription: initialValues?.metaDescription ?? "",
-            category: initialValues?.category ?? "RINGS",
+            isReturnable: initialValues?.isReturnable ?? true,
+            refundPolicy: initialValues?.refundPolicy ?? "",
+            allowPartialPayment: initialValues?.allowPartialPayment ?? false,
+            minBookingAmount: initialValues?.minBookingAmount ?? undefined,
+            categoryId: initialValues?.categoryId ?? "",
             collectionId: initialValues?.collectionId ?? "",
             certificateNo: initialValues?.certificateNo ?? "",
             status: initialValues?.status ?? "DRAFT",
@@ -375,22 +402,21 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
                             <h2 className="text-sm font-bold text-charcoal uppercase tracking-wider mb-5">Organization</h2>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="label-uppercase block mb-2 text-charcoal">Category *</label>
-                                    <select {...register("category")} className="w-full h-10 px-3 text-sm rounded-md border border-border text-charcoal bg-white focus:outline-none focus:border-charcoal">
+                                    <label className="label-uppercase block mb-2 text-charcoal flex justify-between items-center">
+                                        <span>Category *</span>
+                                        {isLoadingCategories && <Loader2 size={12} className="animate-spin text-charcoal" />}
+                                    </label>
+                                    <select 
+                                        {...register("categoryId")} 
+                                        disabled={isLoadingCategories}
+                                        className="w-full h-10 px-3 text-sm rounded-md border border-border text-charcoal bg-white focus:outline-none focus:border-charcoal disabled:opacity-50"
+                                    >
                                         <option value="">Select category...</option>
-                                        <option value="RINGS">Rings</option>
-                                        <option value="NECKLACES">Necklaces</option>
-                                        <option value="BANGLES">Bangles</option>
-                                        <option value="EARRINGS">Earrings</option>
-                                        <option value="BRACELETS">Bracelets</option>
-                                        <option value="PENDANTS">Pendants</option>
-                                        <option value="CHAINS">Chains</option>
-                                        <option value="ANKLETS">Anklets</option>
-                                        <option value="NOSE_PINS">Nose Pins</option>
-                                        <option value="MAANG_TIKKA">Maang Tikka</option>
-                                        <option value="OTHER">Other</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                        ))}
                                     </select>
-                                    {errors.category && <p className="text-error text-xs mt-1">{errors.category.message}</p>}
+                                    {errors.categoryId && <p className="text-error text-xs mt-1">{errors.categoryId.message}</p>}
                                 </div>
                                 <Input label="Collection ID (Optional UUID)" placeholder="00000000-0000-0000-0000-000000000000" {...register("collectionId")} />
                                 <div>
@@ -419,6 +445,43 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
                                         <option value="CUBIC_ZIRCONIA">Cubic Zirconia</option>
                                         <option value="OTHER">Other</option>
                                     </select>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Payment Options */}
+                        <section className="bg-white rounded-xl border border-border p-6">
+                            <h2 className="text-sm font-bold text-charcoal uppercase tracking-wider mb-5">Payment Options</h2>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <input type="checkbox" id="allowPartialPayment" {...register("allowPartialPayment")} className="rounded border-gray-300 text-charcoal focus:ring-charcoal" />
+                                    <label htmlFor="allowPartialPayment" className="text-sm font-medium text-charcoal">Allow Partial Payment (Booking)</label>
+                                </div>
+                                {watch("allowPartialPayment") && (
+                                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                        <Input label="Minimum Booking Amount (₹) *" type="number" placeholder="1000" {...register("minBookingAmount")} />
+                                        {errors.minBookingAmount && <p className="text-error text-xs mt-1">{errors.minBookingAmount.message}</p>}
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Returns & Refund Policy */}
+                        <section className="bg-white rounded-xl border border-border p-6">
+                            <h2 className="text-sm font-bold text-charcoal uppercase tracking-wider mb-5">Returns & Refunds</h2>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <input type="checkbox" id="isReturnable" {...register("isReturnable")} className="rounded border-gray-300 text-charcoal focus:ring-charcoal" />
+                                    <label htmlFor="isReturnable" className="text-sm font-medium text-charcoal">Product is Returnable</label>
+                                </div>
+                                <div>
+                                    <label className="label-uppercase block mb-2 text-charcoal">Refund / Return Policy</label>
+                                    <textarea
+                                        {...register("refundPolicy")}
+                                        rows={4}
+                                        className="w-full px-4 py-3 text-sm rounded-md border border-border text-charcoal placeholder:text-muted-light focus:outline-none focus:border-charcoal resize-none"
+                                        placeholder="E.g., 7-day no questions asked return policy. Must include original packaging..."
+                                    />
                                 </div>
                             </div>
                         </section>

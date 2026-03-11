@@ -265,7 +265,13 @@ export default function AdminProductsPage() {
 
                                         {/* Category */}
                                         <td className="px-5 py-4 text-charcoal capitalize">
-                                            {String(product.category || '').replace(/_/g, ' ')}
+                                            {(() => {
+                                                const cat = product.category;
+                                                if (cat && typeof cat === 'object') {
+                                                    return String((cat as Record<string, unknown>).name || '').replace(/_/g, ' ');
+                                                }
+                                                return String(cat || '').replace(/_/g, ' ');
+                                            })()}
                                         </td>
 
                                         {/* Price */}

@@ -1,140 +1,165 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, ChevronRight, Package, Truck } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { mockOrders } from "@/data/mock-data";
+import { CheckCircle, Package, Loader2 } from "lucide-react";
+import { useOrderStore } from "@/store/useOrderStore";
+import { useAuth } from "@clerk/nextjs";
 import { formatPrice } from "@/lib/utils";
 
-export default function OrderConfirmedPage() {
-    const order = mockOrders[0];
+const STATUS_LABELS: Record<string, string> = {
+    PENDING_PAYMENT: "Payment Pending",
+    PAYMENT_CONFIRMED: "Payment Confirmed",
+    PROCESSING: "Processing",
+    QUALITY_CHECK: "Quality Check",
+    SHIPPED: "Shipped",
+    OUT_FOR_DELIVERY: "Out for Delivery",
+    DELIVERED: "Delivered",
+};
+
+function OrderConfirmedContent() {
+    const searchParams = useSearchParams();
+    const orderId = searchParams.get("orderId");
+    const { order, isLoading, fetchOrderById } = useOrderStore();
+    const { getToken } = useAuth();
+
+    useEffect(() => {
+        if (orderId) {
+            fetchOrderById(orderId, getToken);
+        }
+    }, [orderId, fetchOrderById, getToken]);
+
+    if (!orderId) {
+        return (
+            <div className="min-h-screen bg-cream flex items-center justify-center px-4">
+                <div className="text-center py-16">
+                    <p className="text-muted text-sm">No order ID provided.</p>
+                    <Link href="/products" className="mt-4 inline-block text-sm text-[#107c6f] underline">Browse Collection</Link>
+                </div>
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-cream flex items-center justify-center">
+                <Loader2 size={32} className="animate-spin text-charcoal" />
+            </div>
+        );
+    }
+
+    if (!order) {
+        return (
+            <div className="min-h-screen bg-cream flex items-center justify-center px-4">
+                <div className="text-center py-16">
+                    <Package size={40} className="mx-auto mb-4 text-gray-300" />
+                    <p className="text-muted text-sm">Order not found. Please contact support.</p>
+                    <Link href="/products" className="mt-4 inline-block text-sm text-[#107c6f] underline">Continue Shopping</Link>
+                </div>
+            </div>
+        );
+    }
+
+    const addr = order.shippingAddress;
 
     return (
-        <div className="bg-cream min-h-screen py-10 lg:py-16">
-            <div className="max-w-[800px] mx-auto px-4 sm:px-6">
-
-                {/* ======== SUCCESS HEADER ======== */}
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald/10 text-emerald mb-6">
-                        <CheckCircle2 size={40} className="stroke-[1.5]" />
-                    </div>
-                    <h1 className="text-3xl lg:text-4xl font-semibold text-charcoal mb-4" style={{ fontFamily: "var(--font-heading)" }}>
-                        Thank you for your order!
+        <div className="min-h-screen bg-[#f5f5f3]">
+            <div className="max-w-2xl mx-auto px-4 py-10 sm:py-16">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <CheckCircle size={56} className="text-[#107c6f] mx-auto mb-4" strokeWidth={1.5} />
+                    <h1 className="text-[36px] font-bold text-charcoal mb-2 leading-tight" style={{ fontFamily: "var(--font-heading)" }}>
+                        Thank You, {addr?.fullName?.split(" ")[0]}!
                     </h1>
-                    <p className="text-muted max-w-lg mx-auto leading-relaxed">
-                        Your exquisite silver jewellery is being prepared for dispatch. We have sent an email confirmation with order details to <strong>john.doe@example.com</strong>
-                    </p>
-                </div>
-
-                {/* ======== ORDER STATUS CARDS ======== */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
-                    <div className="bg-white rounded-xl p-6 border border-border shadow-sm flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-emerald/10 flex items-center justify-center shrink-0 text-emerald">
-                            <Package size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Order Number</p>
-                            <p className="text-lg font-semibold text-charcoal">{order.orderNumber}</p>
-                            <Button variant="link" size="sm" className="mt-1">Track Order Status</Button>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-6 border border-border shadow-sm flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-emerald/10 flex items-center justify-center shrink-0 text-emerald">
-                            <Truck size={20} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-1">Estimated Delivery</p>
-                            <p className="text-lg font-semibold text-charcoal">Oct 15 - Oct 18</p>
-                            <p className="text-sm text-muted mt-1">Free Insured Shipping</p>
-                        </div>
+                    <p className="text-muted text-sm">Your order has been placed and is being processed.</p>
+                    <div className="mt-4 inline-flex items-center gap-2 bg-white border border-[#e8e8e4] rounded-full px-5 py-2">
+                        <span className="text-[12px] uppercase tracking-widest text-muted font-medium">Order ID</span>
+                        <span className="text-[14px] font-bold text-charcoal">{order.orderNumber}</span>
                     </div>
                 </div>
 
-                {/* ======== ORDER SUMMARY ======== */}
-                <div className="bg-white rounded-xl border border-border overflow-hidden mb-10 shadow-sm">
-                    <div className="bg-gray-50 px-6 py-4 border-b border-border">
-                        <h2 className="text-base font-semibold text-charcoal uppercase tracking-wider">Order Details</h2>
-                    </div>
-
-                    <div className="p-6">
-                        {/* Items */}
-                        <div className="space-y-4 mb-6 pb-6 border-b border-border">
-                            {order.items.map((item) => (
-                                <div key={item.id} className="flex gap-4">
-                                    <div className="w-16 h-16 rounded-lg bg-gray-100 shrink-0 flex items-center justify-center text-xs text-muted">
-                                        Img
+                {/* Order Items */}
+                <div className="bg-white rounded-xl border border-[#e8e8e4] p-6 mb-5">
+                    <h2 className="text-[16px] font-bold text-charcoal mb-4" style={{ fontFamily: "var(--font-heading)" }}>Items Ordered</h2>
+                    <div className="space-y-4">
+                        {order.items.map((item) => {
+                            const imageUrl = item.productVariant?.product?.images?.find((i) => i.isPrimary)?.s3Url
+                                ?? item.productVariant?.product?.images?.[0]?.s3Url ?? "";
+                            return (
+                                <div key={item.id} className="flex gap-3 items-center">
+                                    <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                                        {imageUrl ? <img src={imageUrl} alt={item.productName} className="w-full h-full object-cover" /> : <Package size={20} className="m-2 text-gray-300" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between">
-                                            <h4 className="text-sm font-medium text-charcoal">{item.productName}</h4>
-                                            <span className="text-sm font-semibold text-charcoal">{formatPrice(item.totalPrice)}</span>
-                                        </div>
-                                        <p className="text-xs text-muted mt-1">Qty: {item.quantity}</p>
+                                        <p className="text-[14px] font-semibold text-charcoal">{item.productName}</p>
+                                        <p className="text-[11px] text-muted">{item.variantLabel} · Qty {item.quantity}</p>
                                     </div>
+                                    <span className="text-[14px] font-semibold text-charcoal">{formatPrice(Number(item.totalPrice))}</span>
                                 </div>
-                            ))}
-                        </div>
+                            );
+                        })}
+                    </div>
 
-                        {/* Address & Payment Info */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-6 pb-6 border-b border-border">
-                            <div>
-                                <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Shipping Address</p>
-                                <div className="text-sm text-charcoal leading-relaxed">
-                                    <span className="font-medium">{order.shippingAddress.fullName}</span><br />
-                                    {order.shippingAddress.addressLine1}<br />
-                                    {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}<br />
-                                    Phone: {order.shippingAddress.phone}
-                                </div>
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Payment Method</p>
-                                <div className="text-sm text-charcoal">
-                                    <span className="font-medium">{order.paymentMethod}</span>
-                                    <p className="text-xs text-emerald mt-1 bg-emerald/10 inline-block px-2 py-0.5 rounded">Payment Successful</p>
-                                </div>
-                            </div>
+                    <div className="border-t border-[#e8e8e4] mt-4 pt-4 space-y-2">
+                        <div className="flex justify-between text-[13px]">
+                            <span className="text-muted">Subtotal</span>
+                            <span className="text-charcoal font-medium">{formatPrice(Number(order.subtotal))}</span>
                         </div>
-
-                        {/* Totals */}
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted">Subtotal</span>
-                                <span className="font-medium text-charcoal">{formatPrice(order.subtotal)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted">Tax</span>
-                                <span className="font-medium text-charcoal">{formatPrice(order.taxAmount)}</span>
-                            </div>
-                            <div className="flex justify-between text-base font-bold text-charcoal pt-2">
-                                <span>Total Paid</span>
-                                <span>{formatPrice(order.totalAmount)}</span>
-                            </div>
+                        <div className="flex justify-between text-[13px]">
+                            <span className="text-muted">Shipping</span>
+                            <span className={Number(order.shippingCharge) === 0 ? "text-[#107c6f] font-semibold" : "text-charcoal font-medium"}>
+                                {Number(order.shippingCharge) === 0 ? "FREE" : formatPrice(Number(order.shippingCharge))}
+                            </span>
+                        </div>
+                        <div className="flex justify-between text-[13px]">
+                            <span className="text-muted">GST</span>
+                            <span className="text-charcoal font-medium">{formatPrice(Number(order.cgst) + Number(order.sgst))}</span>
+                        </div>
+                        <div className="flex justify-between text-[15px] font-bold border-t border-[#e8e8e4] pt-3">
+                            <span className="text-charcoal">Total Paid</span>
+                            <span className="text-charcoal">{formatPrice(Number(order.totalAmount))}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* ======== ACTIONS ======== */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button variant="primary" size="lg" asChild>
-                        <Link href="/products">
-                            Continue Shopping
-                            <ChevronRight size={18} />
-                        </Link>
-                    </Button>
-                    <Button variant="outline" size="lg" asChild>
-                        <Link href="/orders">
-                            View Order History
-                        </Link>
-                    </Button>
+                {/* Shipping Address */}
+                {addr && (
+                    <div className="bg-white rounded-xl border border-[#e8e8e4] p-5 mb-5">
+                        <h2 className="text-[15px] font-bold text-charcoal mb-2">Delivery To</h2>
+                        <p className="text-[13px] text-charcoal font-semibold">{addr.fullName}</p>
+                        <p className="text-[13px] text-muted">{addr.line1}{addr.line2 ? `, ${addr.line2}` : ""}</p>
+                        <p className="text-[13px] text-muted">{addr.city}, {addr.state} – {addr.pincode}</p>
+                        <p className="text-[13px] text-muted">{addr.phone}</p>
+                    </div>
+                )}
+
+                {/* Status */}
+                <div className="bg-white rounded-xl border border-[#e8e8e4] p-5 mb-8">
+                    <h2 className="text-[15px] font-bold text-charcoal mb-2">Order Status</h2>
+                    <span className="inline-block bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold uppercase tracking-widest rounded-full px-3 py-1">
+                        {STATUS_LABELS[order.status] ?? order.status}
+                    </span>
                 </div>
 
-                {/* Need Help */}
-                <div className="mt-12 text-center text-sm text-muted">
-                    Need help? <Link href="/support" className="text-emerald hover:underline font-medium">Contact Customer Support</Link>
+                {/* CTA */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href="/products" className="flex-1 h-11 flex items-center justify-center bg-charcoal text-white text-[12px] font-bold tracking-widest uppercase rounded-md hover:bg-charcoal/90 transition-colors">
+                        Continue Shopping
+                    </Link>
+                    <Link href="/track" className="flex-1 h-11 flex items-center justify-center border border-charcoal text-charcoal text-[12px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-50 transition-colors">
+                        Track Order
+                    </Link>
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function OrderConfirmedPage() {
+    return (
+        <React.Suspense fallback={<div className="min-h-screen bg-cream flex items-center justify-center"><Loader2 size={32} className="animate-spin text-charcoal" /></div>}>
+            <OrderConfirmedContent />
+        </React.Suspense>
     );
 }

@@ -45,6 +45,10 @@ export default function EditProductPage() {
                         : (data.lowStockThreshold ?? undefined),
                     metaTitle: data.metaTitle || "",
                     metaDescription: data.metaDescription || "",
+                    isReturnable: data.isReturnable ?? true,
+                    refundPolicy: data.refundPolicy || "",
+                    allowPartialPayment: data.allowPartialPayment || false,
+                    minBookingAmount: data.minBookingAmount ?? undefined,
                     category: data.category || "RINGS",
                     collectionId: data.collectionId || "",
                     certificateNo: data.certificateNo || "",
@@ -85,6 +89,10 @@ export default function EditProductPage() {
             certificateNo: typeof data.certificateNo === 'string' ? data.certificateNo.trim() || undefined : undefined,
             metaTitle: typeof data.metaTitle === 'string' ? data.metaTitle.trim() || undefined : undefined,
             metaDescription: typeof data.metaDescription === 'string' ? data.metaDescription.trim() || undefined : undefined,
+            isReturnable: typeof data.isReturnable === 'boolean' ? data.isReturnable : true,
+            refundPolicy: typeof data.refundPolicy === 'string' ? data.refundPolicy.trim() || undefined : undefined,
+            allowPartialPayment: typeof data.allowPartialPayment === 'boolean' ? data.allowPartialPayment : false,
+            minBookingAmount: typeof data.minBookingAmount === 'number' ? data.minBookingAmount : undefined,
             tags: tagsArray,
         };
         

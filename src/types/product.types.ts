@@ -8,7 +8,8 @@ export interface Product {
   shortDescription?: string;
   basePrice: number;
   salePrice?: number;
-  category: ProductCategory;
+  category?: Category;
+  categoryId: string;
   status: ProductStatus;
   images: ProductImage[];
   variants?: ProductVariant[];
@@ -16,6 +17,7 @@ export interface Product {
   material?: string;
   purity?: string;
   isBestSeller?: boolean;
+  isFeatured?: boolean;
   isNewArrival?: boolean;
   rating?: number;
   reviewCount?: number;
@@ -23,6 +25,16 @@ export interface Product {
   tags?: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  imageUrl?: string;
+  isVisible: boolean;
+  sortOrder: number;
 }
 
 export interface ProductImage {
@@ -42,28 +54,10 @@ export interface ProductVariant {
   priceOverride?: number;
 }
 
-export type ProductCategory =
-  | "jewellery"
-  | "mangalsutras"
-  | "rings"
-  | "necklaces"
-  | "bangles"
-  | "earrings"
-  | "pendants"
-  | "anklets"
-  | "toe-rings"
-  | "nose-pins"
-  | "silver-coins"
-  | "bracelets"
-  | "new-arrivals"
-  | "best-sellers"
-  | "wedding-special"
-  | "gifting-guide";
-
 export type ProductStatus = "PUBLISHED" | "DRAFT" | "ARCHIVED";
 
 export interface ProductFilter {
-  category?: ProductCategory;
+  categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
   occasion?: string;

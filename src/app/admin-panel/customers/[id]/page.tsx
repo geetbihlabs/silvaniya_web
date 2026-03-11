@@ -1,20 +1,36 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, use } from "react";
 import Link from "next/link";
-import { use } from "react";
-import { ArrowLeft, Mail, Phone, MapPin, ShoppingCart, IndianRupee, Calendar, ShieldCheck, Ban } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, ShoppingCart, IndianRupee, Calendar, ShieldCheck, Ban, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import PageHeader from "@/components/admin/shared/PageHeader";
 import StatusBadge from "@/components/admin/shared/StatusBadge";
-import { mockAdminCustomers, mockAdminOrders, mockSupportTickets } from "@/data/admin-mock-data";
 import { formatPrice } from "@/lib/utils";
+import { useAdminCustomerStore } from "@/store/useAdminCustomerStore";
+import { useAuth } from "@clerk/nextjs";
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const customer = mockAdminCustomers.find((c) => c.id === id) || mockAdminCustomers[0];
-    const customerOrders = mockAdminOrders.filter((o) => o.customerId === customer.id);
-    const customerTickets = mockSupportTickets.filter((t) => t.customerId === customer.id);
+    const { getToken, isLoaded } = useAuth();
+    const { selectedCustomer, isLoading, fetchCustomerById } = useAdminCustomerStore();
+
+    useEffect(() => {
+        if (isLoaded && id) {
+            fetchCustomerById(id, getToken);
+        }
+    }, [isLoaded, id, fetchCustomerById, getToken]);
+
+    if (isLoading || !selectedCustomer) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-10 h-10 animate-spin text-charcoal mb-4" />
+                <p className="text-muted">Loading customer details...</p>
+            </div>
+        );
+    }
+
+    const { customer, recentOrders, recentTickets } = selectedCustomer;
 
     return (
         <div>
@@ -64,7 +80,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                         <div className="p-5 border-b border-border">
                             <h3 className="text-sm font-bold text-charcoal uppercase tracking-wider">Order History</h3>
                         </div>
-                        {customerOrders.length > 0 ? (
+                        {recentOrders && recentOrders.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
@@ -76,12 +92,12 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {customerOrders.map((order) => (
+                                        {recentOrders.map((order) => (
                                             <tr key={order.id} className="border-b border-border/50 last:border-0">
                                                 <td className="px-5 py-3"><Link href={`/admin-panel/orders/${order.id}`} className="font-semibold text-charcoal hover:text-emerald">{order.orderNumber}</Link></td>
-                                                <td className="px-5 py-3 font-medium">{formatPrice(order.totalAmount)}</td>
-                                                <td className="px-5 py-3"><StatusBadge type="order" value={order.status} /></td>
-                                                <td className="px-5 py-3 text-muted">{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</td>
+                                                <td className="px-5 py-3 font-medium">{formatPrice(order.totalAmount || 0)}</td>
+                                                <td className="px-5 py-3"><StatusBadge type="order" value={order.status || ''} /></td>
+                                                <td className="px-5 py-3 text-muted">{new Date(order.createdAt!).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -97,17 +113,17 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                         <div className="p-5 border-b border-border">
                             <h3 className="text-sm font-bold text-charcoal uppercase tracking-wider">Support Tickets</h3>
                         </div>
-                        {customerTickets.length > 0 ? (
+                        {recentTickets && recentTickets.length > 0 ? (
                             <div className="divide-y divide-border/50">
-                                {customerTickets.map((ticket) => (
+                                {recentTickets.map((ticket) => (
                                     <Link key={ticket.id} href={`/admin-panel/support/${ticket.id}`} className="px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 block">
                                         <div>
                                             <p className="text-sm font-medium text-charcoal">{ticket.subject}</p>
                                             <p className="text-xs text-muted">{ticket.ticketNumber}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <StatusBadge type="priority" value={ticket.priority} />
-                                            <StatusBadge type="ticket" value={ticket.status} />
+                                            <StatusBadge type="priority" value={ticket.priority || ''} />
+                                            <StatusBadge type="ticket" value={ticket.status || ''} />
                                         </div>
                                     </Link>
                                 ))}
