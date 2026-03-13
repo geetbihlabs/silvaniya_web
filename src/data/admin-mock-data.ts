@@ -331,43 +331,47 @@ export const mockAdminCustomers: AdminCustomer[] = [
 // ==================== SUPPORT TICKETS ====================
 export const mockSupportTickets: SupportTicket[] = [
   {
-    id: "st1", ticketNumber: "TKT-001", customerId: "c1", customerName: "Priya Sharma", customerEmail: "priya@example.com",
+    id: "st1", ticketNumber: "TKT-001", userId: "c1", customerId: "c1", customerName: "Priya Sharma", customerEmail: "priya@example.com",
     orderId: "ao1", orderNumber: "SLV-10294",
     subject: "Necklace clasp feels loose", description: "The clasp on my Elegant Floral Silver Necklace feels a bit loose. Can I get it fixed?",
     priority: "HIGH", status: "IN_PROGRESS", assignedTo: "Agent Riya",
+    source: "ORDER_QUERY", slaBreached: false,
     replies: [
-      { id: "r1", ticketId: "st1", author: "Priya Sharma", authorRole: "CUSTOMER", message: "The clasp on my necklace feels loose after a week of wearing. I'm worried it might fall off.", isInternal: false, createdAt: "2026-03-06T10:00:00Z" },
-      { id: "r2", ticketId: "st1", author: "Agent Riya", authorRole: "AGENT", message: "Hi Priya, I'm sorry to hear that. We'd like to arrange a free repair. Can you share your availability for a pickup?", isInternal: false, createdAt: "2026-03-06T11:30:00Z" },
-      { id: "r3", ticketId: "st1", author: "Agent Riya", authorRole: "AGENT", message: "Check with QC team if this is a known batch issue for SLV-001", isInternal: true, createdAt: "2026-03-06T11:35:00Z" },
+      { id: "r1", ticketId: "st1", authorId: "c1", author: "Priya Sharma", authorRole: "CUSTOMER", message: "The clasp on my necklace feels loose after a week of wearing. I'm worried it might fall off.", body: "The clasp on my necklace feels loose after a week of wearing. I'm worried it might fall off.", isInternalNote: false, attachments: [], createdAt: "2026-03-06T10:00:00Z", updatedAt: "2026-03-06T10:00:00Z" },
+      { id: "r2", ticketId: "st1", authorId: "admin1", author: "Agent Riya", authorRole: "ADMIN", message: "Hi Priya, I'm sorry to hear that. We'd like to arrange a free repair. Can you share your availability for a pickup?", body: "Hi Priya, I'm sorry to hear that. We'd like to arrange a free repair. Can you share your availability for a pickup?", isInternalNote: false, attachments: [], createdAt: "2026-03-06T11:30:00Z", updatedAt: "2026-03-06T11:30:00Z" },
+      { id: "r3", ticketId: "st1", authorId: "admin1", author: "Agent Riya", authorRole: "ADMIN", message: "Check with QC team if this is a known batch issue for SLV-001", body: "Check with QC team if this is a known batch issue for SLV-001", isInternalNote: true, attachments: [], createdAt: "2026-03-06T11:35:00Z", updatedAt: "2026-03-06T11:35:00Z" },
     ],
     createdAt: "2026-03-06T10:00:00Z", updatedAt: "2026-03-06T11:35:00Z",
   },
   {
-    id: "st2", ticketNumber: "TKT-002", customerId: "c4", customerName: "Ananya Verma", customerEmail: "ananya@example.com",
+    id: "st2", ticketNumber: "TKT-002", userId: "c4", customerId: "c4", customerName: "Ananya Verma", customerEmail: "ananya@example.com",
     orderId: "ao4", orderNumber: "SLV-10297",
     subject: "Return request for earrings - size issue", description: "The studs are too large for my ears. I'd like to exchange for a smaller size or get a refund.",
     priority: "NORMAL", status: "OPEN", assignedTo: "Agent Riya",
+    source: "ORDER_QUERY", slaBreached: false,
     replies: [
-      { id: "r4", ticketId: "st2", author: "Ananya Verma", authorRole: "CUSTOMER", message: "Hi, the Celestial Star Studs are too large for my ears. Can I exchange them for a smaller variant?", isInternal: false, createdAt: "2026-03-02T09:00:00Z" },
+      { id: "r4", ticketId: "st2", authorId: "c4", author: "Ananya Verma", authorRole: "CUSTOMER", message: "Hi, the Celestial Star Studs are too large for my ears. Can I exchange them for a smaller variant?", body: "Hi, the Celestial Star Studs are too large for my ears. Can I exchange them for a smaller variant?", isInternalNote: false, attachments: [], createdAt: "2026-03-02T09:00:00Z", updatedAt: "2026-03-02T09:00:00Z" },
     ],
     createdAt: "2026-03-02T09:00:00Z", updatedAt: "2026-03-02T09:00:00Z",
   },
   {
-    id: "st3", ticketNumber: "TKT-003", customerId: "c3", customerName: "Sneha Mehra", customerEmail: "sneha@example.com",
+    id: "st3", ticketNumber: "TKT-003", userId: "c3", customerId: "c3", customerName: "Sneha Mehra", customerEmail: "sneha@example.com",
     subject: "Bulk order enquiry for wedding", description: "I need 15 silver coin sets for wedding gifting. Can you offer a bulk discount?",
     priority: "NORMAL", status: "WAITING_ON_CUSTOMER",
+    source: "WEBSITE_FORM", slaBreached: false,
     replies: [
-      { id: "r5", ticketId: "st3", author: "Sneha Mehra", authorRole: "CUSTOMER", message: "I'm getting married next month and need 15 silver coin sets for gifting. Can you do a bulk order with discount?", isInternal: false, createdAt: "2026-03-04T15:00:00Z" },
-      { id: "r6", ticketId: "st3", author: "Agent Riya", authorRole: "AGENT", message: "Congratulations Sneha! We'd love to help. I've forwarded this to our corporate gifting team. They'll share a proposal within 24 hrs.", isInternal: false, createdAt: "2026-03-04T16:00:00Z" },
+      { id: "r5", ticketId: "st3", authorId: "c3", author: "Sneha Mehra", authorRole: "CUSTOMER", message: "I'm getting married next month and need 15 silver coin sets for gifting. Can you do a bulk order with discount?", body: "I'm getting married next month and need 15 silver coin sets for gifting. Can you do a bulk order with discount?", isInternalNote: false, attachments: [], createdAt: "2026-03-04T15:00:00Z", updatedAt: "2026-03-04T15:00:00Z" },
+      { id: "r6", ticketId: "st3", authorId: "admin1", author: "Agent Riya", authorRole: "ADMIN", message: "Congratulations Sneha! We'd love to help. I've forwarded this to our corporate gifting team. They'll share a proposal within 24 hrs.", body: "Congratulations Sneha! We'd love to help. I've forwarded this to our corporate gifting team. They'll share a proposal within 24 hrs.", isInternalNote: false, attachments: [], createdAt: "2026-03-04T16:00:00Z", updatedAt: "2026-03-04T16:00:00Z" },
     ],
     createdAt: "2026-03-04T15:00:00Z", updatedAt: "2026-03-04T16:00:00Z",
   },
   {
-    id: "st4", ticketNumber: "TKT-004", customerId: "c6", customerName: "Meera Nair", customerEmail: "meera@example.com",
+    id: "st4", ticketNumber: "TKT-004", userId: "c6", customerId: "c6", customerName: "Meera Nair", customerEmail: "meera@example.com",
     subject: "Certificate of purity not included", description: "My last order didn't have the hallmark certificate. Can you send it separately?",
     priority: "URGENT", status: "OPEN",
+    source: "ORDER_QUERY", slaBreached: true,
     replies: [
-      { id: "r7", ticketId: "st4", author: "Meera Nair", authorRole: "CUSTOMER", message: "I received my order today but the purity certificate is missing from the package. This is important for me.", isInternal: false, createdAt: "2026-03-08T18:00:00Z" },
+      { id: "r7", ticketId: "st4", authorId: "c6", author: "Meera Nair", authorRole: "CUSTOMER", message: "I received my order today but the purity certificate is missing from the package. This is important for me.", body: "I received my order today but the purity certificate is missing from the package. This is important for me.", isInternalNote: false, attachments: [], createdAt: "2026-03-08T18:00:00Z", updatedAt: "2026-03-08T18:00:00Z" },
     ],
     createdAt: "2026-03-08T18:00:00Z", updatedAt: "2026-03-08T18:00:00Z",
   },
