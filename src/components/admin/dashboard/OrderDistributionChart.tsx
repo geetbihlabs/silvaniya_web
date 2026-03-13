@@ -98,7 +98,7 @@ export default function OrderDistributionChart({ data, isLoading }: OrderDistrib
                 fill="#8884d8"
                 dataKey="value"
                 label={({ name, percent }) => 
-                  `${name.replace(/_/g, ' ').split(' ').map(word => word[0]).join('').toUpperCase()} ${(percent * 100).toFixed(0)}%`
+                  name && percent !== undefined ? `${name.replace(/_/g, ' ').split(' ').map(word => word[0]).join('').toUpperCase()} ${(percent * 100).toFixed(0)}%` : ''
                 }
               >
                 {chartData.map((entry, index) => (
