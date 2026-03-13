@@ -112,34 +112,47 @@ export interface AdminCustomer {
 // Support Tickets
 export type TicketStatus = "OPEN" | "IN_PROGRESS" | "WAITING_ON_CUSTOMER" | "RESOLVED" | "CLOSED";
 export type TicketPriority = "URGENT" | "HIGH" | "NORMAL" | "LOW";
+export type TicketSource = "WEBSITE_FORM" | "EMAIL" | "ORDER_QUERY" | "MANUAL";
 
 export interface SupportTicket {
   id: string;
   ticketNumber: string;
+  userId: string;
   customerId: string;
   customerName: string;
   customerEmail: string;
   orderId?: string;
   orderNumber?: string;
-  subject: string;
-  description: string;
-  priority: TicketPriority;
-  status: TicketStatus;
+  assignedToId?: string;
   assignedTo?: string;
+  source: TicketSource;
+  status: TicketStatus;
+  priority: TicketPriority;
+  subject: string;
+  description?: string;
+  firstResponse?: string;
+  resolvedAt?: string;
+  closedAt?: string;
+  csatScore?: number;
+  csatComment?: string;
+  slaBreached: boolean;
   replies: TicketReply[];
   createdAt: string;
   updatedAt: string;
-  resolvedAt?: string;
 }
 
 export interface TicketReply {
   id: string;
   ticketId: string;
+  authorId: string;
   author: string;
-  authorRole: "CUSTOMER" | "AGENT" | "SYSTEM";
+  authorRole: "CUSTOMER" | "ADMIN" | "SYSTEM";
   message: string;
-  isInternal: boolean; // internal notes not visible to customer
+  body: string;
+  isInternalNote: boolean;
+  attachments: string[];
   createdAt: string;
+  updatedAt: string;
 }
 
 // Product (admin-extended)
@@ -180,4 +193,24 @@ export interface AdminNavItem {
   href: string;
   icon: string;
   badge?: number;
+}
+
+// Canned Responses
+export interface CannedResponse {
+  id: string;
+  title: string;
+  body: string;
+  category?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Support Statistics
+export interface SupportStats {
+  totalTickets: number;
+  openTickets: number;
+  resolvedTickets: number;
+  avgResponseTime: number;
+  satisfactionScore: number;
 }

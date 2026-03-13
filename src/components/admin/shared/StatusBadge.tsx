@@ -4,7 +4,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { AdminOrderStatus, TicketStatus, TicketPriority } from "@/types/admin.types";
 
-type BadgeType = "order" | "ticket" | "priority" | "visibility" | "payment" | "loyalty" | "customer";
+type BadgeType = "order" | "ticket" | "priority" | "visibility" | "payment" | "loyalty" | "customer" | "review";
 
 interface StatusBadgeProps {
     type: BadgeType;
@@ -72,6 +72,12 @@ export default function StatusBadge({ type, value, className }: StatusBadgeProps
         colorClass = value === "ACTIVE" ? "bg-green-50 text-green-700 border-green-200"
             : value === "BLOCKED" ? "bg-red-50 text-red-700 border-red-200"
                 : "bg-gray-100 text-gray-600 border-gray-200";
+    } else if (type === "review") {
+        colorClass = value === "PENDING" ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+            : value === "APPROVED" ? "bg-green-50 text-green-700 border-green-200"
+                : value === "REJECTED" ? "bg-red-50 text-red-700 border-red-200"
+                    : value === "FLAGGED" ? "bg-purple-50 text-purple-700 border-purple-200"
+                        : "bg-gray-100 text-gray-600 border-gray-200";
     }
 
     return (
