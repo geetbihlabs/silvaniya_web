@@ -12,6 +12,16 @@ export interface DashboardStats {
   aovChange: number;
 }
 
+export type PaymentMethod =
+  | "RAZORPAY"
+  | "UPI"
+  | "NET_BANKING"
+  | "CREDIT_CARD"
+  | "DEBIT_CARD"
+  | "CASH_ON_DELIVERY"
+  | "STORE_CREDIT"
+  | "EMI";
+
 // Extended order statuses for admin (per PRD lifecycle)
 export type AdminOrderStatus =
   | "PENDING_PAYMENT"
@@ -22,6 +32,9 @@ export type AdminOrderStatus =
   | "OUT_FOR_DELIVERY"
   | "DELIVERED"
   | "RETURN_REQUESTED"
+  | "RETURN_APPROVED"
+  | "RETURN_REJECTED"
+  | "RETURNED"
   | "REFUNDED"
   | "CANCELLED";
 
@@ -99,34 +112,47 @@ export interface AdminCustomer {
 // Support Tickets
 export type TicketStatus = "OPEN" | "IN_PROGRESS" | "WAITING_ON_CUSTOMER" | "RESOLVED" | "CLOSED";
 export type TicketPriority = "URGENT" | "HIGH" | "NORMAL" | "LOW";
+export type TicketSource = "WEBSITE_FORM" | "EMAIL" | "ORDER_QUERY" | "MANUAL";
 
 export interface SupportTicket {
   id: string;
   ticketNumber: string;
+  userId: string;
   customerId: string;
   customerName: string;
   customerEmail: string;
   orderId?: string;
   orderNumber?: string;
-  subject: string;
-  description: string;
-  priority: TicketPriority;
-  status: TicketStatus;
+  assignedToId?: string;
   assignedTo?: string;
+  source: TicketSource;
+  status: TicketStatus;
+  priority: TicketPriority;
+  subject: string;
+  description?: string;
+  firstResponse?: string;
+  resolvedAt?: string;
+  closedAt?: string;
+  csatScore?: number;
+  csatComment?: string;
+  slaBreached: boolean;
   replies: TicketReply[];
   createdAt: string;
   updatedAt: string;
-  resolvedAt?: string;
 }
 
 export interface TicketReply {
   id: string;
   ticketId: string;
+  authorId: string;
   author: string;
-  authorRole: "CUSTOMER" | "AGENT" | "SYSTEM";
+  authorRole: "CUSTOMER" | "ADMIN" | "SYSTEM";
   message: string;
-  isInternal: boolean; // internal notes not visible to customer
+  body: string;
+  isInternalNote: boolean;
+  attachments: string[];
   createdAt: string;
+  updatedAt: string;
 }
 
 // Product (admin-extended)
@@ -134,9 +160,9 @@ export interface AdminProduct {
   id: string;
   name: string;
   sku: string;
-  category: string;
+  category: "RINGS" | "NECKLACES" | "BANGLES" | "EARRINGS" | "BRACELETS" | "PENDANTS" | "CHAINS" | "ANKLETS" | "NOSE_PINS" | "MAANG_TIKKA" | "OTHER";
   collection?: string;
-  material: string;
+  material: "GOLD_22K" | "GOLD_18K" | "GOLD_14K" | "PLATINUM" | "SILVER_925" | "SILVER_999" | "WHITE_GOLD" | "ROSE_GOLD" | "OTHER";
   basePrice: number;
   salePrice?: number;
   stock: number;
@@ -167,4 +193,24 @@ export interface AdminNavItem {
   href: string;
   icon: string;
   badge?: number;
+}
+
+// Canned Responses
+export interface CannedResponse {
+  id: string;
+  title: string;
+  body: string;
+  category?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Support Statistics
+export interface SupportStats {
+  totalTickets: number;
+  openTickets: number;
+  resolvedTickets: number;
+  avgResponseTime: number;
+  satisfactionScore: number;
 }

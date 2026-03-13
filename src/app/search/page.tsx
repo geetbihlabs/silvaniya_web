@@ -21,7 +21,7 @@ export default function MobileSearchPage() {
 
     const searchResults = query.trim() === "" ? [] : mockProducts.filter(p =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase())
+        p.category?.name.toLowerCase().includes(query.toLowerCase())
     ).slice(0, 4);
 
     const handleClear = () => {

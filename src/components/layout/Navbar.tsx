@@ -5,6 +5,21 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
+import { UserButton, useAuth, SignOutButton } from "@clerk/nextjs";
+import CartBadge from "./CartBadge";
+import { useWishlistStore } from "@/store/useWishlistStore";
+
+function WishlistBadge() {
+    const { items, initialized } = useWishlistStore();
+    
+    if (!initialized || items.length === 0) return null;
+    
+    return (
+        <span className="absolute -top-1.5 -right-2 bg-[#e84c4c] text-white text-[10px] font-bold h-4 min-w-[16px] flex items-center justify-center rounded-full px-1 z-10">
+            {items.length}
+        </span>
+    );
+}
 
 const NAV_LINKS = [
     { label: "Jewellery", href: "/products" },
@@ -60,6 +75,7 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
 export default function Navbar() {
     const [searchFocused, setSearchFocused] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { isSignedIn } = useAuth();
 
     return (
         <header className="w-full bg-white h-[72px] border-b border-border sticky top-0 z-50">
@@ -121,9 +137,10 @@ export default function Navbar() {
                     <Link
                         href="/wishlist"
                         aria-label="Wishlist"
-                        className="flex items-center text-charcoal transition-colors duration-300 hover:text-emerald"
+                        className="relative flex items-center text-charcoal transition-colors duration-300 hover:text-emerald"
                     >
                         <Heart size={20} strokeWidth={1.6} />
+                        <WishlistBadge />
                     </Link>
 
                     {/* Cart */}
@@ -133,19 +150,25 @@ export default function Navbar() {
                         className="relative flex items-center text-charcoal transition-colors duration-300 hover:text-emerald"
                     >
                         <ShoppingBag size={20} strokeWidth={1.6} />
-                        <span className="absolute -top-[6px] -right-[8px] bg-emerald text-white text-[9px] font-bold font-body w-4 h-4 rounded-full flex items-center justify-center">
-                            2
-                        </span>
+                        <CartBadge />
                     </Link>
 
                     {/* User */}
-                    <Link
-                        href="/profile"
-                        aria-label="Account"
-                        className="hidden sm:flex items-center text-charcoal transition-colors duration-300 hover:text-emerald"
-                    >
-                        <User size={20} strokeWidth={1.6} />
-                    </Link>
+                    <div className="hidden sm:flex items-center">
+                        {isSignedIn ? (
+                            <UserButton 
+                                appearance={{ elements: { userButtonAvatarBox: "w-6 h-6" } }} 
+                            />
+                        ) : (
+                            <Link
+                                href="/login"
+                                aria-label="Account"
+                                className="text-charcoal transition-colors duration-300 hover:text-emerald"
+                            >
+                                <User size={20} strokeWidth={1.6} />
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
             </div>
@@ -253,13 +276,26 @@ export default function Navbar() {
                     </div>
 
                     <div className="mt-10">
-                        <button
-                            className="flex items-center gap-4 text-red-600 p-4 font-body text-[15px] font-medium transition-colors hover:bg-red-50 rounded-[8px] w-full text-left"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                            Logout
-                        </button>
+                        {isSignedIn ? (
+                            <SignOutButton>
+                                <button
+                                    className="flex items-center gap-4 text-red-600 p-4 font-body text-[15px] font-medium transition-colors hover:bg-red-50 rounded-[8px] w-full text-left"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                    Logout
+                                </button>
+                            </SignOutButton>
+                        ) : (
+                            <Link
+                                href="/login"
+                                className="flex items-center gap-4 text-charcoal p-4 font-body text-[15px] font-medium transition-colors hover:bg-gray-100 rounded-[8px] w-full text-left"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                                Login
+                            </Link>
+                        )}
                     </div>
 
                 </div>

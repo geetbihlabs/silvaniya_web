@@ -5,12 +5,16 @@ import Link from "next/link";
 import { Heart, ShoppingCart } from "lucide-react";
 import { cn, formatPrice, getDiscountPercentage } from "@/lib/utils";
 import { Product } from "@/types/product.types";
+import { ProductCardImage } from "./ProductCardImage";
+import { useWishlistStore } from "@/store/useWishlistStore";
+import { useAuth } from "@clerk/nextjs";
 
 interface ProductCardProps {
     product: Product;
     showAddToCart?: boolean;
     showRemove?: boolean;
     onRemove?: () => void;
+    onAddToCart?: () => void;
     className?: string;
 }
 
@@ -19,8 +23,13 @@ export default function ProductCard({
     showAddToCart = true,
     showRemove = false,
     onRemove,
+    onAddToCart,
     className,
 }: ProductCardProps) {
+    const { getToken } = useAuth();
+    const { addItem, removeItem, isInWishlist } = useWishlistStore();
+    const isWishlisted = isInWishlist(product.id);
+
     const primaryImage = product.images.find((img) => img.isPrimary) || product.images[0];
     const hasDiscount = product.salePrice && product.salePrice < product.basePrice;
     const discountPercent = hasDiscount
@@ -31,10 +40,8 @@ export default function ProductCard({
         <div className={cn("group relative flex flex-col", className)}>
             {/* Image Container */}
             <div className="relative aspect-square overflow-hidden bg-[#f0f0f0] mb-3 rounded-sm">
-                <Link href={`/products/${product.id}`} className="block w-full h-full">
-                    <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-white/30 text-xs">
-                        {primaryImage?.alt || product.name}
-                    </div>
+                <Link href={`/products/${product.slug}`} className="block w-full h-full">
+                    <ProductCardImage images={product.images} productName={product.name} />
                 </Link>
 
                 {/* Discount Badge — top-left, red-orange pill */}
@@ -55,10 +62,30 @@ export default function ProductCard({
                     </button>
                 ) : (
                     <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (isWishlisted) {
+                                removeItem(product.id, getToken);
+                            } else {
+                                addItem({
+                                    productId: product.id,
+                                    productName: product.name,
+                                    slug: product.slug,
+                                    category: typeof product.category === 'object' ? product.category?.name : undefined,
+                                    imageUrl: primaryImage?.url || null,
+                                    price: Number(product.salePrice || product.basePrice),
+                                    basePrice: Number(product.basePrice),
+                                    salePrice: product.salePrice ? Number(product.salePrice) : null,
+                                    addedAt: new Date().toISOString(),
+                                    inStock: product.stock > 0,
+                                }, getToken);
+                            }
+                        }}
                         className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center text-gray-400 hover:text-[#e84c4c] transition-all shadow-sm z-10"
-                        aria-label="Add to wishlist"
+                        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                     >
-                        <Heart size={15} strokeWidth={1.5} />
+                        <Heart size={15} strokeWidth={1.5} className={isWishlisted ? "fill-[#e84c4c] text-[#e84c4c]" : ""} />
                     </button>
                 )}
             </div>
@@ -76,7 +103,7 @@ export default function ProductCard({
                 )}
 
                 {/* Name */}
-                <Link href={`/products/${product.id}`}>
+                <Link href={`/products/${product.slug}`}>
                     <h3 className="text-[13px] font-medium text-charcoal line-clamp-1 hover:text-emerald transition-colors mb-1.5 leading-snug" style={{ fontFamily: "var(--font-heading)" }}>
                         {product.name}
                     </h3>
@@ -96,7 +123,11 @@ export default function ProductCard({
 
                 {/* Add to Cart */}
                 {showAddToCart && (
-                    <button className="mt-auto w-full flex items-center justify-center gap-2 bg-charcoal hover:bg-charcoal/90 text-white text-[11px] font-semibold tracking-widest uppercase py-2.5 rounded-sm transition-colors duration-200">
+                    <button
+                        onClick={onAddToCart}
+                        disabled={!onAddToCart}
+                        className="mt-auto w-full flex items-center justify-center gap-2 bg-charcoal hover:bg-charcoal/90 text-white text-[11px] font-semibold tracking-widest uppercase py-2.5 rounded-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         <ShoppingCart size={13} strokeWidth={1.8} />
                         Add to Cart
                     </button>

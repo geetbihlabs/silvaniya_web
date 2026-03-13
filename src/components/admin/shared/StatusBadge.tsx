@@ -4,7 +4,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { AdminOrderStatus, TicketStatus, TicketPriority } from "@/types/admin.types";
 
-type BadgeType = "order" | "ticket" | "priority" | "visibility" | "payment" | "loyalty" | "customer";
+type BadgeType = "order" | "ticket" | "priority" | "visibility" | "payment" | "loyalty" | "customer" | "review";
 
 interface StatusBadgeProps {
     type: BadgeType;
@@ -21,6 +21,9 @@ const orderStatusColors: Record<AdminOrderStatus, string> = {
     OUT_FOR_DELIVERY: "bg-cyan-50 text-cyan-700 border-cyan-200",
     DELIVERED: "bg-green-50 text-green-700 border-green-200",
     RETURN_REQUESTED: "bg-rose-50 text-rose-700 border-rose-200",
+    RETURN_APPROVED: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
+    RETURN_REJECTED: "bg-gray-100 text-gray-700 border-gray-300",
+    RETURNED: "bg-gray-200 text-gray-800 border-gray-400",
     REFUNDED: "bg-gray-100 text-gray-600 border-gray-200",
     CANCELLED: "bg-red-50 text-red-700 border-red-200",
 };
@@ -41,6 +44,7 @@ const priorityColors: Record<TicketPriority, string> = {
 };
 
 function formatLabel(value: string): string {
+    if (!value) return "";
     return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -68,6 +72,12 @@ export default function StatusBadge({ type, value, className }: StatusBadgeProps
         colorClass = value === "ACTIVE" ? "bg-green-50 text-green-700 border-green-200"
             : value === "BLOCKED" ? "bg-red-50 text-red-700 border-red-200"
                 : "bg-gray-100 text-gray-600 border-gray-200";
+    } else if (type === "review") {
+        colorClass = value === "PENDING" ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+            : value === "APPROVED" ? "bg-green-50 text-green-700 border-green-200"
+                : value === "REJECTED" ? "bg-red-50 text-red-700 border-red-200"
+                    : value === "FLAGGED" ? "bg-purple-50 text-purple-700 border-purple-200"
+                        : "bg-gray-100 text-gray-600 border-gray-200";
     }
 
     return (
