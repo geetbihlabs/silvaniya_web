@@ -214,3 +214,21 @@ export interface SupportStats {
   avgResponseTime: number;
   satisfactionScore: number;
 }
+
+// Banners
+export type BannerPosition = "HERO" | "CATEGORY_BANNER" | "PRODUCT_SHOWCASE" | "FOOTER_PROMO";
+
+export interface Banner {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  targetUrl?: string;
+  position: BannerPosition;
+  startDate?: string;
+  endDate?: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}

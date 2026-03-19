@@ -43,6 +43,8 @@ export interface ShopProduct {
   tags: string[];
   images: ShopProductImage[];
   variants: ShopProductVariant[];
+  careInstructions?: string[];
+  refundPolicy?: string;
   createdAt: string;
   updatedAt: string;
 }

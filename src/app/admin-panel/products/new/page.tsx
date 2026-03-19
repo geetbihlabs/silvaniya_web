@@ -6,6 +6,9 @@ import toast from "react-hot-toast";
 import { useAuth } from "@clerk/nextjs";
 import { useProductStore } from "../../../../store/useProductStore";
 import ProductForm from "../../../../components/admin/products/ProductForm";
+import PageHeader from "@/components/admin/shared/PageHeader";
+import { Button } from "@/components/ui/Button";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function NewProductPage() {
     const router = useRouter();
@@ -35,10 +38,25 @@ export default function NewProductPage() {
     };
 
     return (
-        <ProductForm 
-            onSubmit={onSubmit} 
-            isSubmitting={isSubmitting} 
-            title="Add New Product" 
-        />
+        <>
+            <PageHeader
+                title="Add New Product"
+                breadcrumbs={[
+                    { label: "Dashboard", href: "/admin-panel/dashboard" },
+                    { label: "Products", href: "/admin-panel/products" },
+                    { label: "Add New Product" },
+                ]}
+                actions={
+                    <Button variant="outline" size="sm" onClick={() => router.back()}>
+                        <ArrowLeft size={16} /> Back
+                    </Button>
+                }
+            />
+            <ProductForm 
+                onSubmit={onSubmit} 
+                isSubmitting={isSubmitting} 
+                title="Add New Product" 
+            />
+        </>
     );
 }

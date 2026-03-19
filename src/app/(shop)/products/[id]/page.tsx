@@ -134,7 +134,7 @@ export default function ProductDetailPage() {
                 {/* Image Gallery */}
                 <div className="flex flex-col lg:block gap-4">
                     {/* Main Image */}
-                    <div 
+                    <div
                         className="group aspect-square rounded-xl overflow-hidden bg-gray-100 sm:mb-4 relative w-full max-w-[500px] mx-auto lg:max-w-none cursor-crosshair"
                         onMouseEnter={() => setIsHovering(true)}
                         onMouseLeave={() => setIsHovering(false)}
@@ -144,9 +144,9 @@ export default function ProductDetailPage() {
                             <Badge variant="emerald" size="md" className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10">FEATURED</Badge>
                         )}
                         {currentImage?.s3Url ? (
-                            <img 
-                                src={currentImage.s3Url} 
-                                alt={currentImage.altText ?? product.name} 
+                            <img
+                                src={currentImage.s3Url}
+                                alt={currentImage.altText ?? product.name}
                                 className={`w-full h-full object-cover transition-transform duration-200 ease-out ${isHovering ? 'scale-[2.5]' : 'scale-100'}`}
                                 style={isHovering ? { transformOrigin: `${mousePos.x} ${mousePos.y}` } : { transformOrigin: 'center center' }}
                             />
@@ -259,7 +259,7 @@ export default function ProductDetailPage() {
                             <ShoppingCart size={17} strokeWidth={1.8} />
                             {selectedVariant?.stockQty === 0 ? "Out of Stock" : "Add to Cart"}
                         </button>
-                        <button 
+                        <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 if (isWishlisted) {
@@ -321,22 +321,34 @@ export default function ProductDetailPage() {
                         {activeTab === "materials" && (
                             <div>
                                 <h3 className="text-xl font-semibold text-charcoal mb-4" style={{ fontFamily: "var(--font-heading)" }}>Materials & Care</h3>
-                                <p className="text-muted leading-relaxed">Made from 925 Sterling Silver with a rhodium finish for extra shine and tarnish resistance. Store in the provided airtight pouch to prevent oxidation.</p>
+                                <p className="text-muted leading-relaxed">
+                                    Crafted from high-quality <span className="font-semibold text-charcoal">{product.metalType.replace(/_/g, " ")}</span>.
+                                    {product.bisHallmark && " This piece is BIS Hallmarked for guaranteed purity."}
+                                    {" "}We ensure all our materials are skin-friendly and tarnish-resistant for long-lasting wear.
+                                </p>
                             </div>
                         )}
                         {activeTab === "returns" && (
                             <div>
                                 <h3 className="text-xl font-semibold text-charcoal mb-4" style={{ fontFamily: "var(--font-heading)" }}>Returns & Shipping</h3>
-                                <p className="text-muted leading-relaxed">Free express shipping on all orders. 30-day hassle-free return policy. Items must be in original condition with tags attached.</p>
+                                <p className="text-muted leading-relaxed whitespace-pre-wrap">{product.refundPolicy || "Free express shipping on all orders. 30-day hassle-free return policy. Items must be in original condition with tags attached."}</p>
                             </div>
                         )}
                     </div>
                     <div className="bg-cream rounded-xl p-5">
                         <h4 className="text-base font-semibold text-charcoal mb-3">Care Instructions</h4>
-                        <ul className="space-y-3 text-sm text-muted">
-                            <li className="flex items-start gap-2"><span className="text-emerald mt-0.5">•</span><span>Store in the provided airtight pouch to prevent oxidation</span></li>
-                            <li className="flex items-start gap-2"><span className="text-emerald mt-0.5">•</span><span>Clean with a soft polishing cloth only. Avoid contact with perfumes and water</span></li>
-                        </ul>
+                        {product?.careInstructions && product.careInstructions.length > 0 ? (
+                            <ul className="space-y-3 text-sm text-muted">
+                                {product.careInstructions.map((instruction, index) => (
+                                    <li key={index} className="flex items-start gap-2">
+                                        <span className="text-emerald mt-0.5">•</span>
+                                        <span>{instruction}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-sm text-muted">No specific care instructions available for this product.</p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -358,9 +370,9 @@ export default function ProductDetailPage() {
                         <Link href="/products" className="text-sm text-emerald font-medium hover:underline underline-offset-4">View All</Link>
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                                {relatedProducts.map((p) => (
-                            <ProductCard 
-                                key={p.id} 
+                        {relatedProducts.map((p) => (
+                            <ProductCard
+                                key={p.id}
                                 onAddToCart={() => {
                                     const variant = p.variants?.[0];
                                     if (variant) {
@@ -375,16 +387,16 @@ export default function ProductDetailPage() {
                                     }
                                 }}
                                 product={{
-                                id: p.id, name: p.name, slug: p.slug, sku: p.sku,
-                                description: p.description ?? "", shortDescription: p.metalType,
-                                basePrice: Number(p.basePrice), salePrice: p.salePrice ? Number(p.salePrice) : undefined,
-                                category: p.category as any, status: p.status as "PUBLISHED",
-                                categoryId: p.categoryId,
-                                images: p.images.map((img) => ({ id: img.id, url: img.s3Url, alt: img.altText ?? p.name, isPrimary: img.isPrimary, sortOrder: img.sortOrder })),
-                                material: p.metalType, purity: "92.5%", rating: Number(p.averageRating),
-                                reviewCount: p.reviewCount, stock: p.stock, tags: p.tags,
-                                createdAt: p.createdAt, updatedAt: p.updatedAt,
-                            }} />
+                                    id: p.id, name: p.name, slug: p.slug, sku: p.sku,
+                                    description: p.description ?? "", shortDescription: p.metalType,
+                                    basePrice: Number(p.basePrice), salePrice: p.salePrice ? Number(p.salePrice) : undefined,
+                                    category: p.category as any, status: p.status as "PUBLISHED",
+                                    categoryId: p.categoryId,
+                                    images: p.images.map((img) => ({ id: img.id, url: img.s3Url, alt: img.altText ?? p.name, isPrimary: img.isPrimary, sortOrder: img.sortOrder })),
+                                    material: p.metalType, purity: "92.5%", rating: Number(p.averageRating),
+                                    reviewCount: p.reviewCount, stock: p.stock, tags: p.tags,
+                                    createdAt: p.createdAt, updatedAt: p.updatedAt,
+                                }} />
                         ))}
                     </div>
                 </div>
