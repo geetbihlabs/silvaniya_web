@@ -6,8 +6,10 @@ import { Heart, Loader2 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroCTA from "@/components/features/hero/HeroCTA";
+import BannerSlider from "@/components/features/hero/BannerSlider";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import { useShopProductStore } from "@/store/useShopProductStore";
+import { useBannerStore } from "@/store/useBannerStore";
 
 const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
@@ -36,15 +38,22 @@ const testimonials = [
 export default function HomePage() {
   const { categories, fetchCategories, isLoading: categoriesLoading } = useCategoryStore();
   const { products: trending, fetchProducts, isLoading: productsLoading } = useShopProductStore();
+  const { banners, fetchActiveBanners, loading: bannersLoading } = useBannerStore();
 
   useEffect(() => {
     fetchCategories();
     // Fetch only featured products for "Trending Now"
     fetchProducts({ isFeatured: true, limit: 4 });
-  }, [fetchCategories, fetchProducts]);
+    // Fetch active HERO banners (public route)
+    fetchActiveBanners();
+  }, [fetchCategories, fetchProducts, fetchActiveBanners]);
 
   // Take top 4 categories
   const displayCategories = categories.filter((c) => c.isVisible).slice(0, 4);
+  
+  // Get active HERO banners
+  const heroBanners = banners.filter(b => b.position === 'HERO' && b.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
+  const currentHeroBanner = heroBanners.length > 0 ? heroBanners[0] : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -55,45 +64,7 @@ export default function HomePage() {
         {/* -------------------------- HERO ------------------------------ */}
         <section className="w-full bg-background py-4 md:py-6">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="relative w-full aspect-4/5 sm:aspect-video md:aspect-1138/488 rounded-2xl md:rounded-[20px] overflow-hidden bg-[#222024]">
-              {/* Hero image */}
-              <Image
-                src="/hero.png"
-                alt="Silvaniya Exclusive Festive Collection"
-                fill priority sizes="100vw"
-                className="object-cover object-center"
-              />
-
-              {/* Text block — vertically centered, matching Figma */}
-              <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-0 left-0 md:left-[clamp(32px,6%,80px)] max-w-[500px]">
-                {/* Label */}
-                <p className="font-body text-[10.5px] font-semibold tracking-[0.25em] uppercase text-white mb-[18px]">
-                  Exclusive Festive Collection
-                </p>
-                {/* Heading */}
-                <h1 className="font-heading font-medium leading-[1.12] text-white mb-6 md:mb-8"
-                  style={{ fontSize: 'clamp(32px, 5vw, 56px)' }}>
-                  <span
-                    className="block font-normal text-white font-playfair"
-                  >
-                    Curated for the
-                  </span>
-                  <span
-                    className="block font-normal text-white font-playfair"
-                  >
-                    Modern
-                  </span>
-                  <span
-                    className="block italic font-normal text-emerald font-playfair"
-                  >
-                    Indian Woman
-                  </span>
-                </h1>
-                <div className="mt-2">
-                  <HeroCTA />
-                </div>
-              </div>
-            </div>
+            <BannerSlider banners={banners} isLoading={bannersLoading} />
           </div>
         </section>
 
