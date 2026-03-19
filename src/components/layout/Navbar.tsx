@@ -7,6 +7,7 @@ import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Menu, X, ChevronDown, Layers, Sparkles, TrendingUp, Compass } from "lucide-react";
 import { UserButton, useAuth, SignOutButton } from "@clerk/nextjs";
 import CartBadge from "./CartBadge";
+import NotificationBell from "./NotificationBell";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useCategoryStore } from "@/store/useCategoryStore";
 
@@ -279,6 +280,9 @@ export default function Navbar() {
                     <Link href="/search" className="lg:hidden text-charcoal transition-colors duration-300 hover:text-emerald">
                         <Search size={20} strokeWidth={1.6} />
                     </Link>
+
+                    {/* Notification Bell (signed-in users only) */}
+                    <NotificationBell />
 
                     {/* Wishlist */}
                     <Link

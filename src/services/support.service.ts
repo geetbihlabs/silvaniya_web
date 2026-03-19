@@ -60,6 +60,25 @@ interface PaginatedResponse<T> {
   };
 }
 
+// ─── Mapper: raw Prisma ticket → SupportTicket ───────────────────────────────
+function mapTicket(raw: any): SupportTicket {
+  const user = raw.user ?? {};
+  const agent = raw.assignedTo ?? null;
+  return {
+    ...raw,
+    // flatten customer fields
+    customerId: raw.userId,
+    customerName: [user.firstName, user.lastName].filter(Boolean).join(' ') || raw.userId,
+    customerEmail: user.email ?? '',
+    // flatten assigned agent to display name string
+    assignedTo: agent
+      ? [agent.firstName, agent.lastName].filter(Boolean).join(' ')
+      : undefined,
+    // ensure replies array exists
+    replies: raw.replies ?? [],
+  };
+}
+
 class SupportService {
   // Tickets APIs
   async getTickets(params?: {
@@ -70,7 +89,11 @@ class SupportService {
     search?: string;
   }): Promise<PaginatedResponse<SupportTicket>> {
     const response = await api.get('/tickets', { params });
-    return response.data;
+    const payload = response.data?.data ?? response.data;
+    return {
+      data: (payload.data ?? []).map(mapTicket),
+      meta: payload.meta ?? response.data?.meta,
+    };
   }
 
   async getTicketById(id: string): Promise<SupportTicket & {
@@ -79,8 +102,10 @@ class SupportService {
     replies: TicketReply[];
   }> {
     const response = await api.get(`/tickets/${id}`);
-    return response.data;
+    const raw = response.data?.data ?? response.data;
+    return mapTicket(raw) as any;
   }
+
 
   async createTicket(data: CreateTicketDto): Promise<SupportTicket> {
     const response = await api.post('/tickets', data);

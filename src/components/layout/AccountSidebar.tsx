@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Package, MapPin, Heart, LogOut } from "lucide-react";
+import { User, Package, MapPin, Heart, Bell, LogOut } from "lucide-react";
 import { ACCOUNT_SIDEBAR_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const iconMap: Record<string, React.ElementType> = {
     Package,
     MapPin,
     Heart,
+    Bell,
 };
 
 export default function AccountSidebar() {
