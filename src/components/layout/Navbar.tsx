@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
 import { UserButton, useAuth, SignOutButton } from "@clerk/nextjs";
 import CartBadge from "./CartBadge";
@@ -73,7 +73,7 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
 }
 
 export default function Navbar() {
-    const [searchFocused, setSearchFocused] = useState(false);
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isSignedIn } = useAuth();
 
@@ -114,18 +114,19 @@ export default function Navbar() {
                 <div className="flex items-center gap-4 sm:gap-6 shrink-0 justify-end">
 
                     {/* Search bar (Desktop only) */}
-                    <div className="hidden lg:flex relative items-center">
+                    <div 
+                        className="hidden lg:flex relative items-center cursor-pointer group"
+                        onClick={() => router.push('/search')}
+                    >
                         <Search
                             size={14}
-                            className="absolute left-3 text-muted-light pointer-events-none"
+                            className="absolute left-3 text-muted-light pointer-events-none transition-colors duration-300 group-hover:text-emerald"
                         />
-                        <input
-                            type="text"
-                            placeholder="Search for silver designs..."
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={() => setSearchFocused(false)}
-                            className={`w-[220px] h-9 pl-[34px] pr-[14px] text-[12px] font-body text-charcoal bg-white rounded-[24px] outline-none transition-colors duration-300 ${searchFocused ? "border border-emerald" : "border border-border"}`}
-                        />
+                        <div
+                            className="flex items-center w-[220px] h-9 pl-[34px] pr-[14px] text-[12px] font-body text-muted-light bg-white rounded-[24px] outline-none transition-colors duration-300 border border-border group-hover:border-emerald select-none"
+                        >
+                            Search for silver designs...
+                        </div>
                     </div>
 
                     {/* Search Icon (Mobile/Tablet only) */}
