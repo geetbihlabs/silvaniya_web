@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { Search, Heart, ShoppingBag, User, Menu, X } from "lucide-react";
+import { Search, Heart, ShoppingBag, User, Menu, X, ChevronDown, Layers, Sparkles, TrendingUp, Compass } from "lucide-react";
 import { UserButton, useAuth, SignOutButton } from "@clerk/nextjs";
 import CartBadge from "./CartBadge";
 import { useWishlistStore } from "@/store/useWishlistStore";
+import { useCategoryStore } from "@/store/useCategoryStore";
 
 function WishlistBadge() {
     const { items, initialized } = useWishlistStore();
@@ -21,16 +22,51 @@ function WishlistBadge() {
     );
 }
 
-const NAV_LINKS = [
-    { label: "Jewellery", href: "/products" },
+const FALLBACK_CATEGORIES = [
+    { label: "Necklaces", href: "/products?category=necklaces" },
+    { label: "Earrings", href: "/products?category=earrings" },
+    { label: "Rings", href: "/products?category=rings" },
+    { label: "Bracelets", href: "/products?category=bracelets" },
     { label: "Mangalsutras", href: "/products?category=mangalsutras" },
-    { label: "New Arrivals", href: "/products?filter=new-arrivals" },
-    { label: "Best Sellers", href: "/best-sellers" },
+    { label: "Pendants", href: "/products?category=pendants" },
 ];
+
+type NavItem = { label: string; href?: string; isDropdown?: boolean; items?: { label: string; href: string; description?: string; imageUrl?: string | null }[] };
 
 function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
+    
+    const { categories, fetchCategories } = useCategoryStore();
+
+    useEffect(() => {
+        if (categories.length === 0) {
+            fetchCategories();
+        }
+    }, [categories.length, fetchCategories]);
+
+    const navLinks: NavItem[] = useMemo(() => {
+        const dynamicCategories = categories.length > 0 
+            ? categories.filter(c => c.isVisible !== false).map(cat => ({ 
+                label: cat.name, 
+                href: `/products?category=${cat.slug}`,
+                description: cat.description || `Explore our beautiful collection of premium ${cat.name.toLowerCase()} crafted in pure silver.`,
+                imageUrl: cat.imageUrl ?? null,
+              }))
+            : FALLBACK_CATEGORIES.map(cat => ({
+                ...cat,
+                description: `Explore our beautiful collection of premium ${cat.label.toLowerCase()} crafted in pure silver.`,
+                imageUrl: null,
+            }));
+
+        return [
+            { label: "Jewellery", href: "/products" },
+            { label: "Categories", isDropdown: true, items: dynamicCategories },
+            { label: "New Arrivals", href: "/products?filter=new-arrivals" },
+            { label: "Best Sellers", href: "/best-sellers" },
+        ];
+    }, [categories]);
 
     const isActive = (href: string) => {
         const [path, query] = href.split("?");
@@ -52,13 +88,123 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
     };
 
     return (
-        <nav className={`${isMobile ? "flex flex-col items-start gap-8 w-full" : "hidden lg:flex items-center justify-center gap-10"}`}>
-            {NAV_LINKS.map((link) => {
-                const active = isActive(link.href);
+        <nav className={`${isMobile ? "flex flex-col items-start gap-6 w-full" : "hidden lg:flex items-center justify-center gap-10"}`}>
+            {navLinks.map((link) => {
+                if (link.isDropdown) {
+                    return (
+                        <div key={link.label} className={`${isMobile ? "w-full" : "relative group"}`}>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMobileDropdownOpen(mobileDropdownOpen === link.label ? null : link.label);
+                                }}
+                                className={`flex items-center gap-1.5 font-body font-medium uppercase transition-colors duration-300 w-full text-left ${isMobile
+                                    ? "text-[16px] tracking-wide"
+                                    : "text-[12px] tracking-widest whitespace-nowrap"
+                                    } text-charcoal hover:text-emerald lg:group-hover:text-emerald`}
+                            >
+                                {link.label}
+                                <ChevronDown size={isMobile ? 18 : 14} className={`transition-transform duration-300 ${isMobile && mobileDropdownOpen === link.label ? "rotate-180" : ""} lg:group-hover:rotate-180`} />
+                            </button>
+
+                            {/* Transparent bridge for desktop hover gap */}
+                            {!isMobile && <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-48 h-10 bg-transparent z-40" />}
+
+                            {/* Desktop Mega Menu */}
+                            {!isMobile && (
+                                <div className="fixed top-[72px] left-0 w-full pt-0 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 z-50 max-h-[calc(100vh-72px)] overflow-y-auto">
+                                    <div className="bg-white border-t border-border shadow-2xl pb-12 pt-10 px-4 w-full cursor-auto">
+                                        <div className="max-w-[1400px] mx-auto px-4 sm:px-8">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-12 gap-y-10">
+                                                {link.items?.map((item) => (
+                                                    <Link
+                                                        key={item.label}
+                                                        href={item.href!}
+                                                        className="flex items-start gap-5 p-3 rounded-2xl border border-transparent hover:bg-silver-light/50 transition-all duration-300 group/item"
+                                                    >
+                                                        <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-border group-hover/item:border-emerald/50 transition-all bg-silver-light/30 flex items-center justify-center">
+                                                            {item.imageUrl ? (
+                                                                <Image
+                                                                    src={item.imageUrl}
+                                                                    alt={item.label}
+                                                                    width={64}
+                                                                    height={64}
+                                                                    className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300"
+                                                                />
+                                                            ) : (
+                                                                <Layers className="w-7 h-7 text-emerald/70" strokeWidth={1.5} />
+                                                            )}
+                                                        </div>
+                                                        <div className="flex flex-col gap-1.5 pt-1">
+                                                            <span className="text-charcoal font-body font-semibold text-[17px] tracking-wide group-hover/item:text-emerald transition-colors">{item.label}</span>
+                                                            <span className="text-muted font-body text-[13px] leading-relaxed line-clamp-2">
+                                                                {item.description}
+                                                            </span>
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+
+                                            {/* Bottom promotional cards */}
+                                            <div className="mt-14 pt-8 border-t border-border grid grid-cols-1 md:grid-cols-3 gap-8">
+                                                <Link href="/products" className="bg-silver-light/20 hover:bg-silver-light/50 border border-border p-6 rounded-2xl transition-all duration-300 group/card overflow-hidden relative block shadow-sm hover:shadow-md">
+                                                    <div className="absolute right-0 bottom-0 opacity-[0.03] group-hover/card:scale-110 group-hover/card:-rotate-12 group-hover/card:opacity-[0.05] transition-transform duration-500 text-charcoal">
+                                                        <Compass className="w-40 h-40 -mr-10 -mb-10" />
+                                                    </div>
+                                                    <h3 className="text-charcoal font-heading font-bold text-lg mb-2 relative z-10 flex items-center gap-2">Complete Collection</h3>
+                                                    <p className="text-muted font-body text-sm relative z-10 max-w-[85%] leading-relaxed">Browse our complete collection of classic and contemporary 925 silver jewellery designs.</p>
+                                                </Link>
+
+                                                <Link href="/reviews" className="bg-silver-light/20 hover:bg-silver-light/50 border border-border p-6 rounded-2xl transition-all duration-300 group/card overflow-hidden relative block shadow-sm hover:shadow-md">
+                                                    <div className="absolute right-0 bottom-0 opacity-[0.03] group-hover/card:scale-110 group-hover/card:rotate-12 group-hover/card:opacity-[0.05] transition-transform duration-500 text-charcoal">
+                                                        <Sparkles className="w-40 h-40 -mr-10 -mb-10" />
+                                                    </div>
+                                                    <h3 className="text-charcoal font-heading font-bold text-lg mb-2 relative z-10 flex items-center gap-2">Customer Success</h3>
+                                                    <p className="text-muted font-body text-sm relative z-10 max-w-[85%] leading-relaxed">
+                                                        Testimonials and stories from our loyal customers.<br/>
+                                                        <span className="text-emerald font-semibold text-xl inline-block mt-3 tracking-wide">1000+</span> satisfied clients
+                                                    </p>
+                                                </Link>
+
+                                                <Link href="/support" className="bg-silver-light/20 hover:bg-silver-light/50 border border-border p-6 rounded-2xl transition-all duration-300 group/card overflow-hidden relative block shadow-sm hover:shadow-md">
+                                                   <div className="absolute right-0 bottom-0 opacity-[0.03] group-hover/card:scale-110 group-hover/card:-rotate-12 group-hover/card:opacity-[0.05] transition-transform duration-500 text-charcoal">
+                                                        <TrendingUp className="w-40 h-40 -mr-10 -mb-10" />
+                                                    </div>
+                                                    <h3 className="text-charcoal font-heading font-bold text-lg mb-2 relative z-10 flex items-center gap-2">Styling Support</h3>
+                                                    <p className="text-muted font-body text-sm relative z-10 max-w-[85%] leading-relaxed">Get dedicated styling guidance and personalized assistance for any occasion.</p>
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Mobile Dropdown Accordion */}
+                            {isMobile && (
+                                <div className={`flex flex-col overflow-hidden transition-all duration-300 pl-4 py-1 border-l-2 border-border/50 ${mobileDropdownOpen === link.label ? "h-auto mt-4 mb-2 opacity-100" : "h-0 opacity-0 overflow-hidden m-0"}`}>
+                                    {link.items?.map((item) => (
+                                        <Link
+                                            key={item.label}
+                                            href={item.href!}
+                                            className="flex flex-col gap-1.5 py-3 group/mobile border-b border-border/20 last:border-0"
+                                        >
+                                            <span className="text-[15px] font-body font-bold text-charcoal/90 group-hover/mobile:text-emerald transition-colors flex items-center gap-2">
+                                                <Layers className="w-4 h-4 text-emerald/70" /> {item.label}
+                                            </span>
+                                            <span className="text-[13px] font-body text-muted line-clamp-2 pl-6 leading-relaxed">{item.description}</span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                const active = isActive(link.href!);
                 return (
                     <Link
                         key={link.label}
-                        href={link.href}
+                        href={link.href!}
                         className={`font-body font-medium uppercase no-underline transition-colors duration-300 ${isMobile
                             ? "text-[16px] tracking-wide"
                             : "text-[12px] tracking-widest whitespace-nowrap"
