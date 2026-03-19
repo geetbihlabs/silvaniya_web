@@ -31,6 +31,7 @@ export const ACCOUNT_SIDEBAR_LINKS = [
   { label: "Order History", href: "/orders", icon: "Package" },
   { label: "Saved Addresses", href: "/addresses", icon: "MapPin" },
   { label: "My Wishlist", href: "/wishlist", icon: "Heart" },
+  { label: "Notifications", href: "/account/notifications", icon: "Bell" },
 ] as const;
 
 export const SOCIAL_LINKS = {

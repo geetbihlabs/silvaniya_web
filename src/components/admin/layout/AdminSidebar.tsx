@@ -16,6 +16,8 @@ import {
     Gem,
     Layers,
     ImageIcon,
+    Bell,
+    Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +29,8 @@ const navItems = [
     { label: "Orders", href: "/admin-panel/orders", icon: ShoppingCart },
     { label: "Customers", href: "/admin-panel/customers", icon: Users },
     { label: "Support", href: "/admin-panel/support", icon: Headphones },
+    { label: "Enquiries", href: "/admin-panel/enquiries", icon: Mail },
+    { label: "Notifications", href: "/admin-panel/notifications", icon: Bell },
     // { label: "Settings", href: "/admin-panel/settings", icon: Settings },
 ];
 

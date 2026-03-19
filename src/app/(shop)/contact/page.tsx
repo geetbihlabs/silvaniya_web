@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
-import { MapPin, Globe, Instagram, BookMarked } from "lucide-react";
+import { MapPin, Globe, Instagram, BookMarked, Loader2 } from "lucide-react";
+import { useContactStore } from "@/store/useContactStore";
 
 const SUBJECTS = [
     "General Inquiry",
@@ -27,8 +28,13 @@ const STORES = [
 ];
 
 export default function ContactPage() {
-    const [subject, setSubject] = useState("General Inquiry");
-    const [sent, setSent] = useState(false);
+    const { fields, isLoading, isSubmitted, error, setField, submit, reset } =
+        useContactStore();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await submit();
+    };
 
     return (
         <div className="bg-[#f2f2ef] min-h-screen pb-10">
@@ -75,8 +81,8 @@ export default function ContactPage() {
                         <br /> below and our concierge team will get back to you within 24 hours.
                     </p>
 
-                    {!sent ? (
-                        <div className="flex flex-col gap-4">
+                    {!isSubmitted ? (
+                        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
                             {/* Name + Email */}
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
@@ -84,6 +90,9 @@ export default function ContactPage() {
                                     <input
                                         type="text"
                                         placeholder="John Doe"
+                                        value={fields.name}
+                                        onChange={(e) => setField("name", e.target.value)}
+                                        required
                                         className="w-full h-[42px] px-3.5 text-[13px] text-[#1a1a1a] rounded-lg border border-[#d8d8d2] bg-white placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1a1a] transition-colors box-border"
                                     />
                                 </div>
@@ -92,6 +101,9 @@ export default function ContactPage() {
                                     <input
                                         type="email"
                                         placeholder="john@example.com"
+                                        value={fields.email}
+                                        onChange={(e) => setField("email", e.target.value)}
+                                        required
                                         className="w-full h-[42px] px-3.5 text-[13px] text-[#1a1a1a] rounded-lg border border-[#d8d8d2] bg-white placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1a1a] transition-colors box-border"
                                     />
                                 </div>
@@ -102,8 +114,8 @@ export default function ContactPage() {
                                 <label className="block text-[12px] text-[#555] mb-1.5">Subject</label>
                                 <div className="relative">
                                     <select
-                                        value={subject}
-                                        onChange={(e) => setSubject(e.target.value)}
+                                        value={fields.subject}
+                                        onChange={(e) => setField("subject", e.target.value)}
                                         className="w-full h-[42px] px-3.5 text-[13px] text-[#1a1a1a] rounded-lg border border-[#d8d8d2] bg-white focus:outline-none focus:border-[#1a1a1a] transition-colors appearance-none cursor-pointer box-border"
                                     >
                                         {SUBJECTS.map((s) => (
@@ -125,17 +137,35 @@ export default function ContactPage() {
                                 <textarea
                                     rows={6}
                                     placeholder="How can we help you today?"
+                                    value={fields.message}
+                                    onChange={(e) => setField("message", e.target.value)}
+                                    required
                                     className="w-full px-3.5 py-3 text-[13px] text-[#1a1a1a] rounded-lg border border-[#d8d8d2] bg-white placeholder:text-[#bbb] focus:outline-none focus:border-[#1a1a1a] transition-colors resize-none box-border"
                                 />
                             </div>
 
+                            {/* Error message */}
+                            {error && (
+                                <p className="text-[12px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5">
+                                    {error}
+                                </p>
+                            )}
+
                             <button
-                                onClick={() => setSent(true)}
-                                className="w-full h-[50px] bg-[#1f1b2e] hover:bg-[#2d2845] text-white text-[13px] font-semibold rounded-lg transition-colors"
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full h-[50px] bg-[#1f1b2e] hover:bg-[#2d2845] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                             >
-                                Send Inquiry
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 size={15} className="animate-spin" />
+                                        Sending…
+                                    </>
+                                ) : (
+                                    "Send Inquiry"
+                                )}
                             </button>
-                        </div>
+                        </form>
                     ) : (
                         <div className="bg-[#f0f9f7] border border-[#107c6f]/20 rounded-xl p-10 text-center">
                             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center mx-auto mb-4 shadow">
@@ -146,7 +176,7 @@ export default function ContactPage() {
                             <p className="text-[16px] font-bold text-[#1a1a1a] mb-1.5">Message Sent!</p>
                             <p className="text-[13px] text-[#777]">Our team will reply within 24 hours.</p>
                             <button
-                                onClick={() => setSent(false)}
+                                onClick={reset}
                                 className="mt-4 text-[12px] text-[#107c6f] hover:underline bg-transparent border-none cursor-pointer"
                             >
                                 Send another

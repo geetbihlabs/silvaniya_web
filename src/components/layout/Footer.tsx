@@ -15,7 +15,7 @@ const SHOP_LINKS = [
 
 const SUPPORT_LINKS = [
     { label: "Track Order", href: "/track" },
-    { label: "Returns & Refunds", href: "/support" },
+    { label: "Returns & Refunds", href: "/refund-policy" },
     { label: "Shipping Policy", href: "/support" },
     { label: "Purity Certificate", href: "/support" },
     { label: "FAQs", href: "/support" },
@@ -139,7 +139,8 @@ export default function Footer() {
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8">
                     {[
                         { label: "PRIVACY POLICY", href: "/privacy-policy" },
-                        { label: "TERMS OF USE", href: "/terms" },
+                        { label: "TERMS OF USE", href: "/terms-and-conditions" },
+                        { label: "REFUND POLICY", href: "/refund-policy" },
                         { label: "COOKIE SETTINGS", href: "#" },
                     ].map((l) => (
                         <Link
