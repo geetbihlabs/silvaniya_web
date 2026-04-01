@@ -5,13 +5,41 @@ import Link from "next/link";
 import { Flame, TrendingUp } from "lucide-react";
 import ProductCard from "@/components/features/products/ProductCard";
 import { useShopProductStore } from "@/store/useShopProductStore";
+import { useCartStore } from "@/store/useCartStore";
+import { useAuth } from "@clerk/nextjs";
 
 export default function BestSellersPage() {
     const { products, isLoading, fetchProducts } = useShopProductStore();
+    const { addItem: addCartItem } = useCartStore();
+    const { getToken } = useAuth();
 
     useEffect(() => {
         fetchProducts({ isFeatured: true, limit: 12, status: "PUBLISHED" });
     }, [fetchProducts]);
+
+    const handleAddToCart = (product: typeof products[0]) => {
+        const firstVariant = product.variants?.[0];
+        if (!firstVariant) return;
+
+        addCartItem(
+            {
+                productVariantId: firstVariant.id,
+                productName: product.name,
+                variantLabel: firstVariant.label,
+                sku: firstVariant.sku,
+                imageUrl: product.images.find((i) => i.isPrimary)?.s3Url ?? product.images[0]?.s3Url ?? "",
+                unitPrice: product.salePrice
+                    ? Number(product.salePrice)
+                    : firstVariant.priceOverride
+                        ? Number(firstVariant.priceOverride)
+                        : Number(product.basePrice),
+                stockQty: firstVariant.stockQty,
+                productSlug: product.slug,
+            },
+            1,
+            getToken,
+        );
+    };
 
     const SkeletonGrid = () => (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -73,7 +101,9 @@ export default function BestSellersPage() {
                                 material: p.metalType, purity: "92.5%", isFeatured: p.isFeatured,
                                 rating: Number(p.averageRating), reviewCount: p.reviewCount,
                                 stock: p.stock, tags: p.tags, createdAt: p.createdAt, updatedAt: p.updatedAt,
-                            }} />
+                            }}
+                                onAddToCart={() => handleAddToCart(p)}
+                            />
                         ))}
                     </div>
                 )}

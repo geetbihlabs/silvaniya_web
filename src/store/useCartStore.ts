@@ -25,6 +25,8 @@ export interface CartItem {
   imageUrl?: string;
   unitPrice: number;        // numeric rupees
   quantity: number;
+  stockQty: number;
+  productSlug?: string;     // for linking back to product page
 }
 
 export interface CartTotals {
@@ -32,6 +34,7 @@ export interface CartTotals {
   shippingCharge: number;
   cgst: number;
   sgst: number;
+  discountAmount: number;
   total: number;
   count: number;            // total item quantity (used for badge)
 }
@@ -43,6 +46,7 @@ interface CartState {
   count: number;            // mirrors getTotals().count — cached for badge
   isOpen: boolean;
   isLoading: boolean;
+  coupon: { code: string; discountAmount: number } | null;
 
   // ── Server-syncing actions (pass getToken for authenticated calls) ──
   fetchCart: (getToken: GetTokenFn) => Promise<void>;
@@ -51,6 +55,8 @@ interface CartState {
   removeItem: (productVariantId: string, getToken: GetTokenFn) => Promise<void>;
   updateQty: (productVariantId: string, qty: number, getToken: GetTokenFn) => Promise<void>;
   clearCart: (getToken: GetTokenFn) => Promise<void>;
+  applyCoupon: (code: string, getToken: GetTokenFn) => Promise<void>;
+  removeCoupon: () => void;
 
   // ── Local helpers ──
   getTotals: (shippingMethod?: 'standard' | 'express') => CartTotals;
@@ -83,6 +89,8 @@ function mapServerItem(raw: any): CartItem {
     imageUrl: raw.imageUrl ?? undefined,
     unitPrice: parseFloat(raw.unitPrice),
     quantity: raw.quantity,
+    stockQty: raw.productVariant?.stockQty ?? 999,
+    productSlug: raw.productVariant?.product?.slug ?? undefined,
   };
 }
 
@@ -95,6 +103,7 @@ export const useCartStore = create<CartState>()(
       count: 0,
       isOpen: false,
       isLoading: false,
+      coupon: null,
 
       // ── Fetch full cart from server ─────────────────────────────────────
       fetchCart: async (getToken) => {
@@ -127,11 +136,20 @@ export const useCartStore = create<CartState>()(
 
       // ── Add item ────────────────────────────────────────────────────────
       addItem: async (itemData, qty = 1, getToken) => {
+        const state = get();
+        const existing = state.items.find((i) => i.productVariantId === itemData.productVariantId);
+        const stockQty = existing?.stockQty ?? itemData.stockQty;
+        
+        if (existing && existing.quantity + qty > stockQty) {
+          toast.error(`Only ${stockQty} items available in stock`);
+          return;
+        } else if (!existing && qty > stockQty) {
+          toast.error(`Only ${stockQty} items available in stock`);
+          return;
+        }
+
         // Optimistic update
         set((state) => {
-          const existing = state.items.find(
-            (i) => i.productVariantId === itemData.productVariantId,
-          );
           let items: CartItem[];
           if (existing) {
             items = state.items.map((i) =>
@@ -201,6 +219,14 @@ export const useCartStore = create<CartState>()(
         if (qty < 1) {
           return get().removeItem(productVariantId, getToken);
         }
+        
+        const state = get();
+        const existing = state.items.find((i) => i.productVariantId === productVariantId);
+        if (existing && qty > existing.stockQty) {
+          toast.error(`Only ${existing.stockQty} items available in stock`);
+          return;
+        }
+
         // Optimistic update
         set((state) => {
           const items = state.items.map((i) =>
@@ -233,19 +259,42 @@ export const useCartStore = create<CartState>()(
         }
       },
 
+      // ── Apply coupon code ────────────────────────────────────────────────
+      applyCoupon: async (code, getToken) => {
+        try {
+          const subtotal = get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+          const headers = await authHeader(getToken);
+          const res = await api.post('/discounts/validate', { code: code.trim().toUpperCase(), subtotal }, { headers });
+          const result = res.data?.data ?? res.data;
+          if (result?.valid) {
+            set({ coupon: { code: result.code, discountAmount: result.discountAmount } });
+            toast.success(result.message);
+          } else {
+            toast.error(result?.message ?? 'Invalid coupon code.');
+          }
+        } catch {
+          toast.error('Failed to validate coupon. Please try again.');
+        }
+      },
+
+      // ── Remove coupon ────────────────────────────────────────────────────
+      removeCoupon: () => set({ coupon: null }),
+
       // ── Local helpers ───────────────────────────────────────────────────
       getTotals: (shippingMethod = 'standard') => {
-        const { items } = get();
+        const { items, coupon } = get();
         const subtotal = items.reduce(
           (sum, i) => sum + i.unitPrice * i.quantity,
           0,
         );
+        const discountAmount = coupon?.discountAmount ?? 0;
+        const discounted = Math.max(0, subtotal - discountAmount);
         const shippingCharge = shippingMethod === 'express' ? 250 : 0;
-        const cgst = parseFloat((subtotal * 0.015).toFixed(2));
-        const sgst = parseFloat((subtotal * 0.015).toFixed(2));
-        const total = subtotal + shippingCharge + cgst + sgst;
+        const cgst = parseFloat((discounted * 0.015).toFixed(2));
+        const sgst = parseFloat((discounted * 0.015).toFixed(2));
+        const total = discounted + shippingCharge + cgst + sgst;
         const count = computeCount(items);
-        return { subtotal, shippingCharge, cgst, sgst, total, count };
+        return { subtotal, shippingCharge, cgst, sgst, discountAmount, total, count };
       },
 
       setOpen: (open) => set({ isOpen: open }),
@@ -254,7 +303,7 @@ export const useCartStore = create<CartState>()(
       name: 'silvaniya-cart',
       storage: createJSONStorage(() => localStorage),
       // Only persist items/count for guest fallback
-      partialize: (state) => ({ items: state.items, count: state.count }),
+      partialize: (state) => ({ items: state.items, count: state.count, coupon: state.coupon }),
     },
   ),
 );

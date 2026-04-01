@@ -214,9 +214,13 @@ function ProductListingContent() {
                                                 variantLabel: firstVariant.label,
                                                 sku: firstVariant.sku,
                                                 imageUrl: product.images.find((i) => i.isPrimary)?.s3Url ?? product.images[0]?.s3Url,
-                                                unitPrice: firstVariant.priceOverride
-                                                    ? Number(firstVariant.priceOverride)
-                                                    : Number(product.salePrice ?? product.basePrice),
+                                                unitPrice: product.salePrice
+                                                    ? Number(product.salePrice)
+                                                    : firstVariant.priceOverride
+                                                        ? Number(firstVariant.priceOverride)
+                                                        : Number(product.basePrice),
+                                                stockQty: firstVariant.stockQty,
+                                                productSlug: product.slug,
                                             },
                                             1,
                                             getToken,

@@ -18,6 +18,8 @@ import {
     ImageIcon,
     Bell,
     Mail,
+    Tag,
+    MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +28,8 @@ const navItems = [
     { label: "Products", href: "/admin-panel/products", icon: Package },
     { label: "Categories", href: "/admin-panel/categories", icon: Layers },
     { label: "Banners", href: "/admin-panel/banners", icon: ImageIcon },
+    { label: "Testimonials", href: "/admin-panel/testimonials", icon: MessageSquare },
+    { label: "Discounts", href: "/admin-panel/discounts", icon: Tag },
     { label: "Orders", href: "/admin-panel/orders", icon: ShoppingCart },
     { label: "Customers", href: "/admin-panel/customers", icon: Users },
     { label: "Support", href: "/admin-panel/support", icon: Headphones },

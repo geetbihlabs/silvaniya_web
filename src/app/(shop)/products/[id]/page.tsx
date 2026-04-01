@@ -63,9 +63,13 @@ export default function ProductDetailPage() {
                 variantLabel: variant.label,
                 sku: variant.sku,
                 imageUrl: product.images.find((i) => i.isPrimary)?.s3Url ?? product.images[0]?.s3Url ?? "",
-                unitPrice: variant.priceOverride
-                    ? Number(variant.priceOverride)
-                    : Number(product.salePrice ?? product.basePrice),
+                unitPrice: product.salePrice
+                    ? Number(product.salePrice)
+                    : variant.priceOverride
+                        ? Number(variant.priceOverride)
+                        : Number(product.basePrice),
+                stockQty: variant.stockQty,
+                productSlug: product.slug,
             },
             1,
             getToken,
@@ -245,7 +249,7 @@ export default function ProductDetailPage() {
                     </div>
 
                     {/* Stock warning */}
-                    {selectedVariant && selectedVariant.stockQty <= 5 && selectedVariant.stockQty > 0 && (
+                    {selectedVariant && selectedVariant.stockQty > 0 && selectedVariant.stockQty <= (selectedVariant.lowStockAt ?? 5) && (
                         <p className="text-[12px] text-orange-500 mb-3 font-medium">Only {selectedVariant.stockQty} left in stock!</p>
                     )}
 
@@ -312,7 +316,9 @@ export default function ProductDetailPage() {
                                 <p className="text-muted leading-relaxed">{product.description ?? "Crafted from premium 925 Sterling Silver."}</p>
                                 <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-muted">
                                     <div><span className="font-medium text-charcoal">SKU:</span> {product.sku}</div>
-                                    <div><span className="font-medium text-charcoal">Weight:</span> {product.weightGrams}g</div>
+                                    {product.weightGrams > 0 && (
+                                        <div><span className="font-medium text-charcoal">Weight:</span> {product.weightGrams}g</div>
+                                    )}
                                     <div><span className="font-medium text-charcoal">Metal:</span> {product.metalType.replace(/_/g, " ")}</div>
                                     {product.bisHallmark && <div className="flex items-center gap-1"><Check size={14} className="text-emerald" /> BIS Hallmarked</div>}
                                 </div>
@@ -357,7 +363,11 @@ export default function ProductDetailPage() {
             <div className="mb-10 sm:mb-16">
                 <h2 className="text-xl lg:text-2xl font-semibold text-charcoal mb-6" style={{ fontFamily: "var(--font-heading)" }}>What Our Customers Say</h2>
                 <div className="border border-[#e8e8e3] rounded-xl p-8 text-center text-muted">
-                    <Star size={32} className="mx-auto mb-3 text-gray-300" />
+                    <div className="flex justify-center gap-1 mb-3">
+                        {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={32} className="text-yellow-400 fill-yellow-400" />
+                        ))}
+                    </div>
                     <p className="text-sm">Reviews coming soon. Be the first to review this product!</p>
                 </div>
             </div>
@@ -383,6 +393,7 @@ export default function ProductDetailPage() {
                                             sku: variant.sku,
                                             imageUrl: p.images.find(i => i.isPrimary)?.s3Url || p.images[0]?.s3Url || "",
                                             unitPrice: Number(p.salePrice ?? p.basePrice),
+                                            stockQty: variant.stockQty,
                                         }, 1, getToken);
                                     }
                                 }}

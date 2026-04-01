@@ -16,6 +16,7 @@ export interface ShopProductVariant {
   size?: string;
   purity?: string;
   stockQty: number;
+  lowStockAt?: number;
   priceOverride?: number;
   sku: string;
   isActive: boolean;

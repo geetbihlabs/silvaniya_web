@@ -1,24 +1,19 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useAuth } from "@clerk/nextjs";
 import { useProductStore } from "../../../../store/useProductStore";
 import ProductForm from "../../../../components/admin/products/ProductForm";
-import PageHeader from "@/components/admin/shared/PageHeader";
-import { Button } from "@/components/ui/Button";
-import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function NewProductPage() {
-    const router = useRouter();
     const { getToken } = useAuth();
     const { isSubmitting, createProduct } = useProductStore();
 
     const onSubmit = async (data: Record<string, unknown>, imageFiles: File[]) => {
         const tags = typeof data.tags === 'string' ? data.tags : '';
         const tagsArray = tags ? tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [];
-        
+
         const payload = {
             ...data,
             description: typeof data.description === 'string' ? data.description.trim() || undefined : undefined,
@@ -28,9 +23,9 @@ export default function NewProductPage() {
             metaDescription: typeof data.metaDescription === 'string' ? data.metaDescription.trim() || undefined : undefined,
             tags: tagsArray,
         };
-        
+
         const success = await createProduct(payload, getToken, imageFiles);
-        
+
         if (success) {
             toast.success("Product created successfully!");
         }
@@ -38,25 +33,10 @@ export default function NewProductPage() {
     };
 
     return (
-        <>
-            <PageHeader
-                title="Add New Product"
-                breadcrumbs={[
-                    { label: "Dashboard", href: "/admin-panel/dashboard" },
-                    { label: "Products", href: "/admin-panel/products" },
-                    { label: "Add New Product" },
-                ]}
-                actions={
-                    <Button variant="outline" size="sm" onClick={() => router.back()}>
-                        <ArrowLeft size={16} /> Back
-                    </Button>
-                }
-            />
-            <ProductForm 
-                onSubmit={onSubmit} 
-                isSubmitting={isSubmitting} 
-                title="Add New Product" 
-            />
-        </>
+        <ProductForm
+            onSubmit={onSubmit}
+            isSubmitting={isSubmitting}
+            title="Add New Product"
+        />
     );
 }
