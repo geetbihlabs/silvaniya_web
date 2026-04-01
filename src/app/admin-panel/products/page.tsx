@@ -38,7 +38,22 @@ export default function AdminProductsPage() {
     const [filterCategory, setFilterCategory] = useState("ALL");
     const [filterMetalType, setFilterMetalType] = useState("ALL");
     const [filterStatus, setFilterStatus] = useState("ALL");
+    const [filterSeller, setFilterSeller] = useState("");
+    const [debouncedSeller, setDebouncedSeller] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+
+    // Debounce seller search
+    const sellerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const handleSellerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setFilterSeller(val);
+        if (sellerTimer.current) clearTimeout(sellerTimer.current);
+        sellerTimer.current = setTimeout(() => {
+            setDebouncedSeller(val);
+            setCurrentPage(1);
+        }, 500);
+    };
+    useEffect(() => () => { if (sellerTimer.current) clearTimeout(sellerTimer.current); }, []);
 
     // Debounce search: wait 500ms after typing stops before updating debouncedSearch
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -60,8 +75,9 @@ export default function AdminProductsPage() {
         if (filterCategory !== "ALL") params.category = filterCategory;
         if (filterMetalType !== "ALL") params.metalType = filterMetalType;
         if (filterStatus !== "ALL") params.status = filterStatus;
+        if (debouncedSeller) params.sellerName = debouncedSeller;
         fetchProducts(getToken, params);
-    }, [getToken, fetchProducts, currentPage, debouncedSearch, filterCategory, filterMetalType, filterStatus]);
+    }, [getToken, fetchProducts, currentPage, debouncedSearch, filterCategory, filterMetalType, filterStatus, debouncedSeller]);
 
     useEffect(() => {
         doFetch();
@@ -78,6 +94,8 @@ export default function AdminProductsPage() {
         setFilterCategory("ALL");
         setFilterMetalType("ALL");
         setFilterStatus("ALL");
+        setFilterSeller("");
+        setDebouncedSeller("");
         setCurrentPage(1);
     };
 
@@ -90,7 +108,7 @@ export default function AdminProductsPage() {
     };
 
     const hasActiveFilters =
-        searchInput !== "" || filterCategory !== "ALL" || filterMetalType !== "ALL" || filterStatus !== "ALL";
+        searchInput !== "" || filterCategory !== "ALL" || filterMetalType !== "ALL" || filterStatus !== "ALL" || filterSeller !== "";
 
     const handlePageChange = (page: number) => {
         if (page < 1 || page > meta.totalPages) return;
@@ -175,6 +193,18 @@ export default function AdminProductsPage() {
                     <option value="ARCHIVED">Archived</option>
                 </select>
 
+                {/* Seller Name filter */}
+                <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                    <input
+                        type="text"
+                        placeholder="Filter by seller name..."
+                        value={filterSeller}
+                        onChange={handleSellerChange}
+                        className="h-10 pl-10 pr-4 text-sm rounded-lg border border-border text-charcoal focus:outline-none focus:border-charcoal w-48"
+                    />
+                </div>
+
                 {/* Clear filters */}
                 {hasActiveFilters && (
                     <button
@@ -256,6 +286,9 @@ export default function AdminProductsPage() {
                                                         {String(product.name || '')}
                                                     </Link>
                                                     <p className="text-xs text-muted">{String(product.metalType || '').replace(/_/g, ' ')}</p>
+                                                    {product.sellerName && (
+                                                        <p className="text-[11px] text-muted mt-0.5 italic">Seller: {String(product.sellerName)}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
@@ -290,13 +323,12 @@ export default function AdminProductsPage() {
 
                                         {/* Stock */}
                                         <td className="px-5 py-4">
-                                            <span className={`font-semibold ${
-                                                stockQty === 0
+                                            <span className={`font-semibold ${stockQty === 0
                                                     ? "text-error"
                                                     : stockQty <= lowStock
                                                         ? "text-warning"
                                                         : "text-charcoal"
-                                            }`}>
+                                                }`}>
                                                 {stockQty}
                                             </span>
                                         </td>
@@ -359,11 +391,10 @@ export default function AdminProductsPage() {
                                 <button
                                     key={page}
                                     onClick={() => handlePageChange(page)}
-                                    className={`px-3 py-1.5 text-xs rounded-md font-semibold transition-colors ${
-                                        page === meta.page
+                                    className={`px-3 py-1.5 text-xs rounded-md font-semibold transition-colors ${page === meta.page
                                             ? "bg-charcoal text-white"
                                             : "text-muted hover:bg-gray-100"
-                                    }`}
+                                        }`}
                                 >
                                     {page}
                                 </button>
@@ -381,48 +412,48 @@ export default function AdminProductsPage() {
                 </div>
             </div>
 
-        {/* Delete Confirmation Modal */}
-        {confirmDelete && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-                {/* Backdrop */}
-                <div
-                    className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                    onClick={() => !isDeleting && setConfirmDelete(null)}
-                />
-                {/* Dialog */}
-                <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
-                    <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                            <AlertTriangle size={20} className="text-error" />
+            {/* Delete Confirmation Modal */}
+            {confirmDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                        onClick={() => !isDeleting && setConfirmDelete(null)}
+                    />
+                    {/* Dialog */}
+                    <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl p-6">
+                        <div className="flex items-start gap-4">
+                            <div className="shrink-0 w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                                <AlertTriangle size={20} className="text-error" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-base font-semibold text-charcoal">Archive Product?</h3>
+                                <p className="mt-1 text-sm text-muted">
+                                    <span className="font-medium text-charcoal line-clamp-1">&ldquo;{confirmDelete?.name ?? ''}&rdquo;</span> will be
+                                    archived and hidden from the storefront. You can restore it by changing its status back to Published.
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="text-base font-semibold text-charcoal">Archive Product?</h3>
-                            <p className="mt-1 text-sm text-muted">
-                                <span className="font-medium text-charcoal line-clamp-1">&ldquo;{confirmDelete?.name ?? ''}&rdquo;</span> will be
-                                archived and hidden from the storefront. You can restore it by changing its status back to Published.
-                            </p>
+                        <div className="mt-5 flex gap-2 justify-end">
+                            <button
+                                onClick={() => setConfirmDelete(null)}
+                                disabled={isDeleting}
+                                className="px-4 py-2 text-sm font-medium text-charcoal bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                disabled={isDeleting}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-error hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                {isDeleting ? 'Archiving...' : 'Archive'}
+                            </button>
                         </div>
-                    </div>
-                    <div className="mt-5 flex gap-2 justify-end">
-                        <button
-                            onClick={() => setConfirmDelete(null)}
-                            disabled={isDeleting}
-                            className="px-4 py-2 text-sm font-medium text-charcoal bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleDeleteConfirm}
-                            disabled={isDeleting}
-                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-error hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                            {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                            {isDeleting ? 'Archiving...' : 'Archive'}
-                        </button>
                     </div>
                 </div>
-            </div>
-        )}
+            )}
         </>
     );
 }

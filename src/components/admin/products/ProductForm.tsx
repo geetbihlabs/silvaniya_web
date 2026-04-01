@@ -16,6 +16,7 @@ import api from "@/lib/axios";
 
 const productSchema = z.object({
     name: z.string().min(3, "Product name is required"),
+    sellerName: z.string().optional(),
     sku: z.string().min(3, "SKU is required"),
     weight: z.coerce.number().min(0, "Weight must be positive"),
     description: z.string().optional(),
@@ -173,6 +174,7 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
         resolver: zodResolver(productSchema) as any,
         defaultValues: {
             name: initialValues?.name ?? "",
+            sellerName: (initialValues as any)?.sellerName ?? "",
             sku: initialValues?.sku ?? "",
             weight: initialValues?.weight ?? 0,
             price: initialValues?.price ?? 0,
@@ -294,6 +296,14 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
                                     <div>
                                         <Input label="Product Name" placeholder="Elegant Floral Silver Necklace" {...register("name")} />
                                         {errors.name && <p className="text-error text-xs mt-1">{errors.name.message}</p>}
+                                    </div>
+                                    <div>
+                                        <Input
+                                            label="Seller Name (Internal — not visible on storefront)"
+                                            placeholder="e.g. Rajesh Kumar / Vernium Gold Pvt. Ltd."
+                                            {...register("sellerName")}
+                                        />
+                                        <p className="text-[11px] text-muted mt-1">For internal tracking only. Use this to filter products by seller in the admin panel.</p>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         <div>
@@ -424,9 +434,14 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
                                         <option value="PUBLISHED">Published</option>
                                         <option value="ARCHIVED">Archived</option>
                                     </select>
-                                    <div className="flex items-center gap-2">
-                                        <input type="checkbox" id="isFeatured" {...register("isFeatured")} className="rounded border-gray-300 text-charcoal focus:ring-charcoal" />
-                                        <label htmlFor="isFeatured" className="text-sm font-medium text-charcoal">Is Featured</label>
+                                    <div className="flex items-start gap-2">
+                                        <input type="checkbox" id="isFeatured" {...register("isFeatured")} className="rounded border-gray-300 text-charcoal focus:ring-charcoal mt-0.5" />
+                                        <div>
+                                            <label htmlFor="isFeatured" className="text-sm font-medium text-charcoal cursor-pointer">
+                                                🔥 Feature on Best Sellers Page
+                                            </label>
+                                            <p className="text-[11px] text-muted mt-0.5">This product will appear on the <strong>/best-sellers</strong> page visible to customers.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </section>

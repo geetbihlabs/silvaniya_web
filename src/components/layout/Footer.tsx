@@ -16,10 +16,16 @@ const SHOP_LINKS = [
 const SUPPORT_LINKS = [
     { label: "Track Order", href: "/track" },
     { label: "Returns & Refunds", href: "/refund-policy" },
-    { label: "Shipping Policy", href: "/support" },
-    { label: "Purity Certificate", href: "/support" },
-    { label: "FAQs", href: "/support" },
+    { label: "Shipping Policy", href: "/shipping-policy" },
+    { label: "Jewellery Care", href: "/jewellery-care" },
+    { label: "FAQs", href: "/faqs" },
     { label: "Contact Us", href: "/contact" },
+];
+
+const COMPANY_LINKS = [
+    { label: "About Us", href: "/about" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms & Conditions", href: "/terms-and-conditions" },
 ];
 
 export default function Footer() {
@@ -89,6 +95,24 @@ export default function Footer() {
                     </p>
                     <div className="flex flex-col gap-4">
                         {SUPPORT_LINKS.map((l) => (
+                            <Link
+                                key={l.label}
+                                href={l.href}
+                                className="font-body text-[14px] font-normal text-white/55 no-underline transition-colors duration-200 hover:text-white"
+                            >
+                                {l.label}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Column 3b — Company */}
+                <div>
+                    <p className="font-body text-[11px] font-bold tracking-[0.2em] uppercase text-white mb-6">
+                        COMPANY
+                    </p>
+                    <div className="flex flex-col gap-4">
+                        {COMPANY_LINKS.map((l) => (
                             <Link
                                 key={l.label}
                                 href={l.href}

@@ -54,6 +54,7 @@ interface OrderState {
     address: OrderAddress,
     shippingMethod: 'standard' | 'express',
     paymentMethod: string,
+    couponCode: string | undefined,
     getToken: () => Promise<string | null>,
   ) => Promise<PlacedOrder | null>;
   fetchOrderById: (id: string, getToken: () => Promise<string | null>) => Promise<PlacedOrder | null>;
@@ -67,7 +68,7 @@ export const useOrderStore = create<OrderState>((set) => ({
   isPlacing: false,
   error: null,
 
-  placeOrder: async (cartItems, address, shippingMethod, paymentMethod, getToken) => {
+  placeOrder: async (cartItems, address, shippingMethod, paymentMethod, couponCode, getToken) => {
     set({ isPlacing: true, error: null });
     try {
       const token = await getToken();
@@ -85,6 +86,7 @@ export const useOrderStore = create<OrderState>((set) => ({
         shippingAddress: address,
         paymentMethod,
         shippingMethod,
+        couponCode: couponCode || undefined,
       };
 
       const res = await api.post('/orders', payload, { headers });

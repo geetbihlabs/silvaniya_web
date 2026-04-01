@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Loader2 } from "lucide-react";
+import { Heart, Loader2, Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroCTA from "@/components/features/hero/HeroCTA";
@@ -10,35 +10,17 @@ import BannerSlider from "@/components/features/hero/BannerSlider";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import { useShopProductStore } from "@/store/useShopProductStore";
 import { useBannerStore } from "@/store/useBannerStore";
+import { useTestimonialStore } from "@/store/useTestimonialStore";
 
 const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
-// --- Testimonials data --------------------------------------------------------
-const testimonials = [
-  {
-    id: "r1",
-    text: "The silver quality is exceptional. I bought a mangalsutra for my anniversary and it's even more beautiful in person. The hallmarking gives so much peace of mind.",
-    name: "Priya Sharma",
-    city: "Mumbai",
-  },
-  {
-    id: "r2",
-    text: "Best place for silver coins. I always buy from Silvaniya for Diwali. Fast delivery and beautiful packaging. Highly recommended for gifting.",
-    name: "Ananya Iyer",
-    city: "Chennai",
-  },
-  {
-    id: "r3",
-    text: "Love the minimal nose pins. They are perfect for daily wear and don't irritate the skin. The 92.5 purity is definitely genuine.",
-    name: "Sneha Verma",
-    city: "Delhi",
-  },
-];
+// Hardcoded array removed in favor of dynamic API from useTestimonialStore
 
 export default function HomePage() {
   const { categories, fetchCategories, isLoading: categoriesLoading } = useCategoryStore();
   const { products: trending, fetchProducts, isLoading: productsLoading } = useShopProductStore();
   const { banners, fetchActiveBanners, loading: bannersLoading } = useBannerStore();
+  const { testimonials, fetchActiveTestimonials, isLoading: testimonialsLoading } = useTestimonialStore();
 
   useEffect(() => {
     fetchCategories();
@@ -46,11 +28,13 @@ export default function HomePage() {
     fetchProducts({ isFeatured: true, limit: 4 });
     // Fetch active HERO banners (public route)
     fetchActiveBanners();
-  }, [fetchCategories, fetchProducts, fetchActiveBanners]);
+    // Fetch active Testimonials
+    fetchActiveTestimonials();
+  }, [fetchCategories, fetchProducts, fetchActiveBanners, fetchActiveTestimonials]);
 
   // Take top 4 categories
   const displayCategories = categories.filter((c) => c.isVisible).slice(0, 4);
-  
+
   // Get active HERO banners
   const heroBanners = banners.filter(b => b.position === 'HERO' && b.isActive).sort((a, b) => a.sortOrder - b.sortOrder);
   const currentHeroBanner = heroBanners.length > 0 ? heroBanners[0] : null;
@@ -316,50 +300,86 @@ export default function HomePage() {
               </div>
 
               {/* CTA */}
-              <button className="inline-block py-[18px] px-12 bg-charcoal text-white font-body text-[11px] font-semibold tracking-[0.2em] uppercase border-none rounded cursor-pointer self-start transition-colors duration-300 hover:bg-charcoal-light">
+              <Link href="/best-sellers" className="inline-block py-[18px] px-12 bg-charcoal text-white font-body text-[11px] font-semibold tracking-[0.2em] uppercase border-none rounded cursor-pointer self-start transition-colors duration-300 hover:bg-charcoal-light text-center no-underline">
                 OUR HERITAGE
-              </button>
+              </Link>
             </div>
 
           </div>
         </section>
 
         {/* ------------------------ TESTIMONIALS ----------------------- */}
-        <section className="bg-background py-12 md:py-16 w-full">
-          <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="text-center mb-10 md:mb-12">
-              <h2 className="italic text-[32px] md:text-[40px] font-normal text-charcoal m-0 font-playfair">
-                Voices of Our Customers
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {testimonials.map((t) => (
-                <div
-                  key={t.id}
-                  className="bg-white border border-border rounded-2xl p-[32px_28px_28px] flex flex-col"
-                >
-                  <span className="font-body text-[48px] font-bold text-emerald-light/55 leading-none mb-4 block select-none">
-                    &ldquo;
-                  </span>
-                  <p className="font-body text-[14px] font-normal leading-[1.7] text-charcoal mb-7 flex-1">
-                    &ldquo;{t.text}&rdquo;
-                  </p>
-                  <div className="flex items-center gap-[14px] mt-auto">
-                    <div className="w-11 h-11 rounded-full bg-silver-light shrink-0" />
-                    <div>
-                      <p className="font-body text-[14px] font-semibold text-charcoal mb-[2px]">
-                        {t.name}
-                      </p>
-                      <p className="font-body text-[13px] font-normal text-muted">
-                        {t.city}
-                      </p>
+        {testimonialsLoading ? (
+          <section className="bg-background py-12 md:py-16 w-full flex justify-center">
+            <Loader2 size={32} className="animate-spin text-emerald" />
+          </section>
+        ) : testimonials.length > 0 ? (
+          <section className="bg-background py-12 md:py-16 w-full">
+            <div className="max-w-7xl mx-auto px-4 md:px-8">
+              <div className="text-center mb-10 md:mb-12">
+                <h2 className="italic text-[32px] md:text-[40px] font-normal text-charcoal m-0 font-playfair">
+                  Voices of Our Customers
+                </h2>
+              </div>
+              <style>{`
+                .hide-scroll::-webkit-scrollbar { display: none; }
+                .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+              `}</style>
+              <div className="hide-scroll flex flex-row overflow-x-auto gap-5 md:gap-6 pb-8 snap-x snap-mandatory -mx-4 px-4 md:-mx-8 md:px-8">
+                {testimonials.map((t) => (
+                  <div
+                    key={t.id}
+                    className="bg-white border border-border rounded-2xl p-[28px] md:p-[32px] flex flex-col shrink-0 snap-center w-[85vw] sm:w-[320px] md:w-[340px] aspect-5/4 transition-shadow duration-300 hover:shadow-lg"
+                  >
+                    <div className="flex justify-between items-start mb-4 shrink-0">
+                      <span className="font-body text-[42px] font-bold text-emerald/50 leading-[0.5] block select-none">
+                        &ldquo;
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${i < (t.rating || 5) ? "fill-yellow-400 text-yellow-400" : "text-gray-200"}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex-1 mt-1 mb-6 relative">
+                      <div className="absolute inset-0 overflow-y-auto scrollbar-hide">
+                        <p className="font-body text-[13.5px] font-normal leading-[1.8] text-charcoal">
+                          {t.text}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 mt-auto shrink-0">
+                      {t.avatarUrl ? (
+                        <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-gray-50 border border-border">
+                          <img src={t.avatarUrl} alt={t.name} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-silver shrink-0 flex items-center justify-center text-charcoal font-bold border border-border">
+                          {t.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-body text-[13.5px] font-semibold text-charcoal leading-tight">
+                          {t.name}
+                        </p>
+                        {t.city && (
+                          <p className="font-body text-[12.5px] font-normal text-muted mt-0.5 leading-tight">
+                            {t.city}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
       </main>
 

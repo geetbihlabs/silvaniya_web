@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Minus, Plus, Trash2, Heart, Shield, Truck, RotateCcw, ArrowRight, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, Heart, Shield, Truck, RotateCcw, ArrowRight, ShoppingBag, Tag, X, Loader2 } from "lucide-react";
 import ProductCard from "@/components/features/products/ProductCard";
 import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
@@ -11,7 +11,9 @@ import { useAuth } from "@clerk/nextjs";
 
 export default function CartPage() {
     const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
-    const { items, addItem, removeItem, updateQty, getTotals, fetchCart, isLoading } = useCartStore();
+    const { items, addItem, removeItem, updateQty, getTotals, fetchCart, isLoading, coupon, applyCoupon, removeCoupon } = useCartStore();
+    const [couponInput, setCouponInput] = useState("");
+    const [couponLoading, setCouponLoading] = useState(false);
 
     // Load server cart on mount for authenticated users
     useEffect(() => {
@@ -21,8 +23,16 @@ export default function CartPage() {
     }, [isSignedIn, fetchCart, getToken]);
 
     const shipping = "standard" as const;
-    const { subtotal, shippingCharge, cgst, sgst, total, count } = getTotals(shipping);
+    const { subtotal, shippingCharge, cgst, sgst, discountAmount, total, count } = getTotals(shipping);
     const tax = cgst + sgst;
+
+    const handleApplyCoupon = async () => {
+        if (!couponInput.trim()) return;
+        setCouponLoading(true);
+        await applyCoupon(couponInput, getToken);
+        setCouponLoading(false);
+        setCouponInput("");
+    };
 
     // Collect all unique category IDs from cart items (multi-category support)
     const cartCategoryIds = [...new Set(items.map((i) => i.categoryId).filter(Boolean))] as string[];
@@ -72,18 +82,26 @@ export default function CartPage() {
                             <div key={item.productVariantId} className="bg-white rounded-xl border border-[#e8e8e4] px-5 py-5">
                                 <div className="flex gap-4 items-start">
                                     {/* Product Image */}
-                                    <div className="w-[90px] h-[90px] sm:w-[100px] sm:h-[100px] rounded-lg overflow-hidden bg-[#1a1a1a] shrink-0">
+                                    <Link
+                                        href={item.productSlug ? `/products/${item.productSlug}` : '#'}
+                                        className="w-[90px] h-[90px] sm:w-[100px] sm:h-[100px] rounded-lg overflow-hidden bg-[#1a1a1a] shrink-0 hover:opacity-90 transition-opacity"
+                                    >
                                         {item.imageUrl ? (
                                             <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-[10px] text-white/30">Img</div>
                                         )}
-                                    </div>
+                                    </Link>
 
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-start justify-between gap-2">
                                             <div>
-                                                <h3 className="text-[15px] font-semibold text-charcoal leading-snug">{item.productName}</h3>
+                                                <Link
+                                                    href={item.productSlug ? `/products/${item.productSlug}` : '#'}
+                                                    className="text-[15px] font-semibold text-charcoal leading-snug hover:text-emerald transition-colors"
+                                                >
+                                                    {item.productName}
+                                                </Link>
                                                 <p className="text-[10px] text-muted uppercase tracking-wider mt-1">SKU: {item.sku} | {item.variantLabel}</p>
                                             </div>
                                             <span className="text-[15px] font-bold text-charcoal whitespace-nowrap shrink-0">{formatPrice(item.unitPrice)}</span>
@@ -96,7 +114,10 @@ export default function CartPage() {
                                                     <Minus size={13} />
                                                 </button>
                                                 <span className="w-10 h-8 flex items-center justify-center text-sm font-medium text-charcoal border-x border-[#e0e0db]">{item.quantity}</span>
-                                                <button onClick={() => updateQty(item.productVariantId, item.quantity + 1, getToken)} className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal hover:bg-gray-50 transition-colors">
+                                                <button 
+                                                    onClick={() => updateQty(item.productVariantId, item.quantity + 1, getToken)} 
+                                                    disabled={item.quantity >= item.stockQty}
+                                                    className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                                     <Plus size={13} />
                                                 </button>
                                             </div>
@@ -134,11 +155,58 @@ export default function CartPage() {
                         <div className="bg-white rounded-xl border border-[#e8e8e4] p-6 sticky top-24">
                             <h2 className="text-[18px] font-bold text-charcoal mb-5" style={{ fontFamily: "var(--font-heading)" }}>Order Summary</h2>
 
+                            {/* Coupon Input */}
+                            <div className="mb-4">
+                                {coupon ? (
+                                    <div className="flex items-center justify-between bg-emerald/10 border border-emerald/30 rounded-lg px-3 py-2.5">
+                                        <div className="flex items-center gap-2">
+                                            <Tag size={14} className="text-emerald shrink-0" />
+                                            <div>
+                                                <p className="text-[12px] font-bold text-emerald">{coupon.code} applied</p>
+                                                <p className="text-[11px] text-emerald/80">You save ₹{coupon.discountAmount.toLocaleString("en-IN")}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={removeCoupon}
+                                            className="text-muted hover:text-red-500 transition-colors"
+                                            aria-label="Remove coupon"
+                                        >
+                                            <X size={15} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={couponInput}
+                                            onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                                            onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                                            placeholder="Enter coupon code..."
+                                            className="flex-1 h-10 px-3 text-[13px] rounded-lg border border-[#e0e0db] text-charcoal focus:outline-none focus:border-charcoal placeholder:text-muted/60 uppercase"
+                                        />
+                                        <button
+                                            onClick={handleApplyCoupon}
+                                            disabled={!couponInput.trim() || couponLoading}
+                                            className="h-10 px-4 text-[12px] font-bold bg-charcoal text-white rounded-lg hover:bg-charcoal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                        >
+                                            {couponLoading ? <Loader2 size={13} className="animate-spin" /> : null}
+                                            APPLY
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="space-y-2.5 mb-4">
                                 <div className="flex justify-between text-[13px]">
                                     <span className="text-muted">Subtotal</span>
                                     <span className="font-medium text-charcoal">₹ {subtotal.toLocaleString("en-IN")}</span>
                                 </div>
+                                {discountAmount > 0 && (
+                                    <div className="flex justify-between text-[13px]">
+                                        <span className="text-emerald flex items-center gap-1"><Tag size={12} /> Discount ({coupon?.code})</span>
+                                        <span className="font-semibold text-emerald">− ₹ {discountAmount.toLocaleString("en-IN")}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-[13px]">
                                     <span className="text-muted">Shipping</span>
                                     <span className="font-semibold text-[#107c6f]">FREE</span>
@@ -187,6 +255,7 @@ export default function CartPage() {
                                             sku: variant.sku,
                                             imageUrl: p.images.find(i => i.isPrimary)?.s3Url || p.images[0]?.s3Url || "",
                                             unitPrice: Number(p.salePrice ?? p.basePrice),
+                                            stockQty: variant.stockQty,
                                         }, 1, getToken);
                                     }
                                 }}

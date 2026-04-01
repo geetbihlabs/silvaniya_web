@@ -22,7 +22,7 @@ type PaymentMethodKey = "UPI" | "CREDIT_CARD" | "DEBIT_CARD" | "NET_BANKING" | "
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const { items, getTotals, clearCart } = useCartStore();
+    const { items, getTotals, clearCart, coupon } = useCartStore();
     const { placeOrder, isPlacing } = useOrderStore();
     const { getToken } = useAuth();
 
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
         city: "", state: "Maharashtra", pincode: "",
     });
 
-    const { subtotal, cgst, sgst, total } = getTotals(shippingMethod);
+    const { subtotal, cgst, sgst, total, discountAmount } = getTotals(shippingMethod);
     const shippingCharge = shippingMethod === "express" ? 250 : 0;
     const tax = cgst + sgst;
 
@@ -51,6 +51,7 @@ export default function CheckoutPage() {
             { ...form, country: "India" },
             shippingMethod,
             paymentMethod,
+            coupon?.code,
             getToken,
         );
 
@@ -196,6 +197,12 @@ export default function CheckoutPage() {
                                         <span className="text-muted">Subtotal</span>
                                         <span className="text-charcoal font-medium">₹{subtotal.toLocaleString("en-IN")}</span>
                                     </div>
+                                    {discountAmount > 0 && (
+                                        <div className="flex justify-between text-[13px]">
+                                            <span className="text-emerald font-medium">Discount ({coupon?.code})</span>
+                                            <span className="text-emerald font-semibold">− ₹{discountAmount.toLocaleString("en-IN")}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-[13px]">
                                         <span className="text-muted">Shipping</span>
                                         <span className={shippingCharge === 0 ? "font-semibold text-[#107c6f]" : "font-medium text-charcoal"}>
