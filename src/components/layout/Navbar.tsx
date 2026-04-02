@@ -4,8 +4,8 @@ import React, { useState, Suspense, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { Search, Heart, ShoppingBag, User, Menu, X, ChevronDown, Layers, Sparkles, TrendingUp, Compass } from "lucide-react";
-import { UserButton, useAuth, SignOutButton } from "@clerk/nextjs";
+import { Search, Heart, ShoppingBag, User, Menu, X, ChevronDown, Layers, Sparkles, TrendingUp, Compass, Package, MapPin, Bell, LogOut } from "lucide-react";
+import { useAuth, SignOutButton, useUser } from "@clerk/nextjs";
 import CartBadge from "./CartBadge";
 import NotificationBell from "./NotificationBell";
 import { useWishlistStore } from "@/store/useWishlistStore";
@@ -13,9 +13,9 @@ import { useCategoryStore } from "@/store/useCategoryStore";
 
 function WishlistBadge() {
     const { items, initialized } = useWishlistStore();
-    
+
     if (!initialized || items.length === 0) return null;
-    
+
     return (
         <span className="absolute -top-1.5 -right-2 bg-[#e84c4c] text-white text-[10px] font-bold h-4 min-w-[16px] flex items-center justify-center rounded-full px-1 z-10">
             {items.length}
@@ -38,7 +38,7 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
-    
+
     const { categories, fetchCategories } = useCategoryStore();
 
     useEffect(() => {
@@ -48,13 +48,13 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
     }, [categories.length, fetchCategories]);
 
     const navLinks: NavItem[] = useMemo(() => {
-        const dynamicCategories = categories.length > 0 
-            ? categories.filter(c => c.isVisible !== false).map(cat => ({ 
-                label: cat.name, 
+        const dynamicCategories = categories.length > 0
+            ? categories.filter(c => c.isVisible !== false).map(cat => ({
+                label: cat.name,
                 href: `/products?category=${cat.slug}`,
                 description: cat.description || `Explore our beautiful collection of premium ${cat.name.toLowerCase()} crafted in pure silver.`,
                 imageUrl: cat.imageUrl ?? null,
-              }))
+            }))
             : FALLBACK_CATEGORIES.map(cat => ({
                 ...cat,
                 description: `Explore our beautiful collection of premium ${cat.label.toLowerCase()} crafted in pure silver.`,
@@ -109,7 +109,7 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
                             </button>
 
                             {/* Transparent bridge for desktop hover gap */}
-                            {!isMobile && <div className="absolute top-[100%] left-1/2 -translate-x-1/2 w-48 h-10 bg-transparent z-40" />}
+                            {!isMobile && <div className="absolute top-full left-1/2 -translate-x-1/2 w-48 h-10 bg-transparent z-40" />}
 
                             {/* Desktop Mega Menu */}
                             {!isMobile && (
@@ -162,13 +162,13 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
                                                     </div>
                                                     <h3 className="text-charcoal font-heading font-bold text-lg mb-2 relative z-10 flex items-center gap-2">Customer Success</h3>
                                                     <p className="text-muted font-body text-sm relative z-10 max-w-[85%] leading-relaxed">
-                                                        Testimonials and stories from our loyal customers.<br/>
+                                                        Testimonials and stories from our loyal customers.<br />
                                                         <span className="text-emerald font-semibold text-xl inline-block mt-3 tracking-wide">1000+</span> satisfied clients
                                                     </p>
                                                 </Link>
 
                                                 <Link href="/support" className="bg-silver-light/20 hover:bg-silver-light/50 border border-border p-6 rounded-2xl transition-all duration-300 group/card overflow-hidden relative block shadow-sm hover:shadow-md">
-                                                   <div className="absolute right-0 bottom-0 opacity-[0.03] group-hover/card:scale-110 group-hover/card:-rotate-12 group-hover/card:opacity-[0.05] transition-transform duration-500 text-charcoal">
+                                                    <div className="absolute right-0 bottom-0 opacity-[0.03] group-hover/card:scale-110 group-hover/card:-rotate-12 group-hover/card:opacity-[0.05] transition-transform duration-500 text-charcoal">
                                                         <TrendingUp className="w-40 h-40 -mr-10 -mb-10" />
                                                     </div>
                                                     <h3 className="text-charcoal font-heading font-bold text-lg mb-2 relative z-10 flex items-center gap-2">Styling Support</h3>
@@ -219,10 +219,128 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
     );
 }
 
+function UserAccountMenu() {
+    const { isSignedIn } = useAuth();
+    const { user } = useUser();
+    const [open, setOpen] = useState(false);
+    const menuRef = React.useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    if (!isSignedIn) {
+        return (
+            <Link
+                href="/login"
+                aria-label="Account"
+                className="text-charcoal transition-colors duration-300 hover:text-emerald"
+            >
+                <User size={20} strokeWidth={1.6} />
+            </Link>
+        );
+    }
+
+    const initials = user
+        ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || user.username?.[0]?.toUpperCase() || "U"
+        : "U";
+    const displayName = user?.firstName ? `${user.firstName} ${user.lastName ?? ""}`.trim() : user?.username ?? "Account";
+    const email = user?.primaryEmailAddress?.emailAddress ?? "";
+
+    const menuItems = [
+        // { label: "My Profile",     href: "/profile",       icon: User },
+        { label: "My Orders", href: "/orders", icon: Package },
+        { label: "Saved Addresses", href: "/addresses", icon: MapPin },
+        { label: "My Wishlist", href: "/wishlist", icon: Heart },
+        { label: "Notifications", href: "/notifications", icon: Bell },
+    ];
+
+    return (
+        <div ref={menuRef} className="relative">
+            {/* Avatar trigger */}
+            <button
+                onClick={() => setOpen(prev => !prev)}
+                aria-label="Account menu"
+                className="flex items-center gap-1.5 group focus:outline-none"
+            >
+                {user?.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={user.imageUrl}
+                        alt={displayName}
+                        className="w-8 h-8 rounded-full object-cover ring-2 ring-transparent group-hover:ring-emerald transition-all duration-200"
+                    />
+                ) : (
+                    <span className="w-8 h-8 rounded-full bg-charcoal text-white text-xs font-semibold flex items-center justify-center ring-2 ring-transparent group-hover:ring-emerald transition-all duration-200">
+                        {initials}
+                    </span>
+                )}
+                <ChevronDown size={14} className={`text-charcoal/60 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+            </button>
+
+            {/* Dropdown Panel */}
+            {open && (
+                <div className="absolute right-0 top-[calc(100%+12px)] w-64 bg-white rounded-2xl shadow-2xl border border-border z-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    {/* User info header */}
+                    <div className="px-5 py-4 bg-linear-to-br from-charcoal to-[#374151] text-white">
+                        <div className="flex items-center gap-3">
+                            {user?.imageUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={user.imageUrl} alt={displayName} className="w-10 h-10 rounded-full object-cover ring-2 ring-white/30" />
+                            ) : (
+                                <span className="w-10 h-10 rounded-full bg-white/20 text-white text-sm font-bold flex items-center justify-center">{initials}</span>
+                            )}
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm truncate">{displayName}</p>
+                                {email && <p className="text-white/60 text-xs truncate">{email}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Menu links */}
+                    <div className="py-2">
+                        {menuItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-5 py-2.5 text-sm font-medium text-charcoal hover:bg-silver-light/50 hover:text-emerald transition-colors duration-150"
+                            >
+                                <item.icon size={16} strokeWidth={1.8} className="shrink-0 text-muted" />
+                                {item.label}
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* Divider + Sign out */}
+                    <div className="border-t border-border py-2 px-2">
+                        <SignOutButton>
+                            <button
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors duration-150"
+                            >
+                                <LogOut size={16} strokeWidth={1.8} className="shrink-0" />
+                                Sign out
+                            </button>
+                        </SignOutButton>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function Navbar() {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { isSignedIn } = useAuth();
+    const { user } = useUser();
 
     return (
         <header className="w-full bg-white h-[72px] border-b border-border sticky top-0 z-50">
@@ -261,7 +379,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-4 sm:gap-6 shrink-0 justify-end">
 
                     {/* Search bar (Desktop only) */}
-                    <div 
+                    <div
                         className="hidden lg:flex relative items-center cursor-pointer group"
                         onClick={() => router.push('/search')}
                     >
@@ -304,21 +422,11 @@ export default function Navbar() {
                         <CartBadge />
                     </Link>
 
-                    {/* User */}
+                    {/* User Account Menu */}
                     <div className="hidden sm:flex items-center">
-                        {isSignedIn ? (
-                            <UserButton 
-                                appearance={{ elements: { userButtonAvatarBox: "w-6 h-6" } }} 
-                            />
-                        ) : (
-                            <Link
-                                href="/login"
-                                aria-label="Account"
-                                className="text-charcoal transition-colors duration-300 hover:text-emerald"
-                            >
-                                <User size={20} strokeWidth={1.6} />
-                            </Link>
-                        )}
+                        <Suspense fallback={<div className="w-8 h-8 rounded-full bg-silver-light animate-pulse" />}>
+                            <UserAccountMenu />
+                        </Suspense>
                     </div>
                 </div>
 
@@ -356,75 +464,103 @@ export default function Navbar() {
                         </Suspense>
                     </div>
 
-                    <h2 className="font-heading italic font-bold text-[32px] text-[#111827] mb-1">
-                        My Account
-                    </h2>
-                    <p className="font-body text-muted text-[15px] mb-8">
-                        Welcome back, John
-                    </p>
+                    {isSignedIn ? (
+                        <>
+                            <h2 className="font-heading italic font-bold text-[32px] text-[#111827] mb-1">
+                                My Account
+                            </h2>
+                            <p className="font-body text-muted text-[15px] mb-8">
+                                Welcome back, {user?.firstName || user?.username || 'Guest'}
+                            </p>
 
-                    <div className="flex flex-col gap-4">
-                        <Link
-                            href="/profile"
-                            className="flex items-center gap-4 bg-[#1f2937] text-white p-4 rounded-[8px] font-body text-[15px] font-semibold transition-colors hover:bg-[#111827]"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <User size={20} /> My Profile
-                        </Link>
+                            <div className="flex flex-col gap-4">
+                                <Link
+                                    href="/orders"
+                                    className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                    Order History
+                                </Link>
 
-                        <Link
-                            href="/orders"
-                            className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                            Order History
-                        </Link>
+                                <Link
+                                    href="/addresses"
+                                    className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                    Saved Addresses
+                                </Link>
 
-                        <Link
-                            href="/addresses"
-                            className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            Saved Addresses
-                        </Link>
+                                <Link
+                                    href="/wishlist"
+                                    className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <Heart size={20} /> My Wishlist
+                                </Link>
 
-                        <Link
-                            href="/wishlist"
-                            className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <Heart size={20} /> My Wishlist
-                        </Link>
+                                <Link
+                                    href="/track"
+                                    className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                    Track Order
+                                </Link>
 
-                        <Link
-                            href="/track"
-                            className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                            Track Order
-                        </Link>
+                                <Link
+                                    href="/support"
+                                    className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                                    Support
+                                </Link>
 
-                        <Link
-                            href="/support"
-                            className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-                            Support
-                        </Link>
+                                <Link
+                                    href="/contact"
+                                    className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                    Contact Us
+                                </Link>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex flex-col gap-4">
+                            <h2 className="font-heading italic font-bold text-[32px] text-[#111827] mb-4">
+                                Need Help?
+                            </h2>
+                            <Link
+                                href="/track"
+                                className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                Track Order
+                            </Link>
 
-                        <Link
-                            href="/contact"
-                            className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-                            Contact Us
-                        </Link>
-                    </div>
+                            <Link
+                                href="/support"
+                                className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                                Support
+                            </Link>
+
+                            <Link
+                                href="/contact"
+                                className="flex items-center gap-4 text-[#111827] p-4 font-body text-[15px] font-medium transition-colors hover:bg-border rounded-[8px]"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                Contact Us
+                            </Link>
+                        </div>
+                    )}
 
                     <div className="mt-10">
                         {isSignedIn ? (

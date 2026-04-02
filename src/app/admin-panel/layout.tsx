@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "@/components/admin/layout/AdminSidebar";
 import AdminTopbar from "@/components/admin/layout/AdminTopbar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@clerk/nextjs";
+import { setGetTokenFn } from "@/lib/axios";
 
 export default function AdminPanelLayout({
     children,
@@ -12,6 +14,12 @@ export default function AdminPanelLayout({
 }) {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { getToken } = useAuth();
+
+    // Register Clerk's getToken globally so all axios calls auto-attach Bearer token
+    useEffect(() => {
+        setGetTokenFn(getToken);
+    }, [getToken]);
 
     return (
         <div className="min-h-screen bg-[#f4f5f7]">
