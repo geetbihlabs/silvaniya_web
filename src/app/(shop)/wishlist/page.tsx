@@ -29,6 +29,7 @@ export default function WishlistPage() {
                  sku: `SKU-${item.productId.substring(0, 6)}`,
                  imageUrl: item.imageUrl || "",
                  unitPrice: item.salePrice || item.basePrice,
+                 stockQty: item.stock ?? 0,
              }, 1, getToken);
         }
     };

@@ -451,7 +451,7 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
                                 <h2 className="text-sm font-bold text-charcoal uppercase tracking-wider mb-5">Organization</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="label-uppercase block mb-2 text-charcoal flex justify-between items-center">
+                                        <label className="label-uppercase block mb-2 text-charcoal justify-between items-center">
                                             <span>Category *</span>
                                             {isLoadingCategories && <Loader2 size={12} className="animate-spin text-charcoal" />}
                                         </label>

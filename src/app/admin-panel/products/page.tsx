@@ -286,7 +286,7 @@ export default function AdminProductsPage() {
                                                         {String(product.name || '')}
                                                     </Link>
                                                     <p className="text-xs text-muted">{String(product.metalType || '').replace(/_/g, ' ')}</p>
-                                                    {product.sellerName && (
+                                                    {Boolean(product.sellerName) && (
                                                         <p className="text-[11px] text-muted mt-0.5 italic">Seller: {String(product.sellerName)}</p>
                                                     )}
                                                 </div>
