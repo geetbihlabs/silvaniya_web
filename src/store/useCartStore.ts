@@ -50,6 +50,7 @@ interface CartState {
 
   // ── Server-syncing actions (pass getToken for authenticated calls) ──
   fetchCart: (getToken: GetTokenFn) => Promise<void>;
+  mergeAndFetchCart: (getToken: GetTokenFn) => Promise<void>;
   fetchCount: (getToken: GetTokenFn) => Promise<void>;
   addItem: (item: Omit<CartItem, 'id' | 'quantity'> & { unitPrice: number }, qty: number, getToken: GetTokenFn) => Promise<void>;
   removeItem: (productVariantId: string, getToken: GetTokenFn) => Promise<void>;
@@ -111,7 +112,43 @@ export const useCartStore = create<CartState>()(
         try {
           const headers = await authHeader(getToken);
           const res = await api.get('/cart', { headers });
-          // API wraps response: { success, data: { id, userId, items: [...] }, meta }
+          const cart = res.data?.data ?? res.data;
+          const items: CartItem[] = (cart?.items ?? []).map(mapServerItem);
+          set({ items, count: computeCount(items), isLoading: false });
+        } catch {
+          set({ isLoading: false });
+        }
+      },
+
+      // ── Merge guest local items → server, then fetch ────────────────────
+      mergeAndFetchCart: async (getToken) => {
+        set({ isLoading: true });
+        try {
+          const localItems = get().items.filter((i) => i.id.startsWith('temp-'));
+          if (localItems.length > 0) {
+            const headers = await authHeader(getToken);
+            // Push each guest item to server (fire-and-forget per item)
+            await Promise.allSettled(
+              localItems.map((item) =>
+                api.post(
+                  '/cart/items',
+                  {
+                    productVariantId: item.productVariantId,
+                    productName: item.productName,
+                    variantLabel: item.variantLabel,
+                    sku: item.sku,
+                    imageUrl: item.imageUrl,
+                    unitPrice: String(item.unitPrice),
+                    quantity: item.quantity,
+                  },
+                  { headers },
+                ),
+              ),
+            );
+          }
+          // Now fetch the authoritative server cart
+          const headers = await authHeader(getToken);
+          const res = await api.get('/cart', { headers });
           const cart = res.data?.data ?? res.data;
           const items: CartItem[] = (cart?.items ?? []).map(mapServerItem);
           set({ items, count: computeCount(items), isLoading: false });

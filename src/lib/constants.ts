@@ -27,11 +27,11 @@ export const FOOTER_SUPPORT_LINKS = [
 ] as const;
 
 export const ACCOUNT_SIDEBAR_LINKS = [
-  { label: "My Profile", href: "/profile", icon: "User" },
+  // { label: "My Profile", href: "/profile", icon: "User" },
   { label: "Order History", href: "/orders", icon: "Package" },
   { label: "Saved Addresses", href: "/addresses", icon: "MapPin" },
   { label: "My Wishlist", href: "/wishlist", icon: "Heart" },
-  { label: "Notifications", href: "/account/notifications", icon: "Bell" },
+  { label: "Notifications", href: "/notifications", icon: "Bell" },
 ] as const;
 
 export const SOCIAL_LINKS = {

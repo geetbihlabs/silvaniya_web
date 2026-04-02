@@ -125,7 +125,7 @@ export default function Footer() {
                 </div>
 
                 {/* Column 4 — Newsletter */}
-                <div>
+                {/* <div>
                     <p className="font-body text-[11px] font-bold tracking-[0.2em] uppercase text-white mb-4">
                         NEWSLETTER
                     </p>
@@ -148,7 +148,7 @@ export default function Footer() {
                             JOIN
                         </button>
                     </form>
-                </div>
+                </div> */}
 
             </div>
 

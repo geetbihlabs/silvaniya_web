@@ -11,16 +11,16 @@ import { useAuth } from "@clerk/nextjs";
 
 export default function CartPage() {
     const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
-    const { items, addItem, removeItem, updateQty, getTotals, fetchCart, isLoading, coupon, applyCoupon, removeCoupon } = useCartStore();
+    const { items, addItem, removeItem, updateQty, getTotals, mergeAndFetchCart, isLoading, coupon, applyCoupon, removeCoupon } = useCartStore();
     const [couponInput, setCouponInput] = useState("");
     const [couponLoading, setCouponLoading] = useState(false);
 
-    // Load server cart on mount for authenticated users
+    // Merge local guest cart → server, then fetch (preserves items added before login)
     useEffect(() => {
         if (isSignedIn) {
-            fetchCart(getToken);
+            mergeAndFetchCart(getToken);
         }
-    }, [isSignedIn, fetchCart, getToken]);
+    }, [isSignedIn, mergeAndFetchCart, getToken]);
 
     const shipping = "standard" as const;
     const { subtotal, shippingCharge, cgst, sgst, discountAmount, total, count } = getTotals(shipping);
@@ -157,7 +157,22 @@ export default function CartPage() {
 
                             {/* Coupon Input */}
                             <div className="mb-4">
-                                {coupon ? (
+                                {!isSignedIn ? (
+                                    // Guest: prompt to login
+                                    <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                                        <Tag size={15} className="text-amber-500 shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[12px] font-semibold text-amber-700 leading-tight">Login to use coupon codes</p>
+                                            <p className="text-[11px] text-amber-600/80 mt-0.5">Exclusive discounts available for members.</p>
+                                        </div>
+                                        <Link
+                                            href="/login"
+                                            className="shrink-0 text-[11px] font-bold text-white bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded-md transition-colors"
+                                        >
+                                            Login
+                                        </Link>
+                                    </div>
+                                ) : coupon ? (
                                     <div className="flex items-center justify-between bg-emerald/10 border border-emerald/30 rounded-lg px-3 py-2.5">
                                         <div className="flex items-center gap-2">
                                             <Tag size={14} className="text-emerald shrink-0" />

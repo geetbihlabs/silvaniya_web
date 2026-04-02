@@ -9,7 +9,7 @@ export default function AdminLoginPage() {
             <SignIn 
                 path="/admin-login" 
                 routing="path" 
-                forceRedirectUrl="/admin-panel/dashboard" 
+                forceRedirectUrl={`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/admin-panel/dashboard`}
             />
         </div>
     );
