@@ -220,10 +220,12 @@ export default function ProductDetailPage() {
                     )}
 
                     {/* Trust Tiles */}
-                    <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className={`grid gap-3 mb-6 ${product.bisHallmark ? 'grid-cols-3' : 'grid-cols-2'}`}>
                         <div className="flex flex-col items-center justify-center gap-2 border border-[#e0e0db] rounded-md py-4 px-2 bg-white">
                             <Shield size={22} strokeWidth={1.5} className="text-charcoal" />
-                            <span className="text-[10px] font-semibold uppercase tracking-widest text-charcoal text-center leading-tight">925 Silver</span>
+                            <span className="text-[10px] font-semibold uppercase tracking-widest text-charcoal text-center leading-tight">
+                                {product.metalType ? product.metalType.replace(/_/g, ' ') : "925 Silver"}
+                            </span>
                         </div>
                         <div className="flex flex-col items-center justify-center gap-2 border border-[#e0e0db] rounded-md py-4 px-2 bg-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-charcoal">
@@ -231,12 +233,14 @@ export default function ProductDetailPage() {
                             </svg>
                             <span className="text-[10px] font-semibold uppercase tracking-widest text-charcoal text-center leading-tight">Handcrafted</span>
                         </div>
-                        <div className="flex flex-col items-center justify-center gap-2 border border-[#e0e0db] rounded-md py-4 px-2 bg-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-charcoal">
-                                <circle cx="12" cy="8" r="6" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
-                            </svg>
-                            <span className="text-[10px] font-semibold uppercase tracking-widest text-charcoal text-center leading-tight">BIS Hallmarked</span>
-                        </div>
+                        {product.bisHallmark && (
+                            <div className="flex flex-col items-center justify-center gap-2 border border-[#e0e0db] rounded-md py-4 px-2 bg-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-charcoal">
+                                    <circle cx="12" cy="8" r="6" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+                                </svg>
+                                <span className="text-[10px] font-semibold uppercase tracking-widest text-charcoal text-center leading-tight">BIS Hallmarked</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Pincode */}
@@ -271,6 +275,7 @@ export default function ProductDetailPage() {
                                 } else {
                                     addItem({
                                         productId: product.id,
+                                        productVariantId: product.variants?.[0]?.id,
                                         productName: product.name,
                                         slug: product.slug,
                                         category: typeof product.category === 'object' ? product.category?.name : undefined,

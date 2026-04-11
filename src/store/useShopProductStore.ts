@@ -68,6 +68,7 @@ export interface ProductFilter {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  inStockOnly?: boolean;
 }
 
 interface ShopProductState {
@@ -96,7 +97,11 @@ export const useShopProductStore = create<ShopProductState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const res = await api.get('/products', {
-        params: { status: 'PUBLISHED', ...filter },
+        params: { 
+          status: 'PUBLISHED', 
+          inStockOnly: filter.inStockOnly !== false,
+          ...filter 
+        },
       });
       const data = res.data?.data ?? [];
       const meta = res.data?.meta ?? { page: 1, limit: 20, total: 0, totalPages: 1 };

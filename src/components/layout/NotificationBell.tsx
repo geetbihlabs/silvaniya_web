@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { Bell, CheckCheck, Package, Truck, CheckCircle2, RotateCcw, XCircle, CreditCard, MessageSquare, ShieldAlert, BarChart2, Mail } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useNotificationStore } from "@/store/useNotificationStore";
-import { Notification } from "@/services/notificationService";
+import { Notification, notificationService } from "@/services/notificationService";
+import { toast } from "react-hot-toast";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -144,6 +145,47 @@ export default function NotificationBell() {
     return () => clearInterval(interval);
   }, [isSignedIn, getTokenCb, fetchUnreadCount]);
 
+  // Track unread count to show toast
+  const prevUnreadRef = useRef<number | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (prevUnreadRef.current !== null && unreadCount > prevUnreadRef.current) {
+      getTokenCb().then((token) => {
+        notificationService.getMyNotifications(token, 1, 5).then((res) => {
+          const latest = res.data[0];
+          if (latest && !latest.isRead) {
+            toast.custom(
+              (t) => (
+                <div
+                  className={`${
+                    t.visible ? 'animate-enter' : 'animate-leave'
+                  } max-w-md w-full bg-white shadow-xl rounded-xl pointer-events-auto flex items-start p-4 cursor-pointer hover:bg-slate-50 border border-border/50`}
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                    router.push("/notifications");
+                  }}
+                >
+                  <span className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mr-4 ${typeColor(latest.type)}`}>
+                    {typeIcon(latest.type)}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-semibold text-charcoal">{latest.title}</p>
+                    <p className="mt-1 text-[12px] text-muted line-clamp-2 leading-relaxed">
+                      {latest.body}
+                    </p>
+                  </div>
+                </div>
+              ),
+              { duration: 6000, position: "bottom-right" }
+            );
+          }
+        });
+      });
+    }
+    prevUnreadRef.current = unreadCount;
+  }, [unreadCount, getTokenCb, router]);
+
   // Fetch full list when dropdown opens
   useEffect(() => {
     if (open && isSignedIn) {
@@ -237,7 +279,7 @@ export default function NotificationBell() {
           {/* Footer */}
           <div className="border-t border-border px-4 py-3">
             <Link
-              href="/admin-panel/notifications"
+              href="/notifications"
               onClick={() => setOpen(false)}
               className="block text-center text-[12px] font-body font-semibold text-emerald hover:text-emerald/70 transition-colors"
             >
