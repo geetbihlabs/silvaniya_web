@@ -27,6 +27,10 @@ export interface CartItem {
   quantity: number;
   stockQty: number;
   productSlug?: string;     // for linking back to product page
+  /** True when admin has "Allow Partial Payment (Booking)" ticked for this product */
+  allowPartialPayment?: boolean;
+  /** Admin-defined minimum booking amount in INR — used for COD orders */
+  minBookingAmount?: number;
 }
 
 export interface CartTotals {
@@ -92,6 +96,11 @@ function mapServerItem(raw: any): CartItem {
     quantity: raw.quantity,
     stockQty: raw.productVariant?.stockQty ?? 999,
     productSlug: raw.productVariant?.product?.slug ?? undefined,
+    allowPartialPayment: raw.productVariant?.product?.allowPartialPayment ?? false,
+    minBookingAmount:
+      raw.productVariant?.product?.minBookingAmount != null
+        ? parseFloat(String(raw.productVariant.product.minBookingAmount))
+        : undefined,
   };
 }
 
@@ -319,6 +328,7 @@ export const useCartStore = create<CartState>()(
 
       // ── Local helpers ───────────────────────────────────────────────────
       getTotals: (shippingMethod = 'standard') => {
+        void shippingMethod; // retained for API compat — shipping is always free
         const { items, coupon } = get();
         const subtotal = items.reduce(
           (sum, i) => sum + i.unitPrice * i.quantity,
@@ -326,12 +336,11 @@ export const useCartStore = create<CartState>()(
         );
         const discountAmount = coupon?.discountAmount ?? 0;
         const discounted = Math.max(0, subtotal - discountAmount);
-        const shippingCharge = shippingMethod === 'express' ? 250 : 0;
-        const cgst = parseFloat((discounted * 0.015).toFixed(2));
-        const sgst = parseFloat((discounted * 0.015).toFixed(2));
-        const total = discounted + shippingCharge + cgst + sgst;
+        // GST is inclusive in product prices — do not add extra tax
+        // Shipping is always free (Standard only)
+        const total = discounted;
         const count = computeCount(items);
-        return { subtotal, shippingCharge, cgst, sgst, discountAmount, total, count };
+        return { subtotal, shippingCharge: 0, cgst: 0, sgst: 0, discountAmount, total, count };
       },
 
       setOpen: (open) => set({ isOpen: open }),
