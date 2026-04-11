@@ -7,6 +7,7 @@ import api from '@/lib/axios';
 
 export interface WishlistItem {
   productId: string;
+  productVariantId?: string;
   productName: string;
   slug: string;
   category?: string;

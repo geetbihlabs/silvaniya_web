@@ -21,16 +21,18 @@ export default function WishlistPage() {
 
     // Handle adding item from wishlist to cart
     const handleMoveToCart = (item: any) => {
-        if (item.stock > 0) {
+        if (item.inStock) {
              addCartItem({
-                 productVariantId: item.productId, // We are using productId here as a fallback since specific variants aren't in wishlist yet
+                 productVariantId: item.productVariantId || item.productId, // Use variant id if fetched, fallback as last resort
                  productName: item.productName,
                  variantLabel: "Default",
                  sku: `SKU-${item.productId.substring(0, 6)}`,
                  imageUrl: item.imageUrl || "",
                  unitPrice: item.salePrice || item.basePrice,
-                 stockQty: item.stock ?? 0,
+                 stockQty: 10, // Assuming basic stock since WishlistItem only gives inStock
              }, 1, getToken);
+             // Remove from wishlist after moving to cart
+             removeItem(item.productId, getToken);
         }
     };
 

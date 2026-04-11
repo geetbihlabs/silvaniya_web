@@ -37,7 +37,8 @@ type NavItem = { label: string; href?: string; isDropdown?: boolean; items?: { l
 function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
+    const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+    const [hoverOpen, setHoverOpen] = useState<string | null>(null);
 
     const { categories, fetchCategories } = useCategoryStore();
 
@@ -46,6 +47,20 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
             fetchCategories();
         }
     }, [categories.length, fetchCategories]);
+
+    useEffect(() => {
+        function handleOutside() {
+            setDropdownOpen(null);
+        }
+        document.addEventListener("mousedown", handleOutside);
+        return () => document.removeEventListener("mousedown", handleOutside);
+    }, []);
+
+    // Close dropdowns on route change
+    useEffect(() => {
+        setDropdownOpen(null);
+        setHoverOpen(null);
+    }, [pathname, searchParams]);
 
     const navLinks: NavItem[] = useMemo(() => {
         const dynamicCategories = categories.length > 0
@@ -89,23 +104,28 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
     };
 
     return (
-        <nav className={`${isMobile ? "flex flex-col items-start gap-6 w-full" : "hidden lg:flex items-center justify-center gap-10"}`}>
+        <nav className={`${isMobile ? "flex flex-col items-start gap-6 w-full" : "hidden xl:flex items-center justify-center gap-10"}`}>
             {navLinks.map((link) => {
                 if (link.isDropdown) {
                     return (
-                        <div key={link.label} className={`${isMobile ? "w-full" : "relative group"}`}>
+                        <div 
+                            key={link.label} 
+                            className={`${isMobile ? "w-full" : "relative group"}`}
+                            onMouseEnter={() => !isMobile && setHoverOpen(link.label)}
+                            onMouseLeave={() => !isMobile && setHoverOpen(null)}
+                        >
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setMobileDropdownOpen(mobileDropdownOpen === link.label ? null : link.label);
+                                    setDropdownOpen(dropdownOpen === link.label ? null : link.label);
                                 }}
                                 className={`flex items-center gap-1.5 font-body font-medium uppercase transition-colors duration-300 w-full text-left ${isMobile
                                     ? "text-[16px] tracking-wide"
                                     : "text-[12px] tracking-widest whitespace-nowrap"
-                                    } text-charcoal hover:text-emerald lg:group-hover:text-emerald`}
+                                    } text-charcoal hover:text-emerald ${(!isMobile && (dropdownOpen === link.label || hoverOpen === link.label)) ? "xl:text-emerald" : ""}`}
                             >
                                 {link.label}
-                                <ChevronDown size={isMobile ? 18 : 14} className={`transition-transform duration-300 ${isMobile && mobileDropdownOpen === link.label ? "rotate-180" : ""} lg:group-hover:rotate-180`} />
+                                <ChevronDown size={isMobile ? 18 : 14} className={`transition-transform duration-300 ${dropdownOpen === link.label || hoverOpen === link.label ? "rotate-180" : ""}`} />
                             </button>
 
                             {/* Transparent bridge for desktop hover gap */}
@@ -113,8 +133,16 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
 
                             {/* Desktop Mega Menu */}
                             {!isMobile && (
-                                <div className="fixed top-[72px] left-0 w-full pt-0 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 z-50 max-h-[calc(100vh-72px)] overflow-y-auto">
-                                    <div className="bg-white border-t border-border shadow-2xl pb-12 pt-10 px-4 w-full cursor-auto">
+                                <div className={`fixed top-[72px] left-0 w-full pt-0 transition-all duration-300 z-50 max-h-[calc(100vh-72px)] overflow-y-auto ${
+                                    dropdownOpen === link.label || hoverOpen === link.label
+                                        ? "opacity-100 pointer-events-auto"
+                                        : "opacity-0 pointer-events-none"
+                                }`}>
+                                    <div 
+                                        className="bg-white border-t border-border shadow-2xl pb-12 pt-10 px-4 w-full cursor-auto"
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
                                         <div className="max-w-[1400px] mx-auto px-4 sm:px-8">
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-12 gap-y-10">
                                                 {link.items?.map((item) => (
@@ -182,7 +210,7 @@ function NavLinks({ isMobile = false }: { isMobile?: boolean }) {
 
                             {/* Mobile Dropdown Accordion */}
                             {isMobile && (
-                                <div className={`flex flex-col overflow-hidden transition-all duration-300 pl-4 py-1 border-l-2 border-border/50 ${mobileDropdownOpen === link.label ? "h-auto mt-4 mb-2 opacity-100" : "h-0 opacity-0 overflow-hidden m-0"}`}>
+                                <div className={`flex flex-col overflow-hidden transition-all duration-300 pl-4 py-1 border-l-2 border-border/50 ${dropdownOpen === link.label ? "h-auto mt-4 mb-2 opacity-100" : "h-0 opacity-0 overflow-hidden m-0"}`}>
                                     {link.items?.map((item) => (
                                         <Link
                                             key={item.label}
@@ -344,12 +372,12 @@ export default function Navbar() {
 
     return (
         <header className="w-full bg-white h-[72px] border-b border-border sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto h-full px-4 md:px-8 grid grid-cols-[auto_1fr_auto] items-center gap-4 lg:gap-6">
+            <div className="max-w-7xl mx-auto h-full px-4 md:px-8 grid grid-cols-[auto_1fr_auto] items-center gap-4 xl:gap-6">
 
                 {/* ── Left: Hamburger (Mobile) + Logo ── */}
                 <div className="flex items-center gap-4 shrink-0">
                     <button
-                        className="lg:hidden p-1 -ml-1 text-charcoal"
+                        className="xl:hidden p-1 -ml-1 text-charcoal"
                         onClick={() => setIsMenuOpen(true)}
                         aria-label="Open Menu"
                     >
@@ -369,7 +397,7 @@ export default function Navbar() {
                 </div>
 
                 {/* ── Center: Nav Links ── */}
-                <Suspense fallback={<nav className="hidden lg:flex items-center justify-center gap-10"></nav>}>
+                <Suspense fallback={<nav className="hidden xl:flex items-center justify-center gap-10"></nav>}>
                     <div className="flex justify-center w-full">
                         <NavLinks />
                     </div>
@@ -380,7 +408,7 @@ export default function Navbar() {
 
                     {/* Search bar (Desktop only) */}
                     <div
-                        className="hidden lg:flex relative items-center cursor-pointer group"
+                        className="hidden xl:flex relative items-center cursor-pointer group"
                         onClick={() => router.push('/search')}
                     >
                         <Search
@@ -395,7 +423,7 @@ export default function Navbar() {
                     </div>
 
                     {/* Search Icon (Mobile/Tablet only) */}
-                    <Link href="/search" className="lg:hidden text-charcoal transition-colors duration-300 hover:text-emerald">
+                    <Link href="/search" className="xl:hidden text-charcoal transition-colors duration-300 hover:text-emerald">
                         <Search size={20} strokeWidth={1.6} />
                     </Link>
 
@@ -435,12 +463,12 @@ export default function Navbar() {
             {/* ── Mobile Side Menu Overlay ── */}
             {/* Backdrop */}
             <div
-                className={`fixed inset-0 bg-black/50 z-100 lg:hidden transition-opacity duration-300 ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                className={`fixed inset-0 bg-black/50 z-100 xl:hidden transition-opacity duration-300 ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
                 onClick={() => setIsMenuOpen(false)}
             />
 
             {/* Slide Panel */}
-            <div className={`fixed top-0 left-0 h-full w-[85%] sm:w-[350px] bg-[#f4f4f4] z-101 shadow-2xl lg:hidden transition-transform duration-300 ease-out flex flex-col ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+            <div className={`fixed top-0 left-0 h-full w-[85%] sm:w-[350px] bg-[#f4f4f4] z-101 shadow-2xl xl:hidden transition-transform duration-300 ease-out flex flex-col ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
 
                 {/* Mobile Menu Header with Close */}
                 <div className="flex items-center justify-end p-4">

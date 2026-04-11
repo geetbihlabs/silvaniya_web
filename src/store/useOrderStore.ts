@@ -1,7 +1,10 @@
+// src/store/useOrderStore.ts
 import { create } from 'zustand';
 import api from '@/lib/axios';
 import { toast } from 'react-hot-toast';
 import { CartItem } from './useCartStore';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface OrderAddress {
   fullName: string;
@@ -19,11 +22,14 @@ export interface PlacedOrder {
   orderNumber: string;
   status: string;
   paymentStatus: string;
+  paymentMethod: string;
   subtotal: number;
   cgst: number;
   sgst: number;
   shippingCharge: number;
   totalAmount: number;
+  gatewayOrderId?: string | null;
+  gatewayPaymentId?: string | null;
   items: {
     id: string;
     productName: string;
@@ -43,32 +49,75 @@ export interface PlacedOrder {
   createdAt: string;
 }
 
+export interface RazorpayOrderData {
+  razorpayOrderId: string;
+  amount: number;   // in paisa
+  currency: string;
+  orderId: string;
+  keyId: string;
+}
+
+type GetTokenFn = () => Promise<string | null>;
+
+// ─── State Shape ──────────────────────────────────────────────────────────────
+
 interface OrderState {
   order: PlacedOrder | null;
   orders: PlacedOrder[];
   isLoading: boolean;
   isPlacing: boolean;
+  isInitiatingPayment: boolean;
   error: string | null;
+
+  /** Creates a DB order record with PENDING_PAYMENT status */
   placeOrder: (
     cartItems: CartItem[],
     address: OrderAddress,
     shippingMethod: 'standard' | 'express',
     paymentMethod: string,
     couponCode: string | undefined,
-    getToken: () => Promise<string | null>,
+    getToken: GetTokenFn,
   ) => Promise<PlacedOrder | null>;
-  fetchOrderById: (id: string, getToken: () => Promise<string | null>) => Promise<PlacedOrder | null>;
-  fetchMyOrders: (getToken: () => Promise<string | null>, page?: number) => Promise<void>;
+
+  /** Calls the backend to create a Razorpay order and returns modal credentials */
+  initiateRazorpayPayment: (
+    orderId: string,
+    getToken: GetTokenFn,
+  ) => Promise<RazorpayOrderData | null>;
+
+  /** Verifies the HMAC signature after Razorpay modal success */
+  verifyRazorpayPayment: (
+    dto: {
+      razorpayOrderId: string;
+      razorpayPaymentId: string;
+      razorpaySignature: string;
+      orderId: string;
+    },
+    getToken: GetTokenFn,
+  ) => Promise<boolean>;
+
+  fetchOrderById: (id: string, getToken: GetTokenFn) => Promise<PlacedOrder | null>;
+  fetchMyOrders: (getToken: GetTokenFn, page?: number) => Promise<void>;
 }
+
+// ─── Store ────────────────────────────────────────────────────────────────────
 
 export const useOrderStore = create<OrderState>((set) => ({
   order: null,
   orders: [],
   isLoading: false,
   isPlacing: false,
+  isInitiatingPayment: false,
   error: null,
 
-  placeOrder: async (cartItems, address, shippingMethod, paymentMethod, couponCode, getToken) => {
+  placeOrder: async (
+    cartItems,
+    address,
+    shippingMethod,
+    paymentMethod,
+    couponCode,
+    getToken,
+  ) => {
     set({ isPlacing: true, error: null });
     try {
       const token = await getToken();
@@ -92,15 +141,54 @@ export const useOrderStore = create<OrderState>((set) => ({
       const res = await api.post('/orders', payload, { headers });
       const placedOrder: PlacedOrder = res.data?.data ?? res.data;
       set({ order: placedOrder, isPlacing: false });
-      toast.success('Order placed successfully!');
       return placedOrder;
     } catch (err: unknown) {
       const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'Failed to place order. Please try again.';
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? 'Failed to place order. Please try again.';
       set({ error: msg, isPlacing: false });
       toast.error(msg);
       return null;
+    }
+  },
+
+  initiateRazorpayPayment: async (orderId, getToken) => {
+    set({ isInitiatingPayment: true, error: null });
+    try {
+      const token = await getToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await api.post(
+        '/payments/razorpay/create-order',
+        { orderId },
+        { headers },
+      );
+      const data: RazorpayOrderData = res.data?.data ?? res.data;
+      set({ isInitiatingPayment: false });
+      return data;
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? 'Failed to initiate payment. Please try again.';
+      set({ error: msg, isInitiatingPayment: false });
+      toast.error(msg);
+      return null;
+    }
+  },
+
+  verifyRazorpayPayment: async (dto, getToken) => {
+    try {
+      const token = await getToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      await api.post('/payments/razorpay/verify', dto, { headers });
+      toast.success('Payment successful! Your order is confirmed.');
+      return true;
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ??
+        'Payment verification failed. Please contact support with your order number.';
+      toast.error(msg);
+      return false;
     }
   },
 
@@ -115,8 +203,8 @@ export const useOrderStore = create<OrderState>((set) => ({
       return order;
     } catch (err: unknown) {
       const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'Failed to load order details.';
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? 'Failed to load order details.';
       set({ error: msg, isLoading: false });
       toast.error(msg);
       return null;
@@ -128,13 +216,16 @@ export const useOrderStore = create<OrderState>((set) => ({
     try {
       const token = await getToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await api.get('/orders/my', { headers, params: { page, limit: 20 } });
+      const res = await api.get('/orders/my', {
+        headers,
+        params: { page, limit: 20 },
+      });
       const orders: PlacedOrder[] = res.data?.data ?? [];
       set({ orders, isLoading: false });
     } catch (err: unknown) {
       const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'Failed to load orders.';
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? 'Failed to load orders.';
       set({ error: msg, isLoading: false });
       toast.error(msg);
     }

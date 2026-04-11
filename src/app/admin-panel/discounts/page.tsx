@@ -79,7 +79,9 @@ export default function AdminDiscountsPage() {
                                         <p className="text-muted text-sm">No coupons yet. Create your first one!</p>
                                     </td>
                                 </tr>
-                            ) : discounts.map((d) => (
+                            ) : discounts.map((d) => {
+                                const isExpired = d.expiresAt ? new Date(d.expiresAt) < new Date() : false;
+                                return (
                                 <tr key={d.id} className="border-b border-border/50 last:border-0 hover:bg-gray-50/30">
                                     <td className="px-5 py-4">
                                         <div>
@@ -105,10 +107,15 @@ export default function AdminDiscountsPage() {
                                     <td className="px-5 py-4">
                                         <button
                                             onClick={() => toggleDiscountStatus(d.id, d.isActive, getToken)}
-                                            className="transition-opacity hover:opacity-80"
-                                            title={d.isActive ? "Deactivate Coupon" : "Activate Coupon"}
+                                            className={`transition-opacity ${isExpired ? 'cursor-not-allowed' : 'hover:opacity-80'}`}
+                                            title={isExpired ? "Coupon has expired" : (d.isActive ? "Deactivate Coupon" : "Activate Coupon")}
+                                            disabled={isExpired}
                                         >
-                                            {d.isActive ? (
+                                            {isExpired ? (
+                                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-100 px-2 py-0.5 rounded-full">
+                                                    <X size={13} /> Expired
+                                                </span>
+                                            ) : d.isActive ? (
                                                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald bg-emerald/10 px-2 py-0.5 rounded-full">
                                                     <ToggleRight size={13} /> Active
                                                 </span>
@@ -128,7 +135,7 @@ export default function AdminDiscountsPage() {
                                             >
                                                 <Edit2 size={14} />
                                             </Link>
-                                            {d.isActive && (
+                                            {d.isActive && !isExpired && (
                                                 <button
                                                     onClick={() => setConfirmDeactivate(d)}
                                                     className="p-1.5 text-muted hover:text-error hover:bg-red-50 rounded-md transition-colors"
@@ -140,7 +147,7 @@ export default function AdminDiscountsPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))}
+                            )})}
                         </tbody>
                     </table>
                 </div>

@@ -44,6 +44,15 @@ export default function ProductCard({
                     <ProductCardImage images={product.images} productName={product.name} />
                 </Link>
 
+                {/* Out of Stock Overlay */}
+                {product.stock <= 0 && (
+                    <div className="absolute inset-0 bg-white/40 flex items-center justify-center pointer-events-none z-10">
+                        <div className="bg-white/95 backdrop-blur-sm text-charcoal px-4 py-1.5 rounded-sm border border-border/50 text-[11px] font-bold tracking-widest uppercase shadow-sm">
+                            Out of Stock
+                        </div>
+                    </div>
+                )}
+
                 {/* Discount Badge — top-left, red-orange pill */}
                 {hasDiscount && (
                     <div className="absolute top-2.5 left-2.5 bg-[#e84c4c] text-white text-[10px] font-semibold px-2 py-0.5 rounded-sm leading-tight z-10">
@@ -70,6 +79,7 @@ export default function ProductCard({
                             } else {
                                 addItem({
                                     productId: product.id,
+                                    productVariantId: product.variants?.[0]?.id,
                                     productName: product.name,
                                     slug: product.slug,
                                     category: typeof product.category === 'object' ? product.category?.name : undefined,
@@ -125,11 +135,15 @@ export default function ProductCard({
                 {showAddToCart && (
                     <button
                         onClick={onAddToCart}
-                        disabled={!onAddToCart}
-                        className="mt-auto w-full flex items-center justify-center gap-2 bg-charcoal hover:bg-charcoal/90 text-white text-[11px] font-semibold tracking-widest uppercase py-2.5 rounded-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!onAddToCart || product.stock <= 0}
+                        className={`mt-auto w-full flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest uppercase py-2.5 rounded-sm transition-colors duration-200 disabled:cursor-not-allowed ${
+                            product.stock > 0 
+                            ? "bg-charcoal hover:bg-charcoal/90 text-white disabled:opacity-50" 
+                            : "bg-gray-100 text-gray-400 border border-gray-200"
+                        }`}
                     >
                         <ShoppingCart size={13} strokeWidth={1.8} />
-                        Add to Cart
+                        {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
                     </button>
                 )}
             </div>

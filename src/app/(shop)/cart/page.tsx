@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
 import { useRelatedProducts } from "@/hooks/useRelatedProducts";
 import { useAuth } from "@clerk/nextjs";
+import { useWishlistStore } from "@/store/useWishlistStore";
 
 export default function CartPage() {
     const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
@@ -22,9 +23,27 @@ export default function CartPage() {
         }
     }, [isSignedIn, mergeAndFetchCart, getToken]);
 
+    const { addItem: addWishlistItem, isInWishlist } = useWishlistStore();
+
+    const handleMoveToWishlist = async (item: any) => {
+        if (isInWishlist(item.productId)) return; // Already in wishlist
+        await addWishlistItem({
+            productId: item.productId,
+            productVariantId: item.productVariantId,
+            productName: item.productName,
+            slug: item.productSlug,
+            imageUrl: item.imageUrl,
+            price: item.unitPrice,
+            basePrice: item.basePrice,
+            salePrice: item.salePrice,
+            addedAt: new Date().toISOString(),
+            inStock: item.stockQty > 0
+        }, getToken);
+        await removeItem(item.productVariantId, getToken);
+    };
+
     const shipping = "standard" as const;
-    const { subtotal, shippingCharge, cgst, sgst, discountAmount, total, count } = getTotals(shipping);
-    const tax = cgst + sgst;
+    const { subtotal, shippingCharge, discountAmount, total, count } = getTotals(shipping);
 
     const handleApplyCoupon = async () => {
         if (!couponInput.trim()) return;
@@ -114,8 +133,8 @@ export default function CartPage() {
                                                     <Minus size={13} />
                                                 </button>
                                                 <span className="w-10 h-8 flex items-center justify-center text-sm font-medium text-charcoal border-x border-[#e0e0db]">{item.quantity}</span>
-                                                <button 
-                                                    onClick={() => updateQty(item.productVariantId, item.quantity + 1, getToken)} 
+                                                <button
+                                                    onClick={() => updateQty(item.productVariantId, item.quantity + 1, getToken)}
                                                     disabled={item.quantity >= item.stockQty}
                                                     className="w-8 h-8 flex items-center justify-center text-muted hover:text-charcoal hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                                     <Plus size={13} />
@@ -126,8 +145,13 @@ export default function CartPage() {
                                                 <button onClick={() => removeItem(item.productVariantId, getToken)} className="flex items-center gap-1.5 text-[11px] text-muted hover:text-red-500 transition-colors uppercase tracking-wider font-medium">
                                                     <Trash2 size={13} strokeWidth={1.8} /> REMOVE
                                                 </button>
-                                                <button className="flex items-center gap-1.5 text-[11px] text-muted hover:text-emerald transition-colors uppercase tracking-wider font-medium">
-                                                    <Heart size={13} strokeWidth={1.8} /> WISHLIST
+                                                <button 
+                                                    onClick={() => handleMoveToWishlist(item)} 
+                                                    disabled={isInWishlist(item.productId || "")}
+                                                    className={`flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-medium transition-colors ${isInWishlist(item.productId || "") ? 'text-emerald' : 'text-muted hover:text-emerald'}`}
+                                                >
+                                                    <Heart size={13} strokeWidth={1.8} className={isInWishlist(item.productId || "") ? "fill-emerald text-emerald" : ""} /> 
+                                                    {isInWishlist(item.productId || "") ? "WISHLISTED" : "WISHLIST"}
                                                 </button>
                                             </div>
                                         </div>
@@ -138,7 +162,7 @@ export default function CartPage() {
 
                         {/* Trust Badges */}
                         <div className="flex flex-wrap items-center gap-6 sm:gap-10 py-4 px-1">
-                            {[{ Icon: Shield, title: "Secure Payment", sub: "SSL Encrypted Checkout" }, { Icon: Truck, title: "Fast Delivery", sub: "Free shipping across India" }, { Icon: RotateCcw, title: "Easy Returns", sub: "30-day hassle-free policy" }].map(({ Icon, title, sub }) => (
+                            {[{ Icon: Shield, title: "Secure Payment", sub: "SSL Encrypted Checkout" }, { Icon: Truck, title: "Fast Delivery", sub: "Free shipping across India" }].map(({ Icon, title, sub }) => (
                                 <div key={title} className="flex items-center gap-2.5">
                                     <Icon size={18} strokeWidth={1.5} className="text-charcoal shrink-0" />
                                     <div>
@@ -226,9 +250,9 @@ export default function CartPage() {
                                     <span className="text-muted">Shipping</span>
                                     <span className="font-semibold text-[#107c6f]">FREE</span>
                                 </div>
-                                <div className="flex justify-between text-[13px]">
-                                    <span className="text-muted">GST (3%)</span>
-                                    <span className="font-medium text-charcoal">₹ {tax.toLocaleString("en-IN")}</span>
+                                <div className="flex justify-between items-center text-[13px]">
+                                    <span className="text-muted">GST</span>
+                                    <span className="text-[#107c6f] font-medium text-[11px]">Included in price</span>
                                 </div>
                             </div>
 
@@ -243,7 +267,7 @@ export default function CartPage() {
 
                             <p className="text-[10px] text-muted text-center mt-3 leading-relaxed px-2">
                                 Prices inclusive of all taxes. By proceeding, you agree to our{" "}
-                                <Link href="/terms" className="underline underline-offset-2 hover:text-charcoal">Terms of Service</Link>.
+                                <Link href="/terms-and-conditions" className="underline underline-offset-2 hover:text-charcoal">Terms of Service</Link>.
                             </p>
                         </div>
                     </div>
@@ -258,33 +282,33 @@ export default function CartPage() {
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
                             {relatedProducts.map((p) => (
-                                <ProductCard 
-                                key={p.id} 
-                                onAddToCart={() => {
-                                    const variant = p.variants?.[0];
-                                    if (variant) {
-                                        addItem({
-                                            productVariantId: variant.id,
-                                            productName: p.name,
-                                            variantLabel: variant.label,
-                                            sku: variant.sku,
-                                            imageUrl: p.images.find(i => i.isPrimary)?.s3Url || p.images[0]?.s3Url || "",
-                                            unitPrice: Number(p.salePrice ?? p.basePrice),
-                                            stockQty: variant.stockQty,
-                                        }, 1, getToken);
-                                    }
-                                }}
-                                product={{
-                                id: p.id, name: p.name, slug: p.slug, sku: p.sku,
-                                description: p.description ?? "", shortDescription: p.metalType,
-                                basePrice: Number(p.basePrice), salePrice: p.salePrice ? Number(p.salePrice) : undefined,
-                                category: p.category as any, status: "PUBLISHED",
-                                categoryId: p.categoryId,
-                                images: p.images.map((img) => ({ id: img.id, url: img.s3Url, alt: img.altText ?? p.name, isPrimary: img.isPrimary, sortOrder: img.sortOrder })),
-                                material: p.metalType, purity: "92.5%", rating: Number(p.averageRating),
-                                reviewCount: p.reviewCount, stock: p.stock, tags: p.tags,
-                                createdAt: p.createdAt, updatedAt: p.updatedAt,
-                            }} />
+                                <ProductCard
+                                    key={p.id}
+                                    onAddToCart={() => {
+                                        const variant = p.variants?.[0];
+                                        if (variant) {
+                                            addItem({
+                                                productVariantId: variant.id,
+                                                productName: p.name,
+                                                variantLabel: variant.label,
+                                                sku: variant.sku,
+                                                imageUrl: p.images.find(i => i.isPrimary)?.s3Url || p.images[0]?.s3Url || "",
+                                                unitPrice: Number(p.salePrice ?? p.basePrice),
+                                                stockQty: variant.stockQty,
+                                            }, 1, getToken);
+                                        }
+                                    }}
+                                    product={{
+                                        id: p.id, name: p.name, slug: p.slug, sku: p.sku,
+                                        description: p.description ?? "", shortDescription: p.metalType,
+                                        basePrice: Number(p.basePrice), salePrice: p.salePrice ? Number(p.salePrice) : undefined,
+                                        category: p.category as any, status: "PUBLISHED",
+                                        categoryId: p.categoryId,
+                                        images: p.images.map((img) => ({ id: img.id, url: img.s3Url, alt: img.altText ?? p.name, isPrimary: img.isPrimary, sortOrder: img.sortOrder })),
+                                        material: p.metalType, purity: "92.5%", rating: Number(p.averageRating),
+                                        reviewCount: p.reviewCount, stock: p.stock, tags: p.tags,
+                                        createdAt: p.createdAt, updatedAt: p.updatedAt,
+                                    }} />
                             ))}
                         </div>
                     </div>

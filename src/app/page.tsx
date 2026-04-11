@@ -11,16 +11,23 @@ import { useCategoryStore } from "@/store/useCategoryStore";
 import { useShopProductStore } from "@/store/useShopProductStore";
 import { useBannerStore } from "@/store/useBannerStore";
 import { useTestimonialStore } from "@/store/useTestimonialStore";
+import { useWishlistStore } from "@/store/useWishlistStore";
+import { useAuth } from "@clerk/nextjs";
 
 const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
 // Hardcoded array removed in favor of dynamic API from useTestimonialStore
 
 export default function HomePage() {
+  const { getToken } = useAuth();
+  const { addItem, removeItem, isInWishlist } = useWishlistStore();
   const { categories, fetchCategories, isLoading: categoriesLoading } = useCategoryStore();
   const { products: trending, fetchProducts, isLoading: productsLoading } = useShopProductStore();
   const { banners, fetchActiveBanners, loading: bannersLoading } = useBannerStore();
   const { testimonials, fetchActiveTestimonials, isLoading: testimonialsLoading } = useTestimonialStore();
+
+  const testimonialScrollRef = React.useRef<HTMLDivElement>(null);
+  const isTestimonialHovering = React.useRef<boolean>(false);
 
   useEffect(() => {
     fetchCategories();
@@ -31,6 +38,40 @@ export default function HomePage() {
     // Fetch active Testimonials
     fetchActiveTestimonials();
   }, [fetchCategories, fetchProducts, fetchActiveBanners, fetchActiveTestimonials]);
+
+  useEffect(() => {
+    let animationId: number;
+    let speed = 0.5;
+
+    const scroll = () => {
+      const container = testimonialScrollRef.current;
+      if (container && !isTestimonialHovering.current && testimonials.length > 0) {
+        container.scrollLeft += speed;
+        
+        const N = testimonials.length;
+        // Ensure the DOM has rendered the duplicates properly
+        if (container.children.length >= N * 2) {
+          const firstOriginal = container.children[0] as HTMLElement;
+          const firstDuplicate = container.children[N] as HTMLElement;
+          
+          if (firstOriginal && firstDuplicate) {
+            const loopDistance = firstDuplicate.offsetLeft - firstOriginal.offsetLeft;
+            
+            // Seamlessly jump back horizontally without visual stutter
+            if (container.scrollLeft >= loopDistance) {
+              container.scrollLeft -= loopDistance;
+            }
+          }
+        }
+      }
+      animationId = requestAnimationFrame(scroll);
+    };
+
+    if (testimonials.length > 0) {
+      animationId = requestAnimationFrame(scroll);
+    }
+    return () => cancelAnimationFrame(animationId);
+  }, [testimonials.length]);
 
   // Take top 4 categories
   const displayCategories = categories.filter((c) => c.isVisible).slice(0, 4);
@@ -123,7 +164,11 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {trending.slice(0, 4).map((p) => (
+                {trending.slice(0, 4).map((p) => {
+                  const isWishlisted = isInWishlist(p.id);
+                  const primaryImage = p.images && p.images.length > 0 ? p.images[0].s3Url : null;
+                  
+                  return (
                   <div
                     key={p.id}
                     className="group bg-white rounded-xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.07)] flex flex-col"
@@ -145,10 +190,31 @@ export default function HomePage() {
                       </Link>
                       {/* Fake badge logic depending on creation date or tags. For now, we can omit if not in MVP or show NEW if recent */}
                       <button
-                        className="absolute top-3 right-3 w-[34px] h-[34px] rounded-full bg-white/88 border-none flex items-center justify-center cursor-pointer z-10 hover:bg-white transition-colors"
-                        aria-label="Add to wishlist"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (isWishlisted) {
+                            removeItem(p.id, getToken);
+                          } else {
+                            addItem({
+                              productId: p.id,
+                              productVariantId: p.variants?.[0]?.id,
+                              productName: p.name,
+                              slug: p.slug,
+                              category: typeof p.category === 'object' ? p.category?.name : undefined,
+                              imageUrl: primaryImage,
+                              price: Number(p.salePrice || p.basePrice),
+                              basePrice: Number(p.basePrice),
+                              salePrice: p.salePrice ? Number(p.salePrice) : null,
+                              addedAt: new Date().toISOString(),
+                              inStock: p.stock > 0,
+                            }, getToken);
+                          }
+                        }}
+                        className="absolute top-3 right-3 w-[34px] h-[34px] rounded-full bg-white/88 border-none flex items-center justify-center cursor-pointer z-10 hover:bg-white transition-colors shadow-sm"
+                        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                       >
-                        <Heart size={16} className="text-silver-dark hover:text-red-500 transition-colors" fill="none" />
+                        <Heart size={16} className={`transition-colors ${isWishlisted ? "fill-[#e84c4c] text-[#e84c4c]" : "text-silver-dark hover:text-red-500"}`} />
                       </button>
                     </div>
                     {/* Card content */}
@@ -176,7 +242,8 @@ export default function HomePage() {
                       </Link>
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             )}
           </div>
@@ -325,11 +392,18 @@ export default function HomePage() {
                 .hide-scroll::-webkit-scrollbar { display: none; }
                 .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
               `}</style>
-              <div className="hide-scroll flex flex-row overflow-x-auto gap-5 md:gap-6 pb-8 snap-x snap-mandatory -mx-4 px-4 md:-mx-8 md:px-8">
-                {testimonials.map((t) => (
+              <div 
+                ref={testimonialScrollRef}
+                onMouseEnter={() => { isTestimonialHovering.current = true; }}
+                onMouseLeave={() => { isTestimonialHovering.current = false; }}
+                onTouchStart={() => { isTestimonialHovering.current = true; }}
+                onTouchEnd={() => { isTestimonialHovering.current = false; }}
+                className="hide-scroll flex flex-row overflow-x-auto gap-5 md:gap-6 pb-8 -mx-4 px-4 md:-mx-8 md:px-8 cursor-grab active:cursor-grabbing"
+              >
+                {[...testimonials, ...testimonials].map((t, index) => (
                   <div
-                    key={t.id}
-                    className="bg-white border border-border rounded-2xl p-[28px] md:p-[32px] flex flex-col shrink-0 snap-center w-[85vw] sm:w-[320px] md:w-[340px] aspect-5/4 transition-shadow duration-300 hover:shadow-lg"
+                    key={`${t.id}-${index}`}
+                    className="bg-white border border-border rounded-2xl p-[28px] md:p-[32px] flex flex-col shrink-0 w-[85vw] sm:w-[320px] md:w-[340px] aspect-5/4 transition-shadow duration-300 hover:shadow-lg"
                   >
                     <div className="flex justify-between items-start mb-4 shrink-0">
                       <span className="font-body text-[42px] font-bold text-emerald/50 leading-[0.5] block select-none">
