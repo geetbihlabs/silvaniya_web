@@ -320,7 +320,8 @@ export default function CartPage() {
                                         categoryId: p.categoryId,
                                         images: p.images.map((img) => ({ id: img.id, url: img.s3Url, alt: img.altText ?? p.name, isPrimary: img.isPrimary, sortOrder: img.sortOrder })),
                                         material: p.metalType, purity: "92.5%", rating: Number(p.averageRating),
-                                        reviewCount: p.reviewCount, stock: p.stock, tags: p.tags,
+                                        // reviewCount: p.reviewCount,
+                                        stock: p.stock, tags: p.tags,
                                         createdAt: p.createdAt, updatedAt: p.updatedAt,
                                     }} />
                             ))}

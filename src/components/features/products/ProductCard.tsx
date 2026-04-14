@@ -103,14 +103,14 @@ export default function ProductCard({
             {/* Product Info */}
             <div className="flex flex-col flex-1">
                 {/* Rating */}
-                {product.rating && (
+                {/* {product.rating && (
                     <div className="flex items-center gap-1 mb-1">
                         <span className="text-yellow-400 text-xs leading-none">★</span>
                         <span className="text-[11px] text-muted leading-none">
                             {product.rating} ({product.reviewCount})
                         </span>
                     </div>
-                )}
+                )} */}
 
                 {/* Name */}
                 <Link href={`/products/${product.slug}`}>

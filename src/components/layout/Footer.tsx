@@ -158,7 +158,7 @@ export default function Footer() {
             {/* ── Bottom bar ── */}
             <div className="max-w-7xl mx-auto py-6 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 text-center md:text-left">
                 <p className="font-body text-[11px] font-normal tracking-[0.08em] text-white/35">
-                    © 2026 SILVANIYA JEWELLERS PVT LTD. ALL RIGHTS RESERVED.
+                    © 2026 VERNIUM GOLD PVT LTD. ALL RIGHTS RESERVED.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8">
                     {[
