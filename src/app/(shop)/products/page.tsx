@@ -115,8 +115,8 @@ function ProductListingContent() {
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-charcoal">BIS Hallmarked</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                    <RotateCcw size={14} className="text-charcoal shrink-0" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-charcoal">30-Day Returns</span>
+                    {/* <RotateCcw size={14} className="text-charcoal shrink-0" /> */}
+                    {/* <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-charcoal">30-Day Returns</span> */}
                 </div>
             </div>
         </>
@@ -251,14 +251,14 @@ function ProductListingContent() {
                                             purity: "92.5%",
                                             isFeatured: product.isFeatured,
                                             isNewArrival: !product.isFeatured,
-                                            rating: Number(product.averageRating),
+                                            // rating: Number(product.averageRating),
                                             reviewCount: product.reviewCount,
                                             stock: product.stock,
                                             tags: product.tags,
                                             createdAt: product.createdAt,
                                             updatedAt: product.updatedAt,
                                         }}
-                                        onAddToCart={handleAddToCart}
+                                            onAddToCart={handleAddToCart}
                                         />
                                     );
                                 })}

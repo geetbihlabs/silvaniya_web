@@ -37,7 +37,7 @@ export const notificationService = {
       params: { page, limit },
       ...authHeaders(token),
     });
-    return res.data?.data ?? res.data;
+    return res.data;
   },
 
   async getUnreadCount(token: string | null): Promise<number> {
@@ -53,4 +53,34 @@ export const notificationService = {
   async markAllAsRead(token: string | null): Promise<void> {
     await api.patch('/notifications/read-all', {}, authHeaders(token));
   },
+
+  // -------------------------------------------------------------
+  // ADMIN NOTIFICATIONS (Clerk role restricted, hits userId: null)
+  // -------------------------------------------------------------
+  async getAdminNotifications(
+    token: string | null,
+    page = 1,
+    limit = 20,
+  ): Promise<NotificationsResponse> {
+    const res = await api.get('/notifications/admin', {
+      params: { page, limit },
+      ...authHeaders(token),
+    });
+    return res.data;
+  },
+
+  async getAdminUnreadCount(token: string | null): Promise<number> {
+    const res = await api.get('/notifications/admin/unread-count', authHeaders(token));
+    const payload = res.data?.data ?? res.data;
+    return payload?.count ?? 0;
+  },
+
+  async markAdminAsRead(id: string, token: string | null): Promise<void> {
+    await api.patch(`/notifications/admin/${id}/read`, {}, authHeaders(token));
+  },
+
+  async markAllAdminAsRead(token: string | null): Promise<void> {
+    await api.patch('/notifications/admin/read-all', {}, authHeaders(token));
+  },
 };
+

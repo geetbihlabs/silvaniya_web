@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import PageHeader from "@/components/admin/shared/PageHeader";
-import { useNotificationStore } from "@/store/useNotificationStore";
+import { useAdminNotificationStore } from "@/store/useAdminNotificationStore";
 import { Notification } from "@/services/notificationService";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -198,7 +198,7 @@ export default function AdminNotificationsPage() {
     fetchNotifications,
     markAsRead,
     markAllAsRead,
-  } = useNotificationStore();
+  } = useAdminNotificationStore();
 
   const getTokenCb = useCallback(() => getToken(), [getToken]);
 

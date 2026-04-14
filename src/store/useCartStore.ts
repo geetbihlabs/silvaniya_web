@@ -64,7 +64,7 @@ interface CartState {
   removeCoupon: () => void;
 
   // ── Local helpers ──
-  getTotals: (shippingMethod?: 'standard' | 'express') => CartTotals;
+  getTotals: () => CartTotals;
   setOpen: (open: boolean) => void;
 }
 
@@ -183,21 +183,23 @@ export const useCartStore = create<CartState>()(
       // ── Add item ────────────────────────────────────────────────────────
       addItem: async (itemData, qty = 1, getToken) => {
         const state = get();
-        const existing = state.items.find((i) => i.productVariantId === itemData.productVariantId);
-        const stockQty = existing?.stockQty ?? itemData.stockQty;
+        // Pre-check stock against current snapshotted state
+        const snap_existing = state.items.find((i) => i.productVariantId === itemData.productVariantId);
+        const stockQty = snap_existing?.stockQty ?? itemData.stockQty;
         
-        if (existing && existing.quantity + qty > stockQty) {
+        if (snap_existing && snap_existing.quantity + qty > stockQty) {
           toast.error(`Only ${stockQty} items available in stock`);
           return;
-        } else if (!existing && qty > stockQty) {
+        } else if (!snap_existing && qty > stockQty) {
           toast.error(`Only ${stockQty} items available in stock`);
           return;
         }
 
         // Optimistic update
         set((state) => {
+          const freshExisting = state.items.find((i) => i.productVariantId === itemData.productVariantId);
           let items: CartItem[];
-          if (existing) {
+          if (freshExisting) {
             items = state.items.map((i) =>
               i.productVariantId === itemData.productVariantId
                 ? { ...i, quantity: i.quantity + qty }
@@ -209,7 +211,7 @@ export const useCartStore = create<CartState>()(
               { ...itemData, id: `temp-${Date.now()}`, quantity: qty },
             ];
           }
-          return { items, count: computeCount(items) };
+          return { items, count: computeCount(items), coupon: null };
         });
 
         toast.success(`${itemData.productName} added to cart!`);
@@ -249,7 +251,7 @@ export const useCartStore = create<CartState>()(
           const items = state.items.filter(
             (i) => i.productVariantId !== productVariantId,
           );
-          return { items, count: computeCount(items) };
+          return { items, count: computeCount(items), coupon: null };
         });
 
         try {
@@ -278,7 +280,7 @@ export const useCartStore = create<CartState>()(
           const items = state.items.map((i) =>
             i.productVariantId === productVariantId ? { ...i, quantity: qty } : i,
           );
-          return { items, count: computeCount(items) };
+          return { items, count: computeCount(items), coupon: null };
         });
 
         try {
@@ -295,7 +297,7 @@ export const useCartStore = create<CartState>()(
 
       // ── Clear cart ──────────────────────────────────────────────────────
       clearCart: async (getToken) => {
-        set({ items: [], count: 0 });
+        set({ items: [], count: 0, coupon: null });
 
         try {
           const headers = await authHeader(getToken);
@@ -327,8 +329,7 @@ export const useCartStore = create<CartState>()(
       removeCoupon: () => set({ coupon: null }),
 
       // ── Local helpers ───────────────────────────────────────────────────
-      getTotals: (shippingMethod = 'standard') => {
-        void shippingMethod; // retained for API compat — shipping is always free
+      getTotals: () => {
         const { items, coupon } = get();
         const subtotal = items.reduce(
           (sum, i) => sum + i.unitPrice * i.quantity,

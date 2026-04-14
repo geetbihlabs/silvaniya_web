@@ -42,8 +42,7 @@ export default function CartPage() {
         await removeItem(item.productVariantId, getToken);
     };
 
-    const shipping = "standard" as const;
-    const { subtotal, shippingCharge, discountAmount, total, count } = getTotals(shipping);
+    const { subtotal, shippingCharge, discountAmount, total, count } = getTotals();
 
     const handleApplyCoupon = async () => {
         if (!couponInput.trim()) return;
@@ -123,7 +122,22 @@ export default function CartPage() {
                                                 </Link>
                                                 <p className="text-[10px] text-muted uppercase tracking-wider mt-1">SKU: {item.sku} | {item.variantLabel}</p>
                                             </div>
-                                            <span className="text-[15px] font-bold text-charcoal whitespace-nowrap shrink-0">{formatPrice(item.unitPrice)}</span>
+                                            {/* Per-item price: show effective price if coupon applied */}
+                                            {(() => {
+                                                const lineTotal = item.unitPrice * item.quantity;
+                                                if (coupon && subtotal > 0) {
+                                                    const itemDiscount = (lineTotal / subtotal) * coupon.discountAmount;
+                                                    const effectiveLineTotal = Math.max(0, lineTotal - itemDiscount);
+                                                    const effectiveUnit = effectiveLineTotal / item.quantity;
+                                                    return (
+                                                        <div className="text-right shrink-0">
+                                                            <span className="text-[13px] line-through text-muted/70">{formatPrice(item.unitPrice)}</span>
+                                                            <span className="block text-[15px] font-bold text-charcoal">{formatPrice(effectiveUnit)}</span>
+                                                        </div>
+                                                    );
+                                                }
+                                                return <span className="text-[15px] font-bold text-charcoal whitespace-nowrap shrink-0">{formatPrice(item.unitPrice)}</span>;
+                                            })()}
                                         </div>
 
                                         <div className="flex items-center justify-between mt-4">
