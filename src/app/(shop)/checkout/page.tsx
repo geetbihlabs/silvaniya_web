@@ -72,7 +72,7 @@ export default function CheckoutPage() {
         isInitiatingPayment,
     } = useOrderStore();
     const { getToken, isLoaded, isSignedIn } = useAuth();
-    const { addresses, isLoading: isAddressesLoading, fetchAddresses } = useAddressStore();
+    const { addresses, isLoading: isAddressesLoading, hasFetched, fetchAddresses } = useAddressStore();
 
     const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>("ONLINE");
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -97,7 +97,9 @@ export default function CheckoutPage() {
     }, [isLoaded, isSignedIn, getToken, fetchAddresses]);
 
     useEffect(() => {
-        if (!isAddressesLoading && addresses.length > 0 && !selectedAddressId && !isAddingNewAddress) {
+        if (!hasFetched || isAddressesLoading) return;
+
+        if (addresses.length > 0 && !selectedAddressId && !isAddingNewAddress) {
             const defaultAddress = addresses.find(a => a.isDefault) || addresses[0];
             setSelectedAddressId(defaultAddress.id);
             setForm({
@@ -111,10 +113,10 @@ export default function CheckoutPage() {
             });
         }
 
-        if (!isAddressesLoading && addresses.length === 0) {
+        if (addresses.length === 0) {
             setIsAddingNewAddress(true);
         }
-    }, [addresses, isAddressesLoading, selectedAddressId, isAddingNewAddress]);
+    }, [addresses, isAddressesLoading, hasFetched, selectedAddressId, isAddingNewAddress]);
 
     const handleSelectAddress = (address: any) => {
         setSelectedAddressId(address.id);
@@ -130,17 +132,29 @@ export default function CheckoutPage() {
         });
     };
 
-    const { subtotal, shippingCharge, total, discountAmount } = getTotals("standard");
+    const { subtotal, shippingCharge, total, discountAmount } = getTotals();
 
-    // COD is available only when EVERY cart item has allowPartialPayment = true (admin-controlled)
-    const codEligible = items.length > 0 && items.every((item) => item.allowPartialPayment === true);
-    // Booking amount = highest admin-set minBookingAmount across all cart items
-    const codBookingAmount = codEligible
-        ? Math.max(...items.map((item) => item.minBookingAmount ?? 0))
-        : 0;
-    const codRemainingAmount = total - codBookingAmount;
+    // COD is always available if cart has items. Any non-COD items demand full value upfront.
+    const codEligible = items.length > 0;
+    
+    let codBookingAmount = 0;
+    items.forEach((item) => {
+        const lineTotal = item.unitPrice * item.quantity;
+        const discountAllocated = subtotal > 0 ? (lineTotal / subtotal) * discountAmount : 0;
+        const effectivePrice = Math.max(0, item.unitPrice - (discountAllocated / item.quantity));
 
-    // Auto-reset to ONLINE if cart changes and COD is no longer eligible
+        if (item.allowPartialPayment) {
+            codBookingAmount += (item.minBookingAmount ?? 0) * item.quantity;
+        } else {
+            codBookingAmount += effectivePrice * item.quantity;
+        }
+    });
+
+    // Precision rounding & cap
+    codBookingAmount = Math.min(Math.round(codBookingAmount * 100) / 100, total);
+    const codRemainingAmount = parseFloat((total - codBookingAmount).toFixed(2));
+
+    // Auto-reset to ONLINE if cart is immediately emptied
     useEffect(() => {
         if (!codEligible && paymentMethod === "CASH_ON_DELIVERY") {
             setPaymentMethod("ONLINE");
@@ -175,8 +189,11 @@ export default function CheckoutPage() {
 
         const order = await placeOrder(
             items,
-            { ...form, country: "India" },
-            "standard",          // only standard shipping
+            { 
+                ...form, 
+                id: (!isAddingNewAddress && selectedAddressId) ? selectedAddressId : undefined, 
+                country: "India" 
+            },
             dbPaymentMethod,
             coupon?.code,
             getToken,
@@ -205,11 +222,8 @@ export default function CheckoutPage() {
             return;
         }
 
-        // For COD, we charge only the admin-set booking amount through the modal
-        const modalAmountPaisa =
-            paymentMethod === "CASH_ON_DELIVERY"
-                ? Math.round(codBookingAmount * 100)   // admin-defined amount in paisa
-                : rzpData.amount;
+        // Backend strictly enforces and returns the correct amount based on the payment method upfront requirement
+        const modalAmountPaisa = rzpData.amount;
 
         // ── Step 4: Open Razorpay modal ────────────────────────────────────
         openRazorpayModal({
@@ -276,8 +290,8 @@ export default function CheckoutPage() {
                             <div className="flex items-center gap-2">
                                 <div
                                     className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold ${step.active
-                                            ? "bg-charcoal text-white"
-                                            : "border-2 border-[#d0d0cc] text-[#aaa]"
+                                        ? "bg-charcoal text-white"
+                                        : "border-2 border-[#d0d0cc] text-[#aaa]"
                                         }`}
                                 >
                                     {step.n}
@@ -334,8 +348,8 @@ export default function CheckoutPage() {
                                                     key={address.id}
                                                     onClick={() => handleSelectAddress(address)}
                                                     className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedAddressId === address.id
-                                                            ? 'border-emerald bg-emerald/5 ring-1 ring-emerald/20'
-                                                            : 'border-[#e8e8e4] hover:border-charcoal/30'
+                                                        ? 'border-emerald bg-emerald/5 ring-1 ring-emerald/20'
+                                                        : 'border-[#e8e8e4] hover:border-charcoal/30'
                                                         }`}
                                                 >
                                                     <div className="flex items-start justify-between">
@@ -357,8 +371,8 @@ export default function CheckoutPage() {
                                                             </div>
                                                         </div>
                                                         <div className={`w-5 h-5 shrink-0 rounded-full flex items-center justify-center border transition-colors ${selectedAddressId === address.id
-                                                                ? 'border-emerald bg-emerald'
-                                                                : 'border-gray-300'
+                                                            ? 'border-emerald bg-emerald'
+                                                            : 'border-gray-300'
                                                             }`}>
                                                             {selectedAddressId === address.id && <div className="w-2 h-2 rounded-full bg-white" />}
                                                         </div>
@@ -451,7 +465,7 @@ export default function CheckoutPage() {
                             {checkoutStep === "PAYMENT" && (
                                 <>
                                     {/* Selected Address Summary */}
-                                    <section className="bg-white rounded-xl border border-emerald/30 bg-emerald/5 px-5 py-4 flex items-start justify-between">
+                                    <section className="bg-white rounded-xl border border-emerald/30 px-5 py-4 flex items-start justify-between">
                                         <div>
                                             <p className="text-[10px] font-bold text-emerald uppercase tracking-widest mb-1">Delivering To</p>
                                             <p className="text-[14px] font-semibold text-charcoal">{form.fullName}</p>
@@ -504,14 +518,14 @@ export default function CheckoutPage() {
                                             {/* Online Payment */}
                                             <label
                                                 className={`flex items-start gap-4 px-5 py-4 rounded-xl border-2 cursor-pointer transition-colors ${paymentMethod === "ONLINE"
-                                                        ? "border-charcoal bg-white"
-                                                        : "border-[#e0e0db] hover:border-charcoal/40"
+                                                    ? "border-charcoal bg-white"
+                                                    : "border-[#e0e0db] hover:border-charcoal/40"
                                                     }`}
                                             >
                                                 <div
                                                     className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === "ONLINE"
-                                                            ? "border-charcoal"
-                                                            : "border-[#ccc]"
+                                                        ? "border-charcoal"
+                                                        : "border-[#ccc]"
                                                         }`}
                                                 >
                                                     {paymentMethod === "ONLINE" && (
@@ -550,14 +564,14 @@ export default function CheckoutPage() {
                                             {codEligible && (
                                                 <label
                                                     className={`flex items-start gap-4 px-5 py-4 rounded-xl border-2 cursor-pointer transition-colors ${paymentMethod === "CASH_ON_DELIVERY"
-                                                            ? "border-charcoal bg-white"
-                                                            : "border-[#e0e0db] hover:border-charcoal/40"
+                                                        ? "border-charcoal bg-white"
+                                                        : "border-[#e0e0db] hover:border-charcoal/40"
                                                         }`}
                                                 >
                                                     <div
                                                         className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${paymentMethod === "CASH_ON_DELIVERY"
-                                                                ? "border-charcoal"
-                                                                : "border-[#ccc]"
+                                                            ? "border-charcoal"
+                                                            : "border-[#ccc]"
                                                             }`}
                                                     >
                                                         {paymentMethod === "CASH_ON_DELIVERY" && (
@@ -583,19 +597,15 @@ export default function CheckoutPage() {
                                                                     />
                                                                     <div>
                                                                         <p className="text-[12px] font-semibold text-amber-800">
-                                                                            Booking Amount Required
+                                                                            Upfront Payment Required
                                                                         </p>
-                                                                        <p className="text-[11px] text-amber-700 mt-1 leading-relaxed">
-                                                                            A non-refundable booking amount of{" "}
-                                                                            <span className="font-bold">
-                                                                                {formatPrice(codBookingAmount)}
-                                                                            </span>{" "}
-                                                                            must be paid online now to confirm your COD
-                                                                            order. The remaining{" "}
-                                                                            <span className="font-bold">
-                                                                                {formatPrice(codRemainingAmount)}
-                                                                            </span>{" "}
-                                                                            is paid on delivery.
+                                                                        <p className="text-[11px] text-amber-700/90 mt-1 leading-relaxed">
+                                                                            A non-refundable upfront payment of <span className="font-bold">{formatPrice(codBookingAmount)}</span> must be paid online now to confirm your order. The remaining <span className="font-bold">{formatPrice(codRemainingAmount)}</span> is paid on delivery. 
+                                                                            {items.some(item => !item.allowPartialPayment) && (
+                                                                                <span className="block mt-1 font-medium italic text-amber-800/80">
+                                                                                    (This includes the full price for items in your cart not eligible for partial booking).
+                                                                                </span>
+                                                                            )}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -658,9 +668,25 @@ export default function CheckoutPage() {
                                                     Qty: {item.quantity}
                                                 </p>
                                             </div>
-                                            <span className="text-[13px] font-semibold text-charcoal shrink-0">
-                                                {formatPrice(item.unitPrice * item.quantity)}
-                                            </span>
+                                            {/* Show prorated effective price if coupon applied */}
+                                            {(() => {
+                                                const lineTotal = item.unitPrice * item.quantity;
+                                                if (coupon && subtotal > 0) {
+                                                    const itemDiscount = (lineTotal / subtotal) * discountAmount;
+                                                    const effectiveLineTotal = Math.max(0, lineTotal - itemDiscount);
+                                                    return (
+                                                        <div className="text-right shrink-0">
+                                                            <span className="block text-[11px] line-through text-muted/60">{formatPrice(lineTotal)}</span>
+                                                            <span className="text-[13px] font-semibold text-charcoal">{formatPrice(effectiveLineTotal)}</span>
+                                                        </div>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className="text-[13px] font-semibold text-charcoal shrink-0">
+                                                        {formatPrice(lineTotal)}
+                                                    </span>
+                                                );
+                                            })()}
                                         </div>
                                     ))}
                                 </div>

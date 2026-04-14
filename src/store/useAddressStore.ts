@@ -21,6 +21,7 @@ type GetTokenFn = () => Promise<string | null>;
 interface AddressState {
   addresses: Address[];
   isLoading: boolean;
+  hasFetched: boolean;
   error: string | null;
 
   // Actions
@@ -34,6 +35,7 @@ interface AddressState {
 export const useAddressStore = create<AddressState>((set, get) => ({
   addresses: [],
   isLoading: false,
+  hasFetched: false,
   error: null,
 
   fetchAddresses: async (getToken) => {
@@ -46,10 +48,10 @@ export const useAddressStore = create<AddressState>((set, get) => ({
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = response.data?.data ?? response.data;
-      set({ addresses: data, isLoading: false });
+      set({ addresses: data, isLoading: false, hasFetched: true });
     } catch (error: any) {
       console.error('Failed to fetch addresses:', error);
-      set({ error: 'Failed to fetch addresses', isLoading: false });
+      set({ error: 'Failed to fetch addresses', isLoading: false, hasFetched: true });
     }
   },
 

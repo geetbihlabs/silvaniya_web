@@ -63,6 +63,9 @@ export interface AdminOrder {
     pincode: string;
     phone: string;
   };
+  awbNumber?: string;
+  courierPartner?: string;
+  trackingUrl?: string;
   trackingNumber?: string;
   internalNotes?: string[];
   timeline: OrderTimelineEvent[];
@@ -77,9 +80,19 @@ export interface AdminOrderItem {
   productImage: string;
   sku: string;
   variantInfo?: string;
+  variantLabel?: string;
   quantity: number;
+  returnedQty?: number;
   unitPrice: number;
   totalPrice: number;
+  effectivePrice?: number;
+  discountAllocated?: number;
+  status?: string;
+  productVariant?: {
+    product?: {
+      images?: { s3Url: string; s3Key: string; isPrimary: boolean; altText?: string }[];
+    };
+  };
 }
 
 export interface OrderTimelineEvent {

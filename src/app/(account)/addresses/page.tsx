@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { useAddressStore } from "@/store/useAddressStore";
 import { useAuth } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "react-hot-toast";
 
 const INDIAN_STATES = [
     "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -101,6 +102,39 @@ export default function AddressesPage() {
             line2: "",
             landmark: "home",
             isDefault: false,
+        });
+    };
+
+    const confirmDelete = (addressId: string) => {
+        toast((t) => (
+            <div className="flex flex-col gap-3">
+                <p className="text-sm font-medium text-charcoal">Are you sure you want to delete this address?</p>
+                <div className="flex justify-end gap-2">
+                    <Button 
+                        variant="outline" 
+                        type="button"
+                        className="h-8 px-3 text-xs" 
+                        onClick={() => toast.dismiss(t.id)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="primary" 
+                        type="button"
+                        className="h-8 px-3 text-xs bg-red-600 hover:bg-red-700 border-red-600 text-white" 
+                        onClick={() => {
+                            deleteAddress(getToken, addressId);
+                            toast.dismiss(t.id);
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </div>
+            </div>
+        ), {
+            duration: Infinity,
+            position: 'top-center',
+            id: 'delete-address-toast'
         });
     };
 
@@ -302,9 +336,7 @@ export default function AddressesPage() {
                                     <button 
                                       aria-label="Delete" 
                                       className="p-1.5 text-muted hover:text-error hover:bg-red-50 rounded-md transition-colors"
-                                      onClick={() => {
-                                        if(confirm("Are you sure you want to delete this address?")) deleteAddress(getToken, address.id);
-                                      }}
+                                      onClick={() => confirmDelete(address.id)}
                                     >
                                         <Trash2 size={16} className="w-[14px] h-[14px] sm:w-4 sm:h-4" />
                                     </button>

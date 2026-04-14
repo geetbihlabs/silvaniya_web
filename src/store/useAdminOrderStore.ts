@@ -32,6 +32,17 @@ interface AdminOrderState {
     note: string,
     getToken: () => Promise<string | null>
   ) => Promise<boolean>;
+  resolveReturnRequest: (
+    id: string,
+    approved: boolean,
+    adminNote: string,
+    getToken: () => Promise<string | null>
+  ) => Promise<boolean>;
+  updateTracking: (
+    id: string,
+    tracking: { awbNumber: string; courierPartner: string; trackingUrl?: string },
+    getToken: () => Promise<string | null>
+  ) => Promise<boolean>;
 }
 
 export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
@@ -122,6 +133,51 @@ export const useAdminOrderStore = create<AdminOrderState>((set, get) => ({
       return true;
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Failed to update order status';
+      set({ error: msg, isUpdating: false });
+      toast.error(msg);
+      return false;
+    }
+  },
+
+  resolveReturnRequest: async (id, approved, adminNote, getToken) => {
+    set({ isUpdating: true, error: null });
+    try {
+      const token = await getToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      await api.patch(`/orders/${id}/returns/resolve`, { approved, adminNote }, { headers });
+      
+      await get().fetchOrderById(id, getToken); // Fresh fetch to get updated return arrays etc.
+      
+      set({ isUpdating: false });
+      toast.success(`Return request ${approved ? 'approved' : 'rejected'} successfully`);
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Failed to resolve return request';
+      set({ error: msg, isUpdating: false });
+      toast.error(msg);
+      return false;
+    }
+  },
+
+  updateTracking: async (id, tracking, getToken) => {
+    set({ isUpdating: true, error: null });
+    try {
+      const token = await getToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      await api.post(`/orders/${id}/fulfilment/tracking`, tracking, { headers });
+
+      const { selectedOrder } = get();
+      if (selectedOrder && selectedOrder.id === id) {
+        set({ selectedOrder: { ...selectedOrder, ...tracking } });
+      }
+
+      set({ isUpdating: false });
+      toast.success('Tracking information saved successfully');
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Failed to save tracking info';
       set({ error: msg, isUpdating: false });
       toast.error(msg);
       return false;

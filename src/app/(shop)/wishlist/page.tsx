@@ -22,17 +22,17 @@ export default function WishlistPage() {
     // Handle adding item from wishlist to cart
     const handleMoveToCart = (item: any) => {
         if (item.inStock) {
-             addCartItem({
-                 productVariantId: item.productVariantId || item.productId, // Use variant id if fetched, fallback as last resort
-                 productName: item.productName,
-                 variantLabel: "Default",
-                 sku: `SKU-${item.productId.substring(0, 6)}`,
-                 imageUrl: item.imageUrl || "",
-                 unitPrice: item.salePrice || item.basePrice,
-                 stockQty: 10, // Assuming basic stock since WishlistItem only gives inStock
-             }, 1, getToken);
-             // Remove from wishlist after moving to cart
-             removeItem(item.productId, getToken);
+            addCartItem({
+                productVariantId: item.productVariantId || item.productId, // Use variant id if fetched, fallback as last resort
+                productName: item.productName,
+                variantLabel: "Default",
+                sku: `SKU-${item.productId.substring(0, 6)}`,
+                imageUrl: item.imageUrl || "",
+                unitPrice: item.salePrice || item.basePrice,
+                stockQty: 10, // Assuming basic stock since WishlistItem only gives inStock
+            }, 1, getToken);
+            // Remove from wishlist after moving to cart
+            removeItem(item.productId, getToken);
         }
     };
 
@@ -61,8 +61,8 @@ export default function WishlistPage() {
                     <Heart className="mx-auto h-16 w-16 text-gray-300 mb-4" />
                     <h2 className="text-2xl font-semibold text-charcoal mb-2" style={{ fontFamily: "var(--font-heading)" }}>Your Wishlist is Empty</h2>
                     <p className="text-muted mb-8 max-w-sm mx-auto">Explore our collection and add some sparkle to your wishlist!</p>
-                    <Link 
-                        href="/products" 
+                    <Link
+                        href="/products"
                         className="inline-flex items-center gap-2 bg-charcoal hover:bg-charcoal/90 text-white font-semibold tracking-wide uppercase px-8 py-3.5 rounded-md transition-all text-sm"
                     >
                         <ShoppingBag size={18} />
@@ -73,7 +73,7 @@ export default function WishlistPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
                     {items.map((item) => (
                         <div key={item.productId} className="relative group flex flex-col">
-                            <ProductCard 
+                            <ProductCard
                                 product={{
                                     id: item.productId,
                                     name: item.productName,
@@ -89,8 +89,8 @@ export default function WishlistPage() {
                                     images: item.imageUrl ? [{ id: '1', url: item.imageUrl, alt: item.productName, isPrimary: true, sortOrder: 0 }] : [],
                                     material: "Silver",
                                     purity: "92.5%",
-                                    rating: 0,
-                                    reviewCount: 0,
+                                    // rating: 0,
+                                    // reviewCount: 0,
                                     stock: item.inStock ? 10 : 0,
                                     tags: [],
                                     createdAt: typeof item.addedAt === 'string' ? item.addedAt : item.addedAt.toISOString(),
@@ -106,11 +106,10 @@ export default function WishlistPage() {
                             <button
                                 onClick={() => handleMoveToCart(item)}
                                 disabled={!item.inStock}
-                                className={`mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-sm text-[11px] font-semibold tracking-widest uppercase transition-colors duration-200 border ${
-                                    item.inStock 
-                                    ? 'border-charcoal text-charcoal hover:bg-charcoal hover:text-white' 
+                                className={`mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-sm text-[11px] font-semibold tracking-widest uppercase transition-colors duration-200 border ${item.inStock
+                                    ? 'border-charcoal text-charcoal hover:bg-charcoal hover:text-white'
                                     : 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                                }`}
+                                    }`}
                             >
                                 <ShoppingBag size={14} />
                                 {item.inStock ? "Move to Cart" : "Out of Stock"}

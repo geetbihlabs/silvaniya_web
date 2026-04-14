@@ -29,8 +29,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="overflow-x-hidden">
-        <body className="antialiased overflow-x-hidden">
+      <html lang="en" className="overflow-x-hidden" suppressHydrationWarning>
+        <body className="antialiased overflow-x-hidden" suppressHydrationWarning>
           {children}
           <Toaster
             position="bottom-right"

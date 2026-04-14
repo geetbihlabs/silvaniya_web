@@ -134,7 +134,11 @@ export default function ProductCard({
                 {/* Add to Cart */}
                 {showAddToCart && (
                     <button
-                        onClick={onAddToCart}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (onAddToCart) onAddToCart();
+                        }}
                         disabled={!onAddToCart || product.stock <= 0}
                         className={`mt-auto w-full flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest uppercase py-2.5 rounded-sm transition-colors duration-200 disabled:cursor-not-allowed ${
                             product.stock > 0 

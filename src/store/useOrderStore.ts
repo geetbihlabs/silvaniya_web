@@ -7,6 +7,7 @@ import { CartItem } from './useCartStore';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface OrderAddress {
+  id?: string;
   fullName: string;
   phone: string;
   line1: string;
@@ -24,10 +25,13 @@ export interface PlacedOrder {
   paymentStatus: string;
   paymentMethod: string;
   subtotal: number;
+  discountAmount: number;
+  discountCode?: string | null;
   cgst: number;
   sgst: number;
   shippingCharge: number;
   totalAmount: number;
+  upfrontPaymentAmount?: number | null;
   gatewayOrderId?: string | null;
   gatewayPaymentId?: string | null;
   items: {
@@ -36,16 +40,33 @@ export interface PlacedOrder {
     variantLabel: string;
     sku: string;
     quantity: number;
+    returnedQty: number;
     unitPrice: number;
     totalPrice: number;
+    effectivePrice: number;
+    discountAllocated: number;
+    status: string;  // OrderItemStatus
     productVariant?: {
       product?: {
         images?: { s3Url: string; isPrimary: boolean }[];
+        returnWindowDays?: number;
+        isReturnable?: boolean;
       };
     };
   }[];
+  returns?: {
+    id: string;
+    status: string;
+    refundAmount: number;
+    reason: string;
+    requestedAt: string;
+    items: { orderItemId: string; quantity: number }[];
+  }[];
   shippingAddress: OrderAddress & { id: string };
   statusHistory: { status: string; note?: string; createdAt: string }[];
+  awbNumber?: string | null;
+  courierPartner?: string | null;
+  trackingUrl?: string | null;
   createdAt: string;
 }
 
@@ -73,7 +94,6 @@ interface OrderState {
   placeOrder: (
     cartItems: CartItem[],
     address: OrderAddress,
-    shippingMethod: 'standard' | 'express',
     paymentMethod: string,
     couponCode: string | undefined,
     getToken: GetTokenFn,
@@ -113,7 +133,6 @@ export const useOrderStore = create<OrderState>((set) => ({
   placeOrder: async (
     cartItems,
     address,
-    shippingMethod,
     paymentMethod,
     couponCode,
     getToken,
@@ -132,9 +151,19 @@ export const useOrderStore = create<OrderState>((set) => ({
           quantity: item.quantity,
           unitPrice: item.unitPrice.toFixed(2),
         })),
-        shippingAddress: address,
+        shippingAddressId: address.id, // Only present if reusing existing
+        shippingAddress: {
+          fullName: address.fullName,
+          phone: address.phone,
+          line1: address.line1,
+          line2: address.line2,
+          city: address.city,
+          state: address.state,
+          pincode: address.pincode,
+          country: address.country,
+        },
         paymentMethod,
-        shippingMethod,
+        shippingMethod: 'standard', // always standard — free shipping
         couponCode: couponCode || undefined,
       };
 
