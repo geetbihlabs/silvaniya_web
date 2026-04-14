@@ -124,7 +124,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const response = await api.get('/analytics/dashboard/enhanced', { headers });
       set({ 
-        dashboardData: response.data,
+        dashboardData: response.data.data,
         isLoading: false 
       });
     } catch (err: any) {
@@ -190,7 +190,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const response = await api.get('/analytics/dashboard/quick-stats', { headers });
       set({ 
-        quickStats: response.data,
+        quickStats: response.data.data,
         isQuickStatsLoading: false 
       });
     } catch (err: any) {
