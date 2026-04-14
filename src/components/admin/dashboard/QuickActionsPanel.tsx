@@ -31,7 +31,7 @@ const quickActions: QuickActionItem[] = [
     title: "Add New Product",
     description: "Create a new jewelry product",
     icon: <PlusCircle size={20} />,
-    href: "/admin-panel/products/create",
+    href: "/admin-panel/products/new",
     color: "emerald"
   },
   {
