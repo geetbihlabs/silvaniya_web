@@ -15,7 +15,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     // Redirect unauthenticated users to sign-in
     if (!authObj.userId) {
-      return authObj.redirectToSignIn({ returnBackUrl: req.url })
+      return authObj.redirectToSignIn({ returnBackUrl: req.nextUrl.pathname })
     }
 
     // Read role from sessionClaims.metadata.role
