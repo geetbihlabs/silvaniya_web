@@ -58,6 +58,7 @@ export default function EditProductPage() {
                     metalType: data.metalType || "SILVER_925",
                     gemstoneType: data.gemstoneType || "NONE",
                     bisHallmark: data.bisHallmark || false,
+                    sizes: Array.isArray(data.sizes) ? data.sizes : [],
                     images: Array.isArray(data.images)            // API: images (not media)
                         ? data.images
                             .sort((a: { sortOrder: number }, b: { sortOrder: number }) => a.sortOrder - b.sortOrder)

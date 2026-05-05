@@ -23,6 +23,7 @@ export interface Product {
   reviewCount?: number;
   stock: number;
   tags?: string[];
+  sizes?: string[];
   createdAt: string;
   updatedAt: string;
 }

@@ -192,8 +192,7 @@ function SingleBannerSlide({ banner }: { banner: Banner }) {
         }}
       />
 
-      {/* Overlay Gradient for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+
 
       {/* Content Container */}
       <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-0 left-0 md:left-[clamp(32px,6%,80px)] max-w-[500px]">

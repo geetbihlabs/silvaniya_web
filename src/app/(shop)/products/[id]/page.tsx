@@ -219,6 +219,23 @@ export default function ProductDetailPage() {
                         </div>
                     )}
 
+                    {/* Available Sizes */}
+                    {product.sizes && product.sizes.length > 0 && (
+                        <div className="mb-5">
+                            <p className="text-[13px] font-semibold text-charcoal mb-2">Available Sizes</p>
+                            <div className="flex flex-wrap gap-2">
+                                {product.sizes.map((size) => (
+                                    <span
+                                        key={size}
+                                        className="inline-flex items-center px-3 py-1.5 text-[12px] font-medium rounded-md border border-[#d1d1cc] text-charcoal bg-white leading-none"
+                                    >
+                                        {size}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Trust Tiles */}
                     <div className={`grid gap-3 mb-6 ${product.bisHallmark ? 'grid-cols-3' : 'grid-cols-2'}`}>
                         <div className="flex flex-col items-center justify-center gap-2 border border-[#e0e0db] rounded-md py-4 px-2 bg-white">

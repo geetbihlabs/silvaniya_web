@@ -32,7 +32,7 @@ export default function HomePage() {
   useEffect(() => {
     fetchCategories();
     // Fetch only featured products for "Trending Now"
-    fetchProducts({ isFeatured: true, limit: 4 });
+    fetchProducts({ isFeatured: true, limit: 12 });
     // Fetch active HERO banners (public route)
     fetchActiveBanners();
     // Fetch active Testimonials
@@ -164,7 +164,7 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {trending.slice(0, 4).map((p) => {
+                {trending.slice(0, 12).map((p) => {
                   const isWishlisted = isInWishlist(p.id);
                   const primaryImage = p.images && p.images.length > 0 ? p.images[0].s3Url : null;
                   

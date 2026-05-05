@@ -46,6 +46,7 @@ export interface ShopProduct {
   variants: ShopProductVariant[];
   careInstructions?: string[];
   refundPolicy?: string;
+  sizes?: string[];
   createdAt: string;
   updatedAt: string;
 }

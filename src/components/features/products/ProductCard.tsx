@@ -120,7 +120,7 @@ export default function ProductCard({
                 </Link>
 
                 {/* Price */}
-                <div className="flex items-baseline gap-2 mb-3">
+                <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-[15px] font-semibold text-charcoal leading-none">
                         {formatPrice(product.salePrice || product.basePrice)}
                     </span>
@@ -130,6 +130,25 @@ export default function ProductCard({
                         </span>
                     )}
                 </div>
+
+                {/* Sizes */}
+                {product.sizes && product.sizes.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1 mb-2.5">
+                        {product.sizes.slice(0, 4).map((size) => (
+                            <span
+                                key={size}
+                                className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#f3f3f0] text-charcoal border border-[#e0e0db] leading-none"
+                            >
+                                {size}
+                            </span>
+                        ))}
+                        {product.sizes.length > 4 && (
+                            <span className="text-[10px] text-muted leading-none">
+                                +{product.sizes.length - 4} more
+                            </span>
+                        )}
+                    </div>
+                )}
 
                 {/* Add to Cart */}
                 {showAddToCart && (

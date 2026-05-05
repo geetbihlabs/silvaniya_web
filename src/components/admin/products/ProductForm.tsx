@@ -14,6 +14,8 @@ import { useDropzone } from 'react-dropzone';
 import Image from "next/image";
 import api from "@/lib/axios";
 
+const PRESET_SIZES = ["Free Size", "XS", "S", "M", "L", "XL", "XXL", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"];
+
 const productSchema = z.object({
     name: z.string().min(3, "Product name is required"),
     sellerName: z.string().optional(),
@@ -52,6 +54,8 @@ const productSchema = z.object({
 
     bisHallmark: z.boolean().default(false),
     certificateNo: z.string().optional(),
+
+    sizes: z.array(z.string()).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -77,6 +81,30 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
             isExisting: true
         })) || []
     );
+
+    // Sizes Management State
+    const [selectedSizes, setSelectedSizes] = useState<string[]>(
+        Array.isArray((initialValues as any)?.sizes) ? (initialValues as any).sizes : []
+    );
+    const [customSizeInput, setCustomSizeInput] = useState("");
+
+    const toggleSize = (size: string) => {
+        setSelectedSizes(prev =>
+            prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+        );
+    };
+
+    const addCustomSize = () => {
+        const trimmed = customSizeInput.trim();
+        if (trimmed && !selectedSizes.includes(trimmed)) {
+            setSelectedSizes(prev => [...prev, trimmed]);
+        }
+        setCustomSizeInput("");
+    };
+
+    const removeSize = (size: string) => {
+        setSelectedSizes(prev => prev.filter(s => s !== size));
+    };
 
     // Categories Management State
     const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
@@ -225,6 +253,9 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
             processedData.careInstructions = lines.length > 0 ? lines : [];
         }
 
+        // Include selected sizes (empty array = no sizes = not sent)
+        processedData.sizes = selectedSizes.length > 0 ? selectedSizes : [];
+
         const parsedData = productSchema.parse(processedData);
         const success = await onSubmit(parsedData, imageFiles);
         if (success) {
@@ -325,6 +356,75 @@ export default function ProductForm({ initialValues, onSubmit, onDeleteExistingI
                                         />
                                     </div>
                                     <Input label="Tags (comma separated)" placeholder="Silver, Handmade, Necklace" {...register("tags")} />
+
+                                    {/* Size Options */}
+                                    <div>
+                                        <label className="label-uppercase block mb-2 text-charcoal">
+                                            Size Options
+                                            <span className="ml-2 text-[10px] font-normal text-muted normal-case">(optional — leave empty if not applicable)</span>
+                                        </label>
+
+                                        {/* Preset size chips */}
+                                        <div className="flex flex-wrap gap-2 mb-3">
+                                            {PRESET_SIZES.map(size => (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    onClick={() => toggleSize(size)}
+                                                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-all duration-150 ${
+                                                        selectedSizes.includes(size)
+                                                            ? 'bg-charcoal text-white border-charcoal'
+                                                            : 'bg-white text-charcoal border-border hover:border-charcoal/50'
+                                                    }`}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Custom size input */}
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={customSizeInput}
+                                                onChange={e => setCustomSizeInput(e.target.value)}
+                                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomSize(); } }}
+                                                placeholder="Add custom size (e.g. 22, 42, King)"
+                                                className="flex-1 px-3 py-2 text-sm rounded-md border border-border text-charcoal placeholder:text-muted-light focus:outline-none focus:border-charcoal"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={addCustomSize}
+                                                className="px-3 py-2 text-xs font-medium rounded-md border border-border text-charcoal hover:bg-charcoal hover:text-white transition-colors"
+                                            >
+                                                Add
+                                            </button>
+                                        </div>
+
+                                        {/* Selected sizes display */}
+                                        {selectedSizes.length > 0 && (
+                                            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                                                <p className="text-[11px] text-muted mb-2">Selected sizes:</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedSizes.map(size => (
+                                                        <span
+                                                            key={size}
+                                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-charcoal text-white text-xs rounded-full font-medium"
+                                                        >
+                                                            {size}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeSize(size)}
+                                                                className="ml-0.5 hover:text-red-300 transition-colors"
+                                                            >
+                                                                <X size={10} />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </section>
 
