@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Loader2, Star } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroCTA from "@/components/features/hero/HeroCTA";
@@ -112,8 +112,13 @@ export default function HomePage() {
             </div>
 
             {categoriesLoading ? (
-              <div className="flex justify-center items-center h-48">
-                <Loader2 size={32} className="animate-spin text-emerald" />
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-10">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex flex-col items-center gap-4">
+                    <div className="w-full aspect-square rounded-xl bg-gradient-to-r from-[#f0ede8] via-[#e8e4de] to-[#f0ede8] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                    <div className="h-3 w-20 rounded-full bg-gradient-to-r from-[#f0ede8] via-[#e8e4de] to-[#f0ede8] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-8 md:mt-10">
@@ -159,8 +164,20 @@ export default function HomePage() {
             </div>
 
             {productsLoading ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader2 size={40} className="animate-spin text-emerald" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-xl overflow-hidden shadow-[0_2px_16px_rgba(0,0,0,0.05)] flex flex-col">
+                    {/* Image skeleton */}
+                    <div className="w-full aspect-square bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.8s_ease-in-out_infinite]" />
+                    {/* Content skeleton */}
+                    <div className="p-5 flex flex-col gap-3">
+                      <div className="h-4 w-3/4 rounded-md bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.8s_ease-in-out_infinite]" />
+                      <div className="h-3 w-1/2 rounded-md bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.8s_ease-in-out_infinite]" />
+                      <div className="h-5 w-2/5 rounded-md bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.8s_ease-in-out_infinite] mt-1" />
+                      <div className="h-10 w-full rounded bg-gradient-to-r from-[#ede9e3] via-[#e2ddd6] to-[#ede9e3] bg-[length:200%_100%] animate-[shimmer_1.8s_ease-in-out_infinite] mt-2" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -377,8 +394,44 @@ export default function HomePage() {
 
         {/* ------------------------ TESTIMONIALS ----------------------- */}
         {testimonialsLoading ? (
-          <section className="bg-background py-12 md:py-16 w-full flex justify-center">
-            <Loader2 size={32} className="animate-spin text-emerald" />
+          <section className="bg-background py-12 md:py-16 w-full">
+            <div className="max-w-7xl mx-auto px-4 md:px-8">
+              {/* Section heading skeleton */}
+              <div className="flex justify-center mb-10">
+                <div className="h-9 w-64 rounded-lg bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+              </div>
+              {/* Review card skeletons */}
+              <div className="flex gap-5 overflow-hidden">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white border border-border rounded-2xl p-7 flex flex-col shrink-0 w-[85vw] sm:w-[320px] md:w-[340px]"
+                    style={{ opacity: 1 - i * 0.25 }}
+                  >
+                    {/* Stars */}
+                    <div className="flex gap-1 mb-5">
+                      {[...Array(5)].map((_, j) => (
+                        <div key={j} className="w-4 h-4 rounded-sm bg-gradient-to-r from-[#fdf6e3] via-[#f5e9c4] to-[#fdf6e3] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                      ))}
+                    </div>
+                    {/* Text lines */}
+                    <div className="flex flex-col gap-2 flex-1 mb-6">
+                      <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                      <div className="h-3 w-5/6 rounded-full bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                      <div className="h-3 w-4/6 rounded-full bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                    </div>
+                    {/* Avatar row */}
+                    <div className="flex items-center gap-3 mt-auto">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite] shrink-0" />
+                      <div className="flex flex-col gap-1.5">
+                        <div className="h-3 w-24 rounded-full bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                        <div className="h-2.5 w-16 rounded-full bg-gradient-to-r from-[#f5f3f0] via-[#ebe7e1] to-[#f5f3f0] bg-[length:200%_100%] animate-[shimmer_1.6s_ease-in-out_infinite]" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </section>
         ) : testimonials.length > 0 ? (
           <section className="bg-background py-12 md:py-16 w-full">

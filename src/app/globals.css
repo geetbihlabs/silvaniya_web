@@ -122,3 +122,8 @@
   animation: fade-in 0.7s ease-out 0.4s backwards;
 }
 
+/* Skeleton shimmer — warm parchment tones for jewellery brand */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
