@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 // Define which routes we want to protect
 const isProtectedRoute = createRouteMatcher(['/profile(.*)', '/orders(.*)'])
@@ -22,7 +23,8 @@ export default clerkMiddleware(async (auth, req) => {
     // In Clerk Dashboard → Sessions → Customize session token, set:
     //   { "metadata": "{{user.public_metadata}}" }
     // This maps publicMetadata into the JWT under the key "metadata"
-    const userRole = authObj.sessionClaims?.metadata?.role
+    const sessionClaims = authObj.sessionClaims as { metadata?: { role?: string } }
+    const userRole = sessionClaims?.metadata?.role
 
     // console.log('Session claims:', authObj.sessionClaims)
     console.log('Resolved user role:', userRole)
@@ -30,12 +32,16 @@ export default clerkMiddleware(async (auth, req) => {
     // If not an admin role, redirect to homepage
     const adminRoles = ['SUPER_ADMIN', 'STORE_MANAGER', 'SUPPORT_AGENT']
     if (!adminRoles.includes(userRole as string)) {
-      return Response.redirect(new URL('/', req.url))
+      const url = req.nextUrl.clone()
+      url.pathname = '/'
+      return NextResponse.redirect(url)
     }
 
     // If they are an admin and hit the base admin route, redirect to the dashboard
     if (req.nextUrl.pathname === '/admin-panel') {
-      return Response.redirect(new URL('/admin-panel/dashboard', req.url))
+      const url = req.nextUrl.clone()
+      url.pathname = '/admin-panel/dashboard'
+      return NextResponse.redirect(url)
     }
   }
 })
